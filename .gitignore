@@ -78,7 +78,10 @@ docker-compose.override.yml
 # =========================
 # Project Data / Artifacts
 # =========================
-data/
+data/tmp/
+data/cache/
+data/processed/
+data/interim/
 artifacts/
 outputs/
 reports/generated/
