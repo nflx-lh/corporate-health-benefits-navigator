@@ -1,0 +1,115 @@
+# =========================
+# OS / Editor
+# =========================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# Environment / Secrets
+# =========================
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+**/secrets/
+
+# =========================
+# Python (Backend)
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+dist/
+build/
+*.egg-info/
+.venv/
+venv/
+ENV/
+.python-version
+
+# Jupyter
+.ipynb_checkpoints/
+
+# =========================
+# Node / Frontend
+# =========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+dist/
+build/
+.vite/
+coverage/
+*.tsbuildinfo
+
+# =========================
+# Logs / Runtime files
+# =========================
+logs/
+*.log
+*.out
+*.pid
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+
+# =========================
+# Docker
+# =========================
+docker-compose.override.yml
+*.env.docker
+.docker/
+
+# =========================
+# Project Data / Artifacts
+# =========================
+data/
+artifacts/
+outputs/
+reports/generated/
+tmp/
+temp/
+
+# Vector DB / embeddings indexes
+faiss_index/
+chroma/
+chroma_db/
+vector_store/
+embeddings_cache/
+
+# Uploaded/generated docs/media
+uploads/
+*.mp4
+*.mov
+*.avi
+*.zip
+
+# =========================
+# Docs (working/scratch only)
+# =========================
+docs/mvp
+docs/post_mvp
+docs/.cache/
+
+# =========================
+# Testing / Playwright / Cypress
+# =========================
+playwright-report/
+test-results/
+cypress/videos/
+cypress/screenshots/

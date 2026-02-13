@@ -1,0 +1,29 @@
+openapi: 3.0.3
+info:
+  title: Corporate Health Benefits Navigator API
+  version: 0.1.0
+paths:
+  /v1/health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+  /v1/auth/login:
+    post:
+      summary: Login (stub)
+      responses:
+        '200':
+          description: Token response
+  /v1/query:
+    post:
+      summary: Query benefits assistant (stub)
+      responses:
+        '200':
+          description: Query result
+  /v1/admin/reindex:
+    post:
+      summary: Reindex policy corpus (stub)
+      responses:
+        '200':
+          description: Reindex accepted
