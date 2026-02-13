@@ -1,0 +1,152 @@
+[
+  {
+    "case_id": "EVAL001",
+    "employee_id": "EMP006",
+    "question": "Can I claim for a dental checkup and cleaning?",
+    "expected_decision": "not_covered",
+    "expected_benefit_type": "dental",
+    "expected_required_docs": [],
+    "expected_min_citations": 2,
+    "notes": "Basic plan has no dental coverage (CL-027, R009)"
+  },
+  {
+    "case_id": "EVAL002",
+    "employee_id": "EMP003",
+    "question": "I need to see a specialist for stomach pain. What do I need to claim?",
+    "expected_decision": "covered",
+    "expected_benefit_type": "outpatient",
+    "expected_required_docs": ["receipt", "mc", "referral_letter"],
+    "expected_min_citations": 3,
+    "notes": "Plus plan outpatient requires GP referral for specialist (CL-008, R026)"
+  },
+  {
+    "case_id": "EVAL003",
+    "employee_id": "EMP017",
+    "question": "Can I claim for mental health counseling sessions?",
+    "expected_decision": "not_covered",
+    "expected_benefit_type": "mental_health",
+    "expected_required_docs": [],
+    "expected_min_citations": 2,
+    "notes": "Basic plan only has EAP (3 free sessions), no claimable coverage (CL-049, R015)"
+  },
+  {
+    "case_id": "EVAL004",
+    "employee_id": "EMP001",
+    "question": "I want to get braces for my daughter. Is this covered?",
+    "expected_decision": "not_covered",
+    "expected_benefit_type": "dental",
+    "expected_required_docs": [],
+    "expected_min_citations": 2,
+    "notes": "Orthodontics excluded for all plans (CL-037, R023)"
+  },
+  {
+    "case_id": "EVAL005",
+    "employee_id": "EMP019",
+    "question": "Can I claim for an outpatient GP visit for flu?",
+    "expected_decision": "not_covered",
+    "expected_benefit_type": "outpatient",
+    "expected_required_docs": [],
+    "expected_min_citations": 2,
+    "notes": "Contract employee with 2 months tenure, needs 3 months (CL-002, R028)"
+  },
+  {
+    "case_id": "EVAL006",
+    "employee_id": "EMP014",
+    "question": "I need a root canal treatment. What documents do I need and what's covered?",
+    "expected_decision": "covered",
+    "expected_benefit_type": "dental",
+    "expected_required_docs": ["invoice", "treatment_summary", "xray", "dentist_justification", "preauth_form"],
+    "expected_min_citations": 3,
+    "notes": "Premium plan covers major dental at 50%, root canal requires preauth (CL-031, CL-075, R038)"
+  },
+  {
+    "case_id": "EVAL007",
+    "employee_id": "EMP012",
+    "question": "I want to get laser eye surgery to improve my vision. Is this claimable?",
+    "expected_decision": "not_covered",
+    "expected_benefit_type": "outpatient",
+    "expected_required_docs": [],
+    "expected_min_citations": 2,
+    "notes": "Cosmetic/elective procedures excluded unless medically necessary (CL-012, R024)"
+  },
+  {
+    "case_id": "EVAL008",
+    "employee_id": "EMP009",
+    "question": "Can I claim for therapy sessions? I've been feeling very stressed at work.",
+    "expected_decision": "covered",
+    "expected_benefit_type": "mental_health",
+    "expected_required_docs": ["therapist_invoice", "license_proof", "diagnosis_summary"],
+    "expected_min_citations": 3,
+    "notes": "Plus plan, 36 months tenure (exceeds 6 month requirement), covered at 70% (CL-052, R013)"
+  },
+  {
+    "case_id": "EVAL009",
+    "employee_id": "EMP024",
+    "question": "I need counseling for my marriage issues. Is this covered under mental health?",
+    "expected_decision": "not_covered",
+    "expected_benefit_type": "mental_health",
+    "expected_required_docs": [],
+    "expected_min_citations": 2,
+    "notes": "Couples counseling excluded unless related to diagnosed mental health condition (CL-060, R027)"
+  },
+  {
+    "case_id": "EVAL010",
+    "employee_id": "EMP007",
+    "question": "I need an MRI scan recommended by my doctor. What's the process?",
+    "expected_decision": "covered",
+    "expected_benefit_type": "outpatient",
+    "expected_required_docs": ["receipt", "mc", "referral_letter", "preauth_form"],
+    "expected_min_citations": 3,
+    "notes": "Premium plan, diagnostic imaging requires preauth by service type (CL-074, R019)"
+  },
+  {
+    "case_id": "EVAL011",
+    "employee_id": "EMP025",
+    "question": "Can I claim for dental cleaning?",
+    "expected_decision": "insufficient_info",
+    "expected_benefit_type": "dental",
+    "expected_required_docs": [],
+    "expected_min_citations": 0,
+    "notes": "Missing tenure_months data prevents eligibility check (employee fixture edge case)"
+  },
+  {
+    "case_id": "EVAL012",
+    "employee_id": "EMP005",
+    "question": "Can I get reimbursed for dental filling at a panel clinic?",
+    "expected_decision": "not_covered",
+    "expected_benefit_type": "dental",
+    "expected_required_docs": [],
+    "expected_min_citations": 2,
+    "notes": "Contract employees not eligible for dental regardless of plan (CL-028, R010)"
+  },
+  {
+    "case_id": "EVAL013",
+    "employee_id": "EMP001",
+    "question": "My annual outpatient limit is almost used up. How much coverage do I have left?",
+    "expected_decision": "insufficient_info",
+    "expected_benefit_type": "outpatient",
+    "expected_required_docs": [],
+    "expected_min_citations": 1,
+    "notes": "Would need claims history data not available in eval context to calculate remaining balance"
+  },
+  {
+    "case_id": "EVAL014",
+    "employee_id": "EMP022",
+    "question": "I want to see a therapist for anxiety. Am I covered?",
+    "expected_decision": "not_covered",
+    "expected_benefit_type": "mental_health",
+    "expected_required_docs": [],
+    "expected_min_citations": 2,
+    "notes": "Contract employee with 10 months tenure, needs 12 months for mental health (CL-050, R029)"
+  },
+  {
+    "case_id": "EVAL015",
+    "employee_id": "EMP010",
+    "question": "I had an emergency visit to A&E last night. Do I need pre-authorization?",
+    "expected_decision": "covered",
+    "expected_benefit_type": "outpatient",
+    "expected_required_docs": ["receipt", "mc"],
+    "expected_min_citations": 2,
+    "notes": "Emergency services exempt from preauth, but need retrospective notification within 48hrs (CL-023, CL-077)"
+  }
+]

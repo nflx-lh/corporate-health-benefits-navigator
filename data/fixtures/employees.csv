@@ -1,0 +1,27 @@
+employee_id,name,age,employment_type,plan_tier,tenure_months,dependents_count,is_active
+EMP001,Sarah Tan,32,full_time,premium,48,2,true
+EMP002,Kumar Rajesh,28,full_time,plus,18,0,true
+EMP003,Chen Wei,35,full_time,plus,24,1,true
+EMP004,Mary Lim,29,full_time,basic,6,0,true
+EMP005,David Wong,31,contract,plus,8,0,true
+EMP006,Jessica Ng,26,full_time,basic,12,0,true
+EMP007,Michael Koh,42,full_time,premium,96,3,true
+EMP008,Priya Sharma,30,full_time,plus,20,1,true
+EMP009,Alex Chia,33,full_time,plus,36,0,true
+EMP010,Rachel Teo,27,full_time,basic,14,0,true
+EMP011,James Lee,38,full_time,premium,72,2,true
+EMP012,Melissa Goh,34,full_time,premium,60,1,true
+EMP013,Ryan Tan,25,full_time,basic,4,0,true
+EMP014,Vivian Chong,40,full_time,premium,84,2,true
+EMP015,Benjamin Loh,29,contract,premium,10,0,true
+EMP016,Amanda Yeo,31,full_time,plus,28,1,true
+EMP017,Daniel Sim,24,full_time,basic,1,0,true
+EMP018,Grace Wong,55,full_time,premium,144,1,true
+EMP019,Kevin Ng,27,contract,plus,2,0,true
+EMP020,Sophie Chen,36,full_time,premium,66,2,true
+EMP021,Marcus Lim,32,full_time,plus,30,0,true
+EMP022,Emily Tan,28,contract,premium,10,0,true
+EMP023,Andrew Lee,45,full_time,premium,120,3,true
+EMP024,Isabelle Goh,26,full_time,plus,5,0,true
+EMP025,,30,full_time,plus,,0,true
+EMP026,Robert Khoo,39,full_time,premium,78,1,false
