@@ -7,8 +7,41 @@ All notable changes to this project are documented in this file.
 ## [Unreleased]
 
 ### Planned
-- Phase 4: Frontend integration and end-to-end demo flow hardening
 - Phase 5: Evaluation harness execution + MVP readiness report
+
+---
+
+## [0.5.0] - 14-Feb-2026
+### Added
+- Frontend integration with `POST /v1/query-orchestrated` for orchestrated benefits queries.
+- Deterministic smoke checklist for Phase 4 validation (`frontend/SMOKE_TEST.md`).
+
+### Changed
+- Navigator result rendering hardened for optional enrichment fields:
+  - `explanation` and `policy_citations` may be missing/null/empty without UI failure.
+- Financial display normalized with safe fallbacks:
+  - `annual_limit` / `annual_limit_sgd` mapping
+  - `remaining_limit` and `estimated_payout` fallback rendering
+- Improved base result resilience:
+  - `reason_summary` fallback
+  - `insufficient_info` helper hint in UI
+- Frontend runnability fixes:
+  - Added/validated build scripts and local `/v1` proxy configuration for dev flow.
+
+### Fixed
+- Graceful unknown employee handling (`404`, `EMPLOYEE_NOT_FOUND`) in frontend UX.
+- Defensive rendering for empty arrays and absent optional fields (no crash/no undefined artifacts).
+
+### Validation
+- Backend API sanity checks:
+  - Known employee (`EMP003`) returns `200`
+  - Unknown employee (`EMP999`) returns `404` with `EMPLOYEE_NOT_FOUND`
+- Frontend smoke checks passed per `frontend/SMOKE_TEST.md`.
+
+### Notes
+- Rules-first decision authority remains unchanged.
+- No semantic changes to locked `POST /v1/query` contract.
+- Phase 4 checkpoint tag planned: `v0.5.0-phase4-freeze`.
 
 ---
 
