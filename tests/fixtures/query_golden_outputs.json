@@ -1,0 +1,237 @@
+[
+  {
+    "label": "mri_covered",
+    "input": {
+      "employee_id": "EMP007",
+      "question": "I need an MRI"
+    },
+    "expected": {
+      "query_id": "QUERY_ID_STATIC",
+      "employee_id": "EMP007",
+      "decision": "covered",
+      "benefit_type": "outpatient",
+      "service_category": "diagnostic_imaging",
+      "reason_summary": "Covered under rule R019",
+      "reason_codes": [
+        "COVERED"
+      ],
+      "matched_rule_ids": [
+        "R019"
+      ],
+      "required_docs": [
+        "receipt",
+        "mc",
+        "referral_letter",
+        "preauth_form"
+      ],
+      "preauth_required": true,
+      "coverage_percent": 90.0,
+      "annual_limit_sgd": 5000.0,
+      "co_pay_sgd": 10.0,
+      "decision_path": [
+        "check_profile_completeness: PASS",
+        "parse_benefit_type: outpatient",
+        "check_active_status: ACTIVE",
+        "candidate_rules_count: 6",
+        "service_category_match: diagnostic_imaging",
+        "winning_rule: R019"
+      ]
+    }
+  },
+  {
+    "label": "root_canal_covered",
+    "input": {
+      "employee_id": "EMP014",
+      "question": "root canal treatment"
+    },
+    "expected": {
+      "query_id": "QUERY_ID_STATIC",
+      "employee_id": "EMP014",
+      "decision": "covered",
+      "benefit_type": "dental",
+      "service_category": "root_canal",
+      "reason_summary": "Covered under rule R038",
+      "reason_codes": [
+        "COVERED"
+      ],
+      "matched_rule_ids": [
+        "R038"
+      ],
+      "required_docs": [
+        "invoice",
+        "treatment_summary",
+        "xray",
+        "dentist_justification",
+        "preauth_form"
+      ],
+      "preauth_required": true,
+      "coverage_percent": 50.0,
+      "annual_limit_sgd": 2000.0,
+      "co_pay_sgd": 15.0,
+      "decision_path": [
+        "check_profile_completeness: PASS",
+        "parse_benefit_type: dental",
+        "check_active_status: ACTIVE",
+        "candidate_rules_count: 7",
+        "service_category_match: root_canal",
+        "winning_rule: R038"
+      ]
+    }
+  },
+  {
+    "label": "dental_cleaning_covered",
+    "input": {
+      "employee_id": "EMP001",
+      "question": "dental cleaning"
+    },
+    "expected": {
+      "query_id": "QUERY_ID_STATIC",
+      "employee_id": "EMP001",
+      "decision": "covered",
+      "benefit_type": "dental",
+      "service_category": "preventive_dental",
+      "reason_summary": "Covered under rule R008",
+      "reason_codes": [
+        "COVERED"
+      ],
+      "matched_rule_ids": [
+        "R008"
+      ],
+      "required_docs": [
+        "invoice",
+        "treatment_summary"
+      ],
+      "preauth_required": false,
+      "coverage_percent": 100.0,
+      "annual_limit_sgd": 2000.0,
+      "co_pay_sgd": 15.0,
+      "decision_path": [
+        "check_profile_completeness: PASS",
+        "parse_benefit_type: dental",
+        "check_active_status: ACTIVE",
+        "candidate_rules_count: 7",
+        "service_category_match: preventive_dental",
+        "winning_rule: R008"
+      ]
+    }
+  },
+  {
+    "label": "orthodontics_exclusion",
+    "input": {
+      "employee_id": "EMP002",
+      "question": "orthodontics braces"
+    },
+    "expected": {
+      "query_id": "QUERY_ID_STATIC",
+      "employee_id": "EMP002",
+      "decision": "not_covered",
+      "benefit_type": "dental",
+      "service_category": "orthodontics",
+      "reason_summary": "Orthodontics excluded for all plans",
+      "reason_codes": [
+        "EXCLUSION"
+      ],
+      "matched_rule_ids": [
+        "R023"
+      ],
+      "required_docs": [],
+      "preauth_required": null,
+      "coverage_percent": null,
+      "annual_limit_sgd": null,
+      "co_pay_sgd": null,
+      "decision_path": [
+        "check_profile_completeness: PASS",
+        "parse_benefit_type: dental",
+        "check_active_status: ACTIVE",
+        "candidate_rules_count: 4",
+        "service_category_match: orthodontics",
+        "exclusion_matched: R023"
+      ]
+    }
+  },
+  {
+    "label": "inactive_employee",
+    "input": {
+      "employee_id": "EMP026",
+      "question": "dental cleaning"
+    },
+    "expected": {
+      "query_id": "QUERY_ID_STATIC",
+      "employee_id": "EMP026",
+      "decision": "not_covered",
+      "benefit_type": "dental",
+      "service_category": "preventive_dental",
+      "reason_summary": "Employee is inactive",
+      "reason_codes": [
+        "EMPLOYEE_INACTIVE"
+      ],
+      "matched_rule_ids": [],
+      "required_docs": [],
+      "preauth_required": null,
+      "coverage_percent": null,
+      "annual_limit_sgd": null,
+      "co_pay_sgd": null,
+      "decision_path": [
+        "check_profile_completeness: PASS",
+        "parse_benefit_type: dental",
+        "check_active_status: INACTIVE"
+      ]
+    }
+  },
+  {
+    "label": "insufficient_info",
+    "input": {
+      "employee_id": "EMP025",
+      "question": "dental cleaning"
+    },
+    "expected": {
+      "query_id": "QUERY_ID_STATIC",
+      "employee_id": "EMP025",
+      "decision": "insufficient_info",
+      "benefit_type": "dental",
+      "service_category": "preventive_dental",
+      "reason_summary": "Employee profile has missing fields: MISSING_TENURE_MONTHS, MISSING_NAME",
+      "reason_codes": [
+        "MISSING_TENURE_MONTHS",
+        "MISSING_NAME"
+      ],
+      "matched_rule_ids": [],
+      "required_docs": [],
+      "preauth_required": null,
+      "coverage_percent": null,
+      "annual_limit_sgd": null,
+      "co_pay_sgd": null,
+      "decision_path": [
+        "check_profile_completeness: FAIL"
+      ]
+    }
+  },
+  {
+    "label": "ambiguous_query",
+    "input": {
+      "employee_id": "EMP001",
+      "question": "something random"
+    },
+    "expected": {
+      "query_id": "QUERY_ID_STATIC",
+      "employee_id": "EMP001",
+      "decision": "insufficient_info",
+      "benefit_type": null,
+      "service_category": null,
+      "reason_summary": "Could not determine benefit type from query",
+      "reason_codes": [
+        "AMBIGUOUS_BENEFIT_TYPE"
+      ],
+      "matched_rule_ids": [],
+      "required_docs": [],
+      "preauth_required": null,
+      "coverage_percent": null,
+      "annual_limit_sgd": null,
+      "co_pay_sgd": null,
+      "decision_path": [
+        "check_profile_completeness: PASS",
+        "parse_benefit_type: FAIL"
+      ]
+    }
+  }
+]

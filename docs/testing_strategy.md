@@ -72,8 +72,34 @@ Eval artifacts are written to `eval/artifacts/` with UTC timestamps:
 - `eval_results_<ts>.json` — full per-case results
 - `eval_summary_<ts>.md` — human-readable summary
 
+### 6. DB Parity & No-Drift Tests (Phase 6)
+
+Ensures DB-backed repositories produce identical outputs to CSV.
+
+```bash
+# Golden output no-drift gate (works without DB)
+python -m pytest tests/test_query_endpoint_nodrift.py -v
+
+# CSV vs DB parity + fallback observability
+python -m pytest tests/test_rule_engine_db_parity.py -v
+```
+
+**No-drift normalization:** Both actual and expected `query_id` are set to
+`QUERY_ID_STATIC` before comparison. All other fields are exact match
+with canonical numeric casting and ordered list equality.
+
+**Fallback tests:** Explicitly named `test_employee_repo_fallback_*` and
+`test_rule_repo_fallback_*` to validate structured warning schema:
+- `event = "repo_fallback_csv"`
+- `repo` in `{"employee_repo", "rule_repo"}`
+- `reason` in `{"db_unavailable", "db_empty", "db_error"}`
+- `exception_type` present ONLY when `reason == "db_error"`
+
+**REPO_MODE rollback:** Set `REPO_MODE=csv_only` to bypass DB entirely.
+
 ## Contract Safety
 
 - `POST /v1/query` semantics are locked and must not change
 - `POST /v1/query-orchestrated` is the additive endpoint for orchestrated flow
 - All tests validate that deterministic decision fields are preserved
+- `rules_engine.py` is frozen — zero drift guaranteed by repo conversion layer
