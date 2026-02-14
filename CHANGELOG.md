@@ -7,11 +7,37 @@ All notable changes to this project are documented in this file.
 ## [Unreleased]
 
 ### Planned
-- Phase 3: LangGraph orchestration (rules-first, retrieval-backed explanations)
 - Phase 4: Frontend integration and end-to-end demo flow hardening
 - Phase 5: Evaluation harness execution + MVP readiness report
 
 ---
+
+## [0.4.0] - 14-Feb-2026
+
+### Added
+- Phase 3 LangGraph orchestration (rules-first, retrieval-optional explanation path):
+  - Orchestration graph with typed state:
+    - `backend/app/orchestration/state.py`
+    - `backend/app/orchestration/nodes.py`
+    - `backend/app/orchestration/graph.py`
+  - Safe rollout endpoint:
+    - `POST /v1/query-orchestrated`
+    - implemented in `backend/app/api/routes_query_orchestrated.py`
+  - App router wiring for orchestrated endpoint in `backend/app/main.py`
+- Phase 3 tests:
+  - `tests/test_orchestration_graph.py`
+  - `tests/test_query_endpoint_orchestrated.py`
+
+### Changed
+- Added pinned orchestration dependency:
+  - `langgraph==1.0.8` in root `requirements.txt`
+
+---
+
+### Notes
+- Existing `POST /v1/query` contract remains unchanged.
+- Orchestration is rules-first; retrieval is for explanation enrichment only.
+- Phase 3 checkpoint tag planned: `v0.4.0-phase3-freeze`.
 
 ## [0.3.0] - 14-Feb-2026
 
