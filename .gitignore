@@ -81,6 +81,7 @@ docker-compose.override.yml
 # =========================
 data/tmp/
 data/cache/
+data/index
 data/processed/
 data/interim/
 artifacts/
