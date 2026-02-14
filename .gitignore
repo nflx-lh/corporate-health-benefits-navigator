@@ -37,6 +37,7 @@ build/
 *.egg-info/
 .venv/
 venv/
+.venv_lock_local.txt
 ENV/
 .python-version
 
@@ -84,12 +85,15 @@ data/cache/
 data/index
 data/processed/
 data/interim/
-artifacts/
-!eval/artifacts/.gitkeep
 outputs/
 reports/generated/
 tmp/
 temp/
+# Eval artifacts: ignore generated files, keep folder placeholder
+eval/artifacts/*
+!eval/artifacts/
+!eval/artifacts/.gitkeep
+
 
 # Vector DB / embeddings indexes
 faiss_index/
@@ -108,7 +112,7 @@ uploads/
 # =========================
 # Docs (working/scratch only)
 # =========================
-docs/mvp
+docs/ref
 docs/post_mvp
 docs/.cache/
 
