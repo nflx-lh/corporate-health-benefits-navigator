@@ -4,16 +4,36 @@ All notable changes to this project are documented in this file.
 
 ---
 
-## [Unreleased]
+## [0.6.0] - 14-Feb-2026
 
-### Planned
-- Phase 5: Evaluation harness execution + MVP readiness report
+### Added
+- Phase 5 deterministic eval harness (`scripts/run_eval.py`):
+  - Executes `eval/eval_cases.json` against `POST /v1/query-orchestrated`
+  - Per-case PASS/FAIL with explicit failure reasons
+  - Malformed eval case handling includes standalone token `INVALID_CASE_SCHEMA` and continues processing remaining cases
+  - Timestamped JSON + markdown artifacts in `eval/artifacts/`
+  - Emits run-level fatal artifacts on pre-run failures (e.g., missing/invalid cases file) with `fatal_error` traceability
+  - Strict exit code policy: 0 only if all cases pass
+  - CLI args: `--base-url`, `--cases`, `--timeout`
+- MVP readiness report generator (`scripts/generate_readiness_report.py`):
+  - Reads latest eval artifacts (or `--eval-results` override)
+  - Accepts optional `--pytest-summary` JSON input for Test Status reporting
+  - Produces GO / CONDITIONAL GO / NO-GO verdict with demo checklist
 
+### Changed
+- `docs/testing_strategy.md`: full testing strategy covering Phases 1–5
+- `docs/runbook_local.md`: added Phase 5 command blocks (eval, artifacts, report)
+- `.gitignore`: added `!eval/artifacts/.gitkeep` exception
+
+### Notes
+- `POST /v1/query` semantics remain unchanged.
+- Eval harness is observation-only; no route or decision logic modifications.
+- Checkpoint tag planned: `v0.6.0-phase5-freeze`.
 ---
 
 ## [0.5.0] - 14-Feb-2026
 ### Added
-- Frontend integration with `POST /v1/query-orchestrated` for orchestrated benefits queries.
+- Phase 4 Frontend integration with `POST /v1/query-orchestrated` for orchestrated benefits queries.
 - Deterministic smoke checklist for Phase 4 validation (`frontend/SMOKE_TEST.md`).
 
 ### Changed
