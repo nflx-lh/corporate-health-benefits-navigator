@@ -7,11 +7,33 @@ All notable changes to this project are documented in this file.
 ## [Unreleased]
 
 ### Planned
-- Phase 1: Deterministic rule engine integration into `/v1/query`
 - Phase 2: Clause-aware chunking + local vector index (FAISS)
 - Phase 3: LangGraph orchestration (rules-first, retrieval-backed explanations)
 - Phase 4: Frontend integration and end-to-end demo flow hardening
 - Phase 5: Evaluation harness execution + MVP readiness report
+
+---
+
+## [0.2.0] - 14-Feb-2026
+
+### Added
+- Phase 1 deterministic rules engine integrated into `/v1/query`.
+- Employee/rule repositories with fail-fast CSV schema validation.
+- Centralized deterministic query parser for benefit/service mapping.
+- Stable decision response schema and reason code output.
+- Test coverage for engine and endpoint behavior:
+  - `tests/test_rule_engine.py`
+  - `tests/test_query_endpoint.py`
+
+### Changed
+- `/v1/query` behavior finalized for Phase 1:
+  - unknown `employee_id` -> HTTP 404 structured error payload
+  - known employee + ambiguous/missing info -> HTTP 200 `insufficient_info`
+  - inactive/exclusion outcomes -> financial fields null
+  - `required_docs` always returned as list
+
+### Notes
+- Checkpoint tag: `v0.2.0-phase1-freeze`.
 
 ---
 
