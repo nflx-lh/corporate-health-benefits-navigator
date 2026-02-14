@@ -85,6 +85,7 @@ data/index
 data/processed/
 data/interim/
 artifacts/
+!eval/artifacts/.gitkeep
 outputs/
 reports/generated/
 tmp/
