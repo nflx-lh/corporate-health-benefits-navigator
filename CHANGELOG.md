@@ -32,12 +32,12 @@ All notable changes to this project are documented in this file.
 - Added pinned orchestration dependency:
   - `langgraph==1.0.8` in root `requirements.txt`
 
----
-
 ### Notes
 - Existing `POST /v1/query` contract remains unchanged.
 - Orchestration is rules-first; retrieval is for explanation enrichment only.
 - Phase 3 checkpoint tag planned: `v0.4.0-phase3-freeze`.
+
+---
 
 ## [0.3.0] - 14-Feb-2026
 
