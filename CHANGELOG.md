@@ -7,10 +7,41 @@ All notable changes to this project are documented in this file.
 ## [Unreleased]
 
 ### Planned
-- Phase 2: Clause-aware chunking + local vector index (FAISS)
 - Phase 3: LangGraph orchestration (rules-first, retrieval-backed explanations)
 - Phase 4: Frontend integration and end-to-end demo flow hardening
 - Phase 5: Evaluation harness execution + MVP readiness report
+
+---
+
+## [0.3.0] - 14-Feb-2026
+
+### Added
+- Phase 2 retrieval foundation (explanation support only; rules-first decisions unchanged):
+  - Clause-aware markdown chunking (one chunk per clause) with clause ID preservation for citation traceability.
+  - Optional bullet-prefixed clause-start support in policy docs.
+  - Strict clause-start candidate validation for malformed clause IDs.
+  - Local embedding index pipeline (local numpy/json artifacts; no FAISS in Phase 2):
+    - `data/index/chunks.jsonl`
+    - `data/index/embeddings.npy`
+    - `data/index/meta.json`
+  - Retrieval service returning citation-ready top-k hits with deterministic ranking tie-break:
+    1. score DESC
+    2. source_file ASC
+    3. clause_id ASC
+    4. chunk_id ASC
+  - Build script:
+    - `scripts/build_index.py`
+  - New Phase 2 tests:
+    - `tests/test_chunker.py`
+    - `tests/test_retriever_smoke.py`
+
+### Changed
+- Dependency layout canonicalized to root `requirements.txt`; removed `backend/requirements.txt`.
+- Pinned `httpx==0.27.2` to preserve Starlette `TestClient` compatibility for endpoint tests.
+
+### Notes
+- No `/v1/query` contract changes in Phase 2
+- Checkpoint tag: `v0.3.0-phase2-freeze`.
 
 ---
 
