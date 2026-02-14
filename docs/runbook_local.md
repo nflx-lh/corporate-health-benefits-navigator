@@ -84,3 +84,79 @@ Vite proxy forwards `/v1` requests to http://127.0.0.1:8000.
 ```bash
 python scripts/generate_readiness_report.py
 ```
+
+---
+
+## Phase 6 — Database Setup
+
+### Start with PostgreSQL
+
+```bash
+# Start all services including PostgreSQL
+docker compose up --build -d
+
+# Verify db service is healthy
+docker compose ps
+docker compose logs db --tail=20
+```
+
+### Migration Safety Checks
+
+```bash
+cd backend
+
+# Check current migration state
+alembic current
+
+# Verify single migration head (fail if multiple heads)
+alembic heads
+# Expected: single head "002"
+
+# Run migrations
+alembic upgrade head
+
+cd ..
+```
+
+### Seed Data
+
+```bash
+# Idempotent — safe to re-run
+python scripts/seed_employees.py
+python scripts/seed_rules.py
+```
+
+### REPO_MODE Toggle
+
+Set `REPO_MODE` env var to control data source:
+- `db_first` (default when `DATABASE_URL` set): query Postgres first, CSV fallback on error
+- `csv_only`: bypass DB entirely (safe rollback path)
+
+```bash
+# Force CSV-only mode (rollback path)
+REPO_MODE=csv_only python -m pytest tests/ -v
+
+# DB-first mode (default)
+DATABASE_URL=postgresql://chbn:chbn_dev@localhost:5432/chbn python -m pytest tests/ -v
+```
+
+### Run DB Parity & No-Drift Tests
+
+```bash
+# No-drift gate (works without DB — pure CSV path)
+python -m pytest tests/test_query_endpoint_nodrift.py -v
+
+# DB parity + fallback tests
+python -m pytest tests/test_rule_engine_db_parity.py -v
+
+# Full suite
+python -m pytest tests/ -v
+```
+
+### Verify Fallback (DB stopped)
+
+```bash
+docker compose stop db
+DATABASE_URL=postgresql://chbn:chbn_dev@localhost:5432/chbn python -m pytest tests/ -v
+docker compose start db
+```

@@ -1,4 +1,23 @@
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: chbn_db
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-chbn}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-chbn_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-chbn}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-chbn}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   api:
     build:
       context: .
@@ -6,6 +25,8 @@ services:
     container_name: chbn_api
     env_file:
       - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-chbn}:${POSTGRES_PASSWORD:-chbn_dev}@db:5432/${POSTGRES_DB:-chbn}
     ports:
       - "8000:8000"
     volumes:
@@ -13,6 +34,9 @@ services:
       - ./data:/app/data
     working_dir: /app
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --app-dir /app/backend
+    depends_on:
+      db:
+        condition: service_healthy
 
   web:
     build: ./frontend
@@ -25,3 +49,6 @@ services:
       - ./frontend:/app
       - /app/node_modules
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
+
+volumes:
+  pgdata:

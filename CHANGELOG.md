@@ -4,6 +4,44 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [0.7.0] - 14-Feb-2026
+
+### Added
+- Phase 6 DB Foundation:
+  - PostgreSQL service (`db`) in `docker-compose.yml` with healthcheck and `depends_on`
+  - SQLAlchemy engine/session factory (`backend/app/db/session.py`) with `REPO_MODE` toggle
+  - Alembic migration scaffold (`backend/alembic/`)
+  - Employee DB model + migration `001_create_employees`
+  - BenefitRule DB model + migration `002_create_benefit_rules`
+  - Idempotent, transactional seed scripts (`scripts/seed_employees.py`, `scripts/seed_rules.py`)
+    - Upsert by key, rollback on failure, prints inserted/updated/skipped counts
+  - Dual-read repos: DB-first with CSV fallback and structured warning logging
+  - Deterministic rule ordering (`ORDER BY rule_id ASC`)
+  - Shared `normalize_response_for_parity()` helper (`tests/parity_helpers.py`)
+  - No-drift golden output test gate (`tests/test_query_endpoint_nodrift.py`)
+    - Covers `/v1/query` (full payload) and `/v1/query-orchestrated` (core decision fields)
+  - DB parity test (`tests/test_rule_engine_db_parity.py`)
+  - Explicit fallback tests: `test_employee_repo_fallback_*`, `test_rule_repo_fallback_*`
+  - Golden output fixture (`tests/fixtures/query_golden_outputs.json`)
+
+### Changed
+- `requirements.txt`: added `sqlalchemy==2.0.36`, `psycopg2-binary==2.9.10`, `alembic==1.14.1`
+- `.env.example`: updated `DATABASE_URL` for PostgreSQL, added `POSTGRES_*` vars and `REPO_MODE` toggle
+  - Documents both `localhost` (host-run API) and `db` (compose network) variants
+- `employee_repo.py`: DB-first lookup with CSV fallback, structured warning logging
+- `rule_repo.py`: DB-first lookup with CSV fallback, deterministic ordering, structured warning logging
+- `docs/runbook_local.md`: added Phase 6 database setup, migration safety checks, REPO_MODE docs
+- `docs/testing_strategy.md`: added DB parity & no-drift test layer
+
+### Notes
+- `rules_engine.py` is NOT modified — zero drift guaranteed by repo conversion layer
+- `POST /v1/query` and `POST /v1/query-orchestrated` contracts remain unchanged
+- Fallback warnings follow exact schema: `{event, repo, reason[, exception_type]}`
+- `REPO_MODE=csv_only` provides a safe rollback path to bypass DB entirely
+- Checkpoint tag planned: `v0.7.0-phase6-freeze`
+
+---
+
 ## [0.6.0] - 14-Feb-2026
 
 ### Added

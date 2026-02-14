@@ -123,3 +123,6 @@ playwright-report/
 test-results/
 cypress/videos/
 cypress/screenshots/
+
+# QC artifacts
+artifacts/qc/
