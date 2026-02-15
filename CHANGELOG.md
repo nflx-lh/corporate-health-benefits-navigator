@@ -4,6 +4,90 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [0.8.1] - 15-Feb-2026
+
+### Added
+- Employee verification endpoint (`GET /v1/employees/{id}/verify`)
+  - Returns 200 if employee exists, 404 if not found, 422 if invalid format
+- Server-side employee validation on login page before granting access
+
+### Fixed
+- Rate limiting enforcement: added missing `SlowAPIMiddleware` registration
+- Vite proxy target updated to use Docker service name (`http://api:8000`)
+
+### Changed
+- Default rate limit reduced from 60/minute to 30/minute
+
+---
+
+## [0.8.0] - 15-Feb-2026
+
+### Added
+- Phase 7 Security Hardening (B-701 through B-710):
+  - JWT authentication with full claims validation (`backend/app/auth/jwt_handler.py`)
+    - Token creation with sub, role, exp, iat, aud claims
+    - Decode with signature, expiry, audience, and required-claim checks
+  - Auth dependency with APP_ENV gate (`backend/app/auth/dependencies.py`)
+    - Dev mode returns default `hr_admin` user without requiring a token
+    - Non-dev mode enforces full JWT validation
+  - RBAC enforcement matrix (`backend/app/auth/rbac.py`)
+    - `/v1/query`, `/v1/query-orchestrated`: employee + hr_admin
+    - `/v1/admin/reindex`: hr_admin only
+    - `/v1/health`, `/v1/auth/login`: public (no auth)
+  - Real login endpoint with JWT issuance (`backend/app/api/routes_auth.py`)
+    - MVP demo credential map (EMP001–EMP003, HR001)
+  - Centralised Settings class (`backend/app/config.py`)
+    - APP_ENV, JWT_SECRET, JWT_ALGORITHM, JWT_EXPIRE_MINUTES, JWT_AUDIENCE
+    - RATE_LIMIT, CORS_ORIGINS with env-aware defaults
+    - Startup secret validation (rejects `change_me` in non-dev)
+  - Input validation guardrails on `QueryRequest`:
+    - `employee_id`: pattern `^[A-Z]{2,5}\d{1,6}$`, max 20 chars
+    - `question`: max 500 chars, whitespace stripped, `extra="forbid"`
+  - Custom 422 exception handler with structured `VALIDATION_ERROR` response
+  - CORS strict allowlist via `CORSMiddleware`
+    - Dev: defaults to `["*"]`; staging/prod: explicit origins only
+  - Rate limiting via `slowapi` on query endpoints (default 60/minute)
+    - Custom 429 response: `RATE_LIMIT_EXCEEDED`
+  - Safe error handling (`backend/app/middleware/error_handler.py`)
+    - Global catch-all returns safe 500 with `INTERNAL_ERROR` (no stack traces)
+    - HTTPException pass-through with structured `{"error": {...}}` wrapping
+  - Sensitive logging hygiene (`backend/app/middleware/log_sanitizer.py`)
+    - Scrubs JWT tokens, passwords, API keys from log records
+  - Prompt injection & output leakage guardrails (`backend/app/services/input_sanitizer.py`)
+    - Strips known injection patterns (ignore instructions, system prompt markers, etc.)
+    - File path sanitization for decision_path outputs
+  - 8 new test files (88 new tests, 190 total):
+    - `tests/test_auth_jwt.py` (19 tests)
+    - `tests/test_auth_rbac.py` (11 tests)
+    - `tests/test_input_validation.py` (11 tests)
+    - `tests/test_cors.py` (4 tests)
+    - `tests/test_rate_limiting.py` (3 tests)
+    - `tests/test_error_handling.py` (5 tests)
+    - `tests/test_logging_hygiene.py` (8 tests)
+    - `tests/test_secrets_hygiene.py` (5 tests)
+    - `tests/test_prompt_injection.py` (12 tests)
+    - `tests/test_token_lifecycle.py` (10 tests)
+
+### Changed
+- `requirements.txt`: added `slowapi==0.1.9`
+- `.env.example`: added `JWT_AUDIENCE`, `RATE_LIMIT`, `CORS_ORIGINS`
+- `backend/app/main.py`: added CORSMiddleware, rate limiter, exception handlers, logging setup
+- `backend/app/api/routes_query.py`: added RBAC + rate limit + input sanitization
+- `backend/app/api/routes_query_orchestrated.py`: added RBAC + rate limit + input sanitization
+- `backend/app/api/routes_admin.py`: added hr_admin-only RBAC
+- `backend/app/models/decision.py`: hardened `QueryRequest` with field validators
+- `tests/test_query_endpoint.py`: updated `UNKNOWN` → `UNK001` for validation compliance
+- `tests/test_query_endpoint_orchestrated.py`: updated `UNKNOWN` → `UNK001`
+
+### Notes
+- `rules_engine.py` is NOT modified — zero drift guaranteed
+- `POST /v1/query` and `POST /v1/query-orchestrated` response schemas remain unchanged
+- All 102 existing tests pass unchanged in dev mode (APP_ENV=development)
+- Auth error responses follow unified `{"error": {"code": "...", "message": "..."}}` format
+- Checkpoint tag planned: `v0.8.0-phase7-freeze`
+
+---
+
 ## [0.7.0] - 14-Feb-2026
 
 ### Added

@@ -46,7 +46,7 @@ class TestUnknownEmployee:
     def test_404_structure(self) -> None:
         resp = client.post(
             "/v1/query-orchestrated",
-            json={"employee_id": "UNKNOWN", "question": "dental"},
+            json={"employee_id": "UNK001", "question": "dental"},
         )
         assert resp.status_code == 404
         body = resp.json()
