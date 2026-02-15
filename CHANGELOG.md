@@ -4,6 +4,22 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [0.8.1] - 15-Feb-2026
+
+### Added
+- Employee verification endpoint (`GET /v1/employees/{id}/verify`)
+  - Returns 200 if employee exists, 404 if not found, 422 if invalid format
+- Server-side employee validation on login page before granting access
+
+### Fixed
+- Rate limiting enforcement: added missing `SlowAPIMiddleware` registration
+- Vite proxy target updated to use Docker service name (`http://api:8000`)
+
+### Changed
+- Default rate limit reduced from 60/minute to 30/minute
+
+---
+
 ## [0.8.0] - 15-Feb-2026
 
 ### Added
