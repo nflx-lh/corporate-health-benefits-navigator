@@ -3,6 +3,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 from app.api.routes_health import router as health_router
 from app.api.routes_auth import router as auth_router
@@ -30,6 +31,7 @@ for handler in logging.root.handlers:
 
 app = FastAPI(title="Corporate Health Benefits Navigator API", version="0.1.0")
 app.state.limiter = limiter
+app.add_middleware(SlowAPIMiddleware)
 
 # --- Exception handlers (order: most specific first) ---
 
