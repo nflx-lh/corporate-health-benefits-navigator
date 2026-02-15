@@ -4,18 +4,22 @@ Safe rollout route that preserves the existing /v1/query contract
 and adds optional ``policy_citations`` and ``explanation`` fields.
 """
 
-from __future__ import annotations
-
 from typing import Any, Optional
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from app.models.decision import QueryRequest
 from app.orchestration.graph import orchestration_graph
+from app.auth.rbac import require_role
+from app.services.input_sanitizer import sanitize_question
+from app.config import get_settings
+from app.rate_limit import limiter
 
 router = APIRouter()
+
+_settings = get_settings()
 
 
 class OrchestratedQueryResponse(BaseModel):
@@ -43,10 +47,12 @@ class OrchestratedQueryResponse(BaseModel):
 
 
 @router.post("/query-orchestrated", response_model=OrchestratedQueryResponse)
-def query_orchestrated(req: QueryRequest) -> Any:
+@limiter.limit(_settings.RATE_LIMIT)
+def query_orchestrated(request: Request, req: QueryRequest, _user: dict = Depends(require_role("employee", "hr_admin"))) -> Any:
     """Run the full LangGraph orchestration pipeline."""
+    cleaned_question = sanitize_question(req.question)
     result = orchestration_graph.invoke({
-        "query_text": req.question,
+        "query_text": cleaned_question,
         "employee_id": req.employee_id,
     })
 

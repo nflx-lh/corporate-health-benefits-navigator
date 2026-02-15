@@ -4,12 +4,21 @@ from __future__ import annotations
 
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class QueryRequest(BaseModel):
-    employee_id: str
-    question: str
+    model_config = ConfigDict(extra="forbid")
+
+    employee_id: str = Field(min_length=1, max_length=20, pattern=r"^[A-Z]{2,5}\d{1,6}$")
+    question: str = Field(min_length=1, max_length=500)
+
+    @field_validator("question", mode="before")
+    @classmethod
+    def strip_question(cls, v: str) -> str:
+        if isinstance(v, str):
+            return v.strip()
+        return v
 
 
 class ErrorDetail(BaseModel):
