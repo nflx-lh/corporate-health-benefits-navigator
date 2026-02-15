@@ -2,11 +2,37 @@ import React, { useState } from "react";
 
 export default function LoginPage({ onLogin }) {
   const [value, setValue] = useState("");
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const trimmed = value.trim();
-    if (trimmed) onLogin(trimmed);
+    if (!trimmed || loading) return;
+
+    setError(null);
+    setLoading(true);
+
+    try {
+      const res = await fetch(`/v1/employees/${encodeURIComponent(trimmed)}/verify`);
+      if (res.ok) {
+        onLogin(trimmed);
+      } else {
+        const body = await res.json();
+        const code = body?.error?.code;
+        if (code === "EMPLOYEE_NOT_FOUND") {
+          setError("Employee not found. Please check your ID.");
+        } else if (code === "VALIDATION_ERROR") {
+          setError("Invalid Employee ID format (e.g. EMP001).");
+        } else {
+          setError("Something went wrong. Please try again.");
+        }
+      }
+    } catch {
+      setError("Unable to reach the server. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -23,8 +49,13 @@ export default function LoginPage({ onLogin }) {
             onChange={(e) => setValue(e.target.value)}
             autoFocus
           />
-          <button style={styles.button} type="submit" disabled={!value.trim()}>
-            Continue
+          {error && <div style={styles.error}>{error}</div>}
+          <button
+            style={{ ...styles.button, opacity: loading || !value.trim() ? 0.6 : 1 }}
+            type="submit"
+            disabled={!value.trim() || loading}
+          >
+            {loading ? "Checking..." : "Continue"}
           </button>
         </form>
       </div>
@@ -60,6 +91,15 @@ const styles = {
     border: "1px solid #ccc",
     borderRadius: "4px",
     outline: "none",
+  },
+  error: {
+    padding: "0.5rem 0.75rem",
+    background: "#fef2f2",
+    border: "1px solid #fecaca",
+    borderRadius: "4px",
+    color: "#991b1b",
+    fontSize: "0.9rem",
+    textAlign: "left",
   },
   button: {
     padding: "0.6rem",
