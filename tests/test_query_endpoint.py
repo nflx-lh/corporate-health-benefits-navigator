@@ -29,12 +29,12 @@ class TestUnknownEmployee:
     """Unknown employee_id => 404 + EMPLOYEE_NOT_FOUND."""
 
     def test_404_structure(self):
-        resp = client.post("/v1/query", json={"employee_id": "UNKNOWN", "question": "dental"})
+        resp = client.post("/v1/query", json={"employee_id": "UNK001", "question": "dental"})
         assert resp.status_code == 404
         body = resp.json()
         assert "error" in body
         assert body["error"]["code"] == "EMPLOYEE_NOT_FOUND"
-        assert "UNKNOWN" in body["error"]["message"]
+        assert "UNK001" in body["error"]["message"]
 
 
 class TestInsufficientInfo:
