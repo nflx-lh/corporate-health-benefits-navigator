@@ -27,6 +27,11 @@ class OrchestratorState(TypedDict, total=False):
     # --- retrieval output ---
     retrieval_hits: list[dict[str, Any]]
 
+    # --- LLM explainer / critic (Phase 8) ---
+    explanation_text: Optional[str]
+    critic_result: Optional[dict[str, Any]]
+    retry_count: int
+
     # --- final assembled response ---
     final_response: dict[str, Any]
 

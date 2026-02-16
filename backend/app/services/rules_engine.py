@@ -175,7 +175,17 @@ def evaluate(employee: EmployeeRecord, parsed: ParsedQuery) -> QueryResponse:
                 candidate_rules = general
                 path.append("service_category_fallback: general_consult")
             else:
-                path.append("service_category_no_match_keeping_all")
+                # Explicit service category with no matching rules and no
+                # general fallback — must NOT award unrelated coverage.
+                path.append(f"service_category_not_covered: {parsed.service_category}")
+                return _not_covered(
+                    employee.employee_id,
+                    parsed,
+                    f"No coverage rules found for service category '{parsed.service_category}'",
+                    ["SERVICE_CATEGORY_NOT_COVERED"],
+                    [],
+                    path,
+                )
 
     # ------------------------------------------------------------------
     # 3-4. Evaluate exclusions and eligibility gates together.

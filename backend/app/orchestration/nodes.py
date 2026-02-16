@@ -6,15 +6,20 @@ partial dict of keys to merge back into state.
 
 from __future__ import annotations
 
+import json
 import logging
+import os
+import time
 from pathlib import Path
 from typing import Any
 
+from app.config import get_settings
 from app.models.decision import QueryResponse
 from app.orchestration.state import OrchestratorState
 from app.services.employee_repo import get_employee
 from app.services.query_parser import parse_query
 from app.services.rules_engine import evaluate
+from app.services.llm_client import chat_completion
 
 logger = logging.getLogger(__name__)
 
@@ -58,8 +63,17 @@ def run_rules_engine_node(state: OrchestratorState) -> dict[str, Any]:
         }
 
     parsed = parse_query(question)
+    logger.debug(
+        "run_rules_engine_node | employee=%s question=%r | parsed=(%s, %s)",
+        employee_id, question, parsed.benefit_type, parsed.service_category,
+    )
     response: QueryResponse = evaluate(employee, parsed)
     decision_dict = response.model_dump()
+    logger.debug(
+        "run_rules_engine_node | decision=%s service_category=%s matched_rules=%s",
+        decision_dict.get("decision"), decision_dict.get("service_category"),
+        decision_dict.get("matched_rule_ids"),
+    )
     needs = decision_dict.get("decision") in ("covered", "not_covered")
     return {
         "rule_decision": decision_dict,
@@ -120,6 +134,41 @@ def retrieve_policy_hits_node(state: OrchestratorState) -> dict[str, Any]:
 
 
 # ------------------------------------------------------------------
+# Helper: normalize required_docs vs preauth_required
+# ------------------------------------------------------------------
+
+def _normalize_docs(
+    required_docs: list[str] | None,
+    preauth_required: bool | None,
+) -> list[str]:
+    """Ensure required_docs and preauth_required are semantically aligned.
+
+    Rules:
+    - Deduplicate while preserving original order.
+    - If preauth_required is True: ensure ``preauth_form`` is present.
+    - If preauth_required is False: remove ``preauth_form``.
+    - If preauth_required is None: dedupe only (no add/remove).
+    """
+    docs = list(required_docs or [])
+
+    # Deduplicate, preserving order
+    seen: set[str] = set()
+    deduped: list[str] = []
+    for d in docs:
+        if d not in seen:
+            seen.add(d)
+            deduped.append(d)
+
+    if preauth_required is True:
+        if "preauth_form" not in seen:
+            deduped.append("preauth_form")
+    elif preauth_required is False:
+        deduped = [d for d in deduped if d != "preauth_form"]
+
+    return deduped
+
+
+# ------------------------------------------------------------------
 # Node: compose_response
 # ------------------------------------------------------------------
 
@@ -160,7 +209,245 @@ def compose_response_node(state: OrchestratorState) -> dict[str, Any]:
             f"{top['section']}): {top['text'][:200]}"
         )
 
+    # --- Phase 8: Safety gate for ai_summary ---
+    ai_summary = state.get("explanation_text")
+    ai_summary_source = "fallback"
+
+    if ai_summary and rule_decision:
+        if _validate_ai_summary(ai_summary, rule_decision):
+            ai_summary_source = "llm"
+        else:
+            logger.warning("Safety gate: ai_summary rejected (mismatch with deterministic decision)")
+            ai_summary = None
+            ai_summary_source = "fallback"
+
     final = dict(rule_decision)
+    final["required_docs"] = _normalize_docs(
+        final.get("required_docs"), final.get("preauth_required"),
+    )
     final["policy_citations"] = citations
     final["explanation"] = explanation
+    final["ai_summary"] = ai_summary
+    final["ai_summary_source"] = ai_summary_source
+
+    # Pass through critic result if present
+    critic = state.get("critic_result")
+    if critic:
+        final["critic_result"] = critic
+
     return {"final_response": final}
+
+
+# ------------------------------------------------------------------
+# Safety gate helper
+# ------------------------------------------------------------------
+
+_DECISION_KEYWORDS = {
+    "covered": ["covered"],
+    "not_covered": ["not covered", "not_covered", "denied", "excluded"],
+    "insufficient_info": ["insufficient", "more information", "unable to determine"],
+}
+
+
+def _validate_ai_summary(ai_summary: str, rule_decision: dict[str, Any]) -> bool:
+    """Validate that ai_summary is consistent with deterministic decision.
+
+    Checks:
+    1. Decision word appears correctly
+    2. Financial fields mentioned if present
+    3. Required docs / preauth mentioned if applicable
+    """
+    decision = rule_decision.get("decision", "")
+    summary_lower = ai_summary.lower()
+
+    # Check 1: Decision keyword present
+    keywords = _DECISION_KEYWORDS.get(decision, [])
+    if not any(kw in summary_lower for kw in keywords):
+        return False
+
+    # Check 2: If decision is 'covered' and there's a preauth requirement, it should be mentioned
+    if rule_decision.get("preauth_required") is True:
+        if "pre-auth" not in summary_lower and "preauth" not in summary_lower and "pre auth" not in summary_lower and "authorization" not in summary_lower:
+            return False
+
+    # Check 3: If there are required docs, at least one should be referenced
+    required_docs = rule_decision.get("required_docs") or []
+    if required_docs and decision == "covered":
+        # At least mention "document" or one of the doc names
+        doc_mentioned = "document" in summary_lower or "doc" in summary_lower
+        if not doc_mentioned:
+            doc_mentioned = any(d.lower() in summary_lower for d in required_docs)
+        if not doc_mentioned:
+            return False
+
+    return True
+
+
+# ------------------------------------------------------------------
+# Node: explainer
+# ------------------------------------------------------------------
+
+def explainer_node(state: OrchestratorState) -> dict[str, Any]:
+    """Build prompt from rule_decision + citations + critic feedback, call LLM."""
+
+    rule_decision = state.get("rule_decision") or {}
+    retrieval_hits = state.get("retrieval_hits") or []
+    retry_count = state.get("retry_count", 0)
+    critic_result = state.get("critic_result")
+
+    # Build citation context
+    citation_text = ""
+    for h in retrieval_hits[:3]:
+        citation_text += f"\n- {h.get('clause_id', '')}: {h.get('text', '')[:200]}"
+
+    # Build system prompt
+    system_prompt = (
+        "You are a benefits explanation assistant. Given a deterministic coverage decision "
+        "and policy citations, produce a clear, conversational summary for the employee. "
+        "IMPORTANT: You must accurately reflect the decision. "
+        f"The decision is: {rule_decision.get('decision', 'unknown')}. "
+        "If covered, mention coverage percentage, limits, and required documents. "
+        "If not covered, explain why. Do not contradict the decision."
+    )
+
+    # Build user message
+    user_message = f"Decision: {json.dumps(rule_decision, default=str)}"
+    if citation_text:
+        user_message += f"\n\nPolicy citations:{citation_text}"
+    if critic_result and not critic_result.get("critic_pass", True):
+        user_message += f"\n\nPrevious attempt was rejected: {critic_result.get('critic_feedback', '')}. Please fix."
+
+    result = chat_completion(system_prompt, user_message)
+
+    return {
+        "explanation_text": result,
+        "retry_count": retry_count + 1,
+    }
+
+
+# ------------------------------------------------------------------
+# Node: critic
+# ------------------------------------------------------------------
+
+_CRITIC_FAILURE_REASONS = frozenset({
+    "decision_mismatch",
+    "financial_mismatch",
+    "missing_required_actions",
+    "low_confidence",
+    "llm_error",
+})
+
+
+def critic_node(state: OrchestratorState) -> dict[str, Any]:
+    """Validate explanation against deterministic decision. Returns critic schema."""
+
+    settings = get_settings()
+    explanation_text = state.get("explanation_text")
+    rule_decision = state.get("rule_decision") or {}
+
+    start_ms = time.time()
+
+    # If explainer produced nothing, auto-pass with llm_error
+    if not explanation_text:
+        latency = int((time.time() - start_ms) * 1000)
+        return {
+            "critic_result": {
+                "critic_pass": False,
+                "critic_failure_reason": "llm_error",
+                "critic_feedback": "Explainer produced no output",
+                "critic_latency_ms": latency,
+                "critic_model": settings.LLM_MODEL_NAME,
+            }
+        }
+
+    system_prompt = (
+        "You are a critic that validates AI-generated benefit explanations against "
+        "deterministic decisions. Check:\n"
+        "1. Decision word matches (covered/not_covered/insufficient_info)\n"
+        "2. Financial fields (coverage_percent, annual_limit_sgd, co_pay_sgd) are accurate\n"
+        "3. Required docs and preauth are mentioned if applicable\n"
+        "Respond ONLY with a JSON object: "
+        '{"pass": true/false, "reason": "decision_mismatch|financial_mismatch|missing_required_actions|low_confidence|llm_error", "feedback": "..."}'
+    )
+
+    user_message = (
+        f"Decision: {json.dumps(rule_decision, default=str)}\n\n"
+        f"Explanation to validate:\n{explanation_text}"
+    )
+
+    raw = chat_completion(system_prompt, user_message)
+    latency = int((time.time() - start_ms) * 1000)
+
+    # If critic LLM call failed, auto-pass (don't block on critic failure)
+    if not raw:
+        return {
+            "critic_result": {
+                "critic_pass": True,
+                "critic_failure_reason": None,
+                "critic_feedback": "Critic LLM unavailable, auto-pass",
+                "critic_latency_ms": latency,
+                "critic_model": settings.LLM_MODEL_NAME,
+            }
+        }
+
+    # Parse critic response
+    try:
+        parsed = json.loads(raw)
+        critic_pass = bool(parsed.get("pass", False))
+        reason = parsed.get("reason")
+        if reason not in _CRITIC_FAILURE_REASONS:
+            reason = None
+        feedback = str(parsed.get("feedback", ""))
+    except (json.JSONDecodeError, KeyError):
+        # Can't parse critic response, auto-pass
+        critic_pass = True
+        reason = None
+        feedback = "Critic response unparseable, auto-pass"
+
+    return {
+        "critic_result": {
+            "critic_pass": critic_pass,
+            "critic_failure_reason": reason if not critic_pass else None,
+            "critic_feedback": feedback,
+            "critic_latency_ms": latency,
+            "critic_model": settings.LLM_MODEL_NAME,
+        }
+    }
+
+
+# ------------------------------------------------------------------
+# Router: should_run_explainer
+# ------------------------------------------------------------------
+
+def should_run_explainer_router(state: OrchestratorState) -> str:
+    """Route to explainer if LLM is enabled + has API key + provider != none + needs_explanation."""
+    settings = get_settings()
+
+    if not settings.LLM_ENABLED:
+        return "compose"
+    if settings.LLM_PROVIDER.lower() == "none":
+        return "compose"
+    if not os.getenv("OPENAI_API_KEY", "").strip():
+        return "compose"
+    if not state.get("needs_explanation", False):
+        return "compose"
+    return "explainer"
+
+
+# ------------------------------------------------------------------
+# Router: critic_decision
+# ------------------------------------------------------------------
+
+def critic_decision_router(state: OrchestratorState) -> str:
+    """Route to retry explainer if critic fails and retries remain, else compose."""
+    settings = get_settings()
+    critic = state.get("critic_result") or {}
+    retry_count = state.get("retry_count", 0)
+
+    if critic.get("critic_pass", True):
+        return "compose"
+
+    if retry_count < settings.MAX_EXPLAINER_RETRIES + 1:
+        return "explainer"
+
+    return "compose"

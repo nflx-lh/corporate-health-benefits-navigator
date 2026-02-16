@@ -45,6 +45,10 @@ class OrchestratedQueryResponse(BaseModel):
     policy_citations: list[dict[str, Any]] = Field(default_factory=list)
     explanation: Optional[str] = None
 
+    # --- Phase 8 explainability fields ---
+    ai_summary: Optional[str] = None
+    ai_summary_source: str = Field(default="fallback")
+
 
 @router.post("/query-orchestrated", response_model=OrchestratedQueryResponse)
 @limiter.limit(_settings.RATE_LIMIT)

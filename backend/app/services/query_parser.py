@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Keyword maps – single source of truth
@@ -15,9 +18,9 @@ SERVICE_KEYWORDS: list[tuple[list[str], str, str]] = [
     # dental service categories
     (["orthodontic", "orthodontics", "braces", "invisalign"], "dental", "orthodontics"),
     (["root canal", "root_canal", "endodontic"], "dental", "root_canal"),
-    (["crown", "bridge", "filling", "restoration", "restorative"], "dental", "restorative_dental"),
+    (["crown", "bridge", "major dental", "wisdom tooth", "dental surgery"], "dental", "major_dental"),
+    (["filling", "restoration", "restorative", "extraction"], "dental", "restorative_dental"),
     (["cosmetic dentistry", "cosmetic dental", "teeth whitening", "veneer"], "dental", "cosmetic_dental"),
-    (["major dental", "wisdom tooth", "extraction", "dental surgery"], "dental", "major_dental"),
     (["cleaning", "scaling", "polishing", "checkup dental", "dental checkup", "preventive dental"], "dental", "preventive_dental"),
     # outpatient service categories
     (["mri", "ct scan", "x-ray", "xray", "ultrasound", "diagnostic imaging", "radiology"], "outpatient", "diagnostic_imaging"),
@@ -54,13 +57,24 @@ def parse_query(query: str) -> ParsedQuery:
     for keywords, b_type, s_cat in SERVICE_KEYWORDS:
         for kw in keywords:
             if kw in q:
-                return ParsedQuery(benefit_type=b_type, service_category=s_cat)
+                result = ParsedQuery(benefit_type=b_type, service_category=s_cat)
+                logger.debug(
+                    "parse_query src=%s | input=%r | result=(%s, %s)",
+                    __file__, query, result.benefit_type, result.service_category,
+                )
+                return result
 
     # 2) Fall back to broad benefit-type keywords
     for keywords, b_type in BENEFIT_KEYWORDS:
         for kw in keywords:
             if kw in q:
-                return ParsedQuery(benefit_type=b_type, service_category=None)
+                result = ParsedQuery(benefit_type=b_type, service_category=None)
+                logger.debug(
+                    "parse_query src=%s | input=%r | result=(%s, %s)",
+                    __file__, query, result.benefit_type, result.service_category,
+                )
+                return result
 
     # 3) Nothing matched
+    logger.debug("parse_query src=%s | input=%r | result=(None, None)", __file__, query)
     return ParsedQuery(benefit_type=None, service_category=None)

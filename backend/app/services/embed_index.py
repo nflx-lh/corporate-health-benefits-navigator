@@ -1,6 +1,6 @@
 """Local embedding index builder and loader.
 
-Uses sentence-transformers for embedding and numpy for storage.
+Uses OpenAI embeddings API and numpy for storage.
 No external vector DB required.
 """
 
@@ -15,23 +15,12 @@ import numpy as np
 
 from app.services.chunker import ClauseChunk
 
-DEFAULT_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-
 
 class LocalIndexBuilder:
     """Builds a local embedding index from clause chunks."""
 
-    def __init__(self, embedding_model_name: str = DEFAULT_MODEL) -> None:
+    def __init__(self, embedding_model_name: str = "text-embedding-3-small") -> None:
         self.embedding_model_name = embedding_model_name
-        self._model: Any = None  # lazy-loaded
-
-    def _get_model(self) -> Any:
-        """Lazy-load the sentence-transformer model."""
-        if self._model is None:
-            from sentence_transformers import SentenceTransformer
-
-            self._model = SentenceTransformer(self.embedding_model_name)
-        return self._model
 
     def build(self, chunks: list[ClauseChunk], index_dir: Path) -> None:
         """Embed *chunks* and persist index artifacts to *index_dir*.
@@ -44,13 +33,21 @@ class LocalIndexBuilder:
         Args:
             chunks: Clause chunks to embed.
             index_dir: Target directory (created if absent).
+
+        Raises:
+            RuntimeError: If the embedding API call fails.
         """
+        from app.services import embedding_client
+
         index_dir.mkdir(parents=True, exist_ok=True)
 
-        model = self._get_model()
         texts = [c.text for c in chunks]
-        embeddings: np.ndarray = model.encode(texts, show_progress_bar=False)
-        embeddings = embeddings.astype(np.float32)
+        result = embedding_client.embed(texts)
+        if result is None:
+            raise RuntimeError(
+                "Embedding API call failed. Check OPENAI_API_KEY and network connectivity."
+            )
+        embeddings = np.array(result, dtype=np.float32)
 
         # chunks.jsonl
         with open(index_dir / "chunks.jsonl", "w", encoding="utf-8") as f:
