@@ -1,9 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import "../styles/login.css";
 
 export default function LoginPage({ onLogin }) {
   const [value, setValue] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const employeeInputRef = useRef(null);
+
+  useEffect(() => {
+    employeeInputRef.current?.focus();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,78 +42,51 @@ export default function LoginPage({ onLogin }) {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>Corporate Health Benefits Navigator</h1>
-        <p style={styles.subtitle}>Enter your Employee ID to get started.</p>
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <input
-            style={styles.input}
-            type="text"
-            placeholder="e.g. EMP001"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            autoFocus
+    <>
+      <header className="app-header">
+        <a className="brand" href="/" aria-label="AnovaGreen home">
+          <img className="brand__logo" src="/images/logo-transparent.png" alt="" aria-hidden="true" />
+        </a>
+      </header>
+      <div className="login-page">
+        <aside className="login-page__media" aria-hidden="true">
+          <img
+            className="login-page__image"
+            src="/images/ui-front.jpg"
+            alt=""
           />
-          {error && <div style={styles.error}>{error}</div>}
-          <button
-            style={{ ...styles.button, opacity: loading || !value.trim() ? 0.6 : 1 }}
-            type="submit"
-            disabled={!value.trim() || loading}
-          >
-            {loading ? "Checking..." : "Continue"}
-          </button>
-        </form>
+        </aside>
+        <main className="login-page__content">
+          <div className="login-page__card">
+            <h1 className="login-page__title">Employee Health Benefits Platform</h1>
+            <p className="login-page__subtitle">
+              Enter your Employee Credentials to get started.
+            </p>
+            <form onSubmit={handleSubmit} className="login-page__form">
+              <label className="login-page__label" htmlFor="employee-id-input">
+                Employee ID
+              </label>
+              <input
+                className="login-page__input login-input"
+                id="employee-id-input"
+                type="text"
+                placeholder="e.g. EMP001"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                ref={employeeInputRef}
+              />
+              {error && <div className="login-page__error">{error}</div>}
+              <button
+                className="login-page__button login-button"
+                type="submit"
+                disabled={!value.trim() || loading}
+              >
+                {loading ? "Checking..." : "Continue"}
+              </button>
+            </form>
+          </div>
+        </main>
       </div>
-    </div>
+    </>
   );
 }
-
-const styles = {
-  container: {
-    minHeight: "100vh",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "#f5f7fa",
-    fontFamily:
-      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-  },
-  card: {
-    background: "#fff",
-    padding: "2.5rem 2rem",
-    borderRadius: "8px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-    maxWidth: "400px",
-    width: "100%",
-    textAlign: "center",
-  },
-  title: { margin: "0 0 0.25rem", fontSize: "1.4rem", color: "#1a1a2e" },
-  subtitle: { margin: "0 0 1.5rem", color: "#666", fontSize: "0.95rem" },
-  form: { display: "flex", flexDirection: "column", gap: "0.75rem" },
-  input: {
-    padding: "0.6rem 0.75rem",
-    fontSize: "1rem",
-    border: "1px solid #ccc",
-    borderRadius: "4px",
-    outline: "none",
-  },
-  error: {
-    padding: "0.5rem 0.75rem",
-    background: "#fef2f2",
-    border: "1px solid #fecaca",
-    borderRadius: "4px",
-    color: "#991b1b",
-    fontSize: "0.9rem",
-    textAlign: "left",
-  },
-  button: {
-    padding: "0.6rem",
-    fontSize: "1rem",
-    background: "#2563eb",
-    color: "#fff",
-    border: "none",
-    borderRadius: "4px",
-    cursor: "pointer",
-  },
-};

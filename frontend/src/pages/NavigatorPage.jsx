@@ -1,9 +1,97 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { queryBenefits } from "../api/client.js";
+import "../styles/navigator.css";
+
+/**
+ * Lightweight markdown → HTML converter (no external dependency).
+ * Handles headings, bold, italic, links, lists, code blocks, hr, paragraphs.
+ */
+function slugify(text) {
+  return text
+    .toLowerCase()
+    .replace(/<[^>]+>/g, "")
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .trim();
+}
+
+function markdownToHtml(md) {
+  let html = md
+    // code blocks
+    .replace(/```[\s\S]*?```/g, (m) => {
+      const code = m.slice(3, -3).replace(/^\w*\n/, "");
+      return `<pre><code>${code.replace(/</g, "&lt;")}</code></pre>`;
+    })
+    // inline code
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    // headings (with id for anchor links)
+    .replace(/^#### (.+)$/gm, (_, t) => `<h4 id="${slugify(t)}">${t}</h4>`)
+    .replace(/^### (.+)$/gm, (_, t) => `<h3 id="${slugify(t)}">${t}</h3>`)
+    .replace(/^## (.+)$/gm, (_, t) => `<h2 id="${slugify(t)}">${t}</h2>`)
+    .replace(/^# (.+)$/gm, (_, t) => `<h1 id="${slugify(t)}">${t}</h1>`)
+    // hr
+    .replace(/^---+$/gm, "<hr/>")
+    // bold + italic
+    .replace(/\*\*\*(.+?)\*\*\*/g, "<strong><em>$1</em></strong>")
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.+?)\*/g, "<em>$1</em>")
+    // links
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+    // unordered list items
+    .replace(/^[-*] (.+)$/gm, "<li>$1</li>")
+    // paragraphs (double newline)
+    .replace(/\n{2,}/g, "</p><p>")
+    // single newlines → <br>
+    .replace(/\n/g, "<br/>");
+
+  // Wrap consecutive <li> in <ul>
+  html = html.replace(/((?:<li>.*?<\/li>(?:<br\/>)?)+)/g, "<ul>$1</ul>");
+  // Clean up <br/> inside <ul>
+  html = html.replace(/<ul>(.*?)<\/ul>/gs, (_, inner) =>
+    "<ul>" + inner.replace(/<br\/>/g, "") + "</ul>"
+  );
+
+  return `<p>${html}</p>`
+    .replace(/<p><\/p>/g, "")
+    .replace(/<p>(<h[1-4]>)/g, "$1")
+    .replace(/(<\/h[1-4]>)<\/p>/g, "$1")
+    .replace(/<p>(<hr\/>)/g, "$1")
+    .replace(/(<hr\/>)<\/p>/g, "$1")
+    .replace(/<p>(<ul>)/g, "$1")
+    .replace(/(<\/ul>)<\/p>/g, "$1")
+    .replace(/<p>(<pre>)/g, "$1")
+    .replace(/(<\/pre>)<\/p>/g, "$1");
+}
+
+const POLICY_GUIDES = [
+  {
+    id: "coverage",
+    title: "Coverage & Eligibility Guide",
+    href: "/guides/coverage_eligibility_guide.md",
+    path: "guides/coverage_eligibility_guide.md",
+  },
+  {
+    id: "claims",
+    title: "Claims & Pre-authorization Guide",
+    href: "/guides/claims_preauth_guide.md",
+    path: "guides/claims_preauth_guide.md",
+  },
+  {
+    id: "exclusions",
+    title: "Clarifications & Exclusions Guide",
+    href: "/guides/exclusions_clarifications_guide.md",
+    path: "guides/exclusions_clarifications_guide.md",
+  },
+];
 
 /* ------------------------------------------------------------------ */
 /*  Sub-components                                                     */
 /* ------------------------------------------------------------------ */
+
+function toTitleCase(str) {
+  return str.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
 function DecisionBadge({ decision }) {
   const colors = {
@@ -16,15 +104,15 @@ function DecisionBadge({ decision }) {
     <span
       style={{
         display: "inline-block",
-        padding: "0.25rem 0.75rem",
-        borderRadius: "9999px",
-        fontSize: "0.85rem",
+        padding: "0.2rem 0.6rem",
+        borderRadius: "6px",
+        fontSize: "0.8rem",
         fontWeight: 600,
         background: c.bg,
         color: c.fg,
       }}
     >
-      {(decision || "unknown").replace(/_/g, " ")}
+      {toTitleCase(decision || "unknown")}
     </span>
   );
 }
@@ -35,13 +123,12 @@ function SourceBadge({ source }) {
     <span
       style={{
         display: "inline-block",
-        padding: "0.15rem 0.5rem",
-        borderRadius: "4px",
-        fontSize: "0.75rem",
-        fontWeight: 500,
+        padding: "0.2rem 0.6rem",
+        borderRadius: "6px",
+        fontSize: "0.8rem",
+        fontWeight: 600,
         background: isAI ? "#ede9fe" : "#f3f4f6",
         color: isAI ? "#6d28d9" : "#6b7280",
-        marginLeft: "0.5rem",
       }}
     >
       {isAI ? "AI Summary" : "System"}
@@ -251,6 +338,62 @@ export default function NavigatorPage({ employeeId, onLogout }) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [activeGuide, setActiveGuide] = useState(null);
+  const [guideContent, setGuideContent] = useState("");
+  const [guideLoading, setGuideLoading] = useState(false);
+  const [guideError, setGuideError] = useState("");
+  const queryInputRef = useRef(null);
+  const drawerCloseBtnRef = useRef(null);
+
+  useEffect(() => {
+    queryInputRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    if (!activeGuide) return;
+
+    drawerCloseBtnRef.current?.focus();
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setActiveGuide(null);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [activeGuide]);
+
+  const openGuide = async (guide) => {
+    setActiveGuide(guide);
+    setGuideContent("");
+    setGuideError("");
+    setGuideLoading(true);
+    try {
+      const response = await fetch(guide.href, {
+        headers: { Accept: "text/plain, text/markdown" },
+        redirect: "follow",
+      });
+      if (!response.ok) {
+        throw new Error("Failed guide fetch");
+      }
+      const contentType = response.headers.get("content-type") || "";
+      if (contentType.includes("text/html")) {
+        throw new Error("Got HTML instead of markdown");
+      }
+      const text = await response.text();
+      if (
+        !text.trim() ||
+        text.trimStart().startsWith("<!") ||
+        text.trimStart().startsWith("<html")
+      ) {
+        throw new Error("Guide content not available");
+      }
+      setGuideContent(text);
+    } catch {
+      setGuideError("Unable to load guide.");
+    } finally {
+      setGuideLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -276,57 +419,162 @@ export default function NavigatorPage({ employeeId, onLogout }) {
   };
 
   return (
-    <div style={styles.page}>
+    <div className="navigator-page">
       {/* Top bar */}
-      <header style={styles.header}>
-        <span style={{ fontWeight: 600 }}>Benefits Navigator</span>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <span style={{ fontSize: "0.9rem", color: "#6b7280" }}>
+      <header className="navigator-header">
+        <span className="navigator-header__title">Employee Policies</span>
+        <div className="navigator-header__actions">
+          <span className="navigator-header__employee">
             {employeeId}
           </span>
-          <button onClick={onLogout} style={styles.logoutBtn}>
+          <button onClick={onLogout} className="navigator-logout-btn">
             Logout
           </button>
         </div>
       </header>
 
-      {/* Query form */}
-      <main style={styles.main}>
-        <form onSubmit={handleSubmit} style={styles.queryForm}>
-          <input
-            style={styles.queryInput}
-            type="text"
-            placeholder="Ask a benefits question, e.g. 'Am I covered for dental cleaning?'"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            disabled={loading}
-            autoFocus
-          />
-          <button
-            type="submit"
-            style={{
-              ...styles.submitBtn,
-              opacity: loading || !question.trim() ? 0.6 : 1,
-            }}
-            disabled={loading || !question.trim()}
-          >
-            {loading ? "Checking..." : "Ask"}
-          </button>
-        </form>
+      <main className="navigator-main navigator-layout">
+        <aside className="navigator-sidebar" aria-label="Policy Library">
+          <h2 className="navigator-sidebar__title">Policy Library</h2>
+          <p className="navigator-sidebar__helper">
+            Guides for manual references.
+          </p>
+          <ul className="navigator-library-list">
+            {POLICY_GUIDES.map((guide) => (
+              <li key={guide.id}>
+                <button
+                  type="button"
+                  className="navigator-library-link"
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); openGuide(guide); }}
+                >
+                  {guide.title}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </aside>
+        <section className="navigator-panel">
+          {/* Query form at the top */}
+          <form onSubmit={handleSubmit} className="navigator-query-form">
+            <input
+              className="navigator-query-input"
+              ref={queryInputRef}
+              type="text"
+              placeholder="Ask a benefits question, e.g. 'Am I covered for dental cleaning?'"
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              disabled={loading}
+            />
+            <button
+              type="submit"
+              className="navigator-ask-btn"
+              disabled={loading || !question.trim()}
+            >
+              {loading ? "Checking..." : "Search"}
+            </button>
+          </form>
 
-        {/* Error display */}
-        {error && <div style={styles.errorBox}>{error}</div>}
+          {/* Results area */}
+          <div className="navigator-results">
+            {loading && (
+              <div className="navigator-spinner-wrap">
+                <div className="navigator-radial-spinner">
+                  {[...Array(8)].map((_, i) => (
+                    <span key={i} className="navigator-radial-spinner__segment" />
+                  ))}
+                </div>
+              </div>
+            )}
 
-        {/* Insufficient-info hint */}
-        {result?.decision === "insufficient_info" && (
-          <div style={styles.infoBox}>
-            More details may be required (e.g., treatment type/date/provider).
+            {error && (
+              <div style={styles.errorBox}>{error}</div>
+            )}
+
+            {result?.decision === "insufficient_info" && (
+              <div style={styles.infoBox}>
+                More details may be required (e.g., treatment type, date, or provider).
+              </div>
+            )}
+
+            {result && (
+              <ResultPanel data={result} />
+            )}
           </div>
-        )}
-
-        {/* Result display */}
-        {result && <ResultPanel data={result} />}
+        </section>
       </main>
+      {activeGuide && (
+        <div className="navigator-guide-drawer-backdrop" onClick={() => setActiveGuide(null)}>
+          <aside
+            className="navigator-guide-drawer"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="navigator-guide-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="navigator-guide-drawer__header">
+              <h2 id="navigator-guide-title" className="navigator-guide-drawer__title">
+                {activeGuide.title}
+              </h2>
+              <div className="navigator-guide-drawer__actions">
+                <button
+                  type="button"
+                  className="navigator-guide-drawer__newwin"
+                  title="Open in new window"
+                  onClick={() => {
+                    const w = window.open("", "_blank", "width=860,height=700");
+                    if (w) {
+                      w.document.write(
+                        `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${activeGuide.title}</title>` +
+                        `<style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;` +
+                        `max-width:780px;margin:2rem auto;padding:0 1.5rem;color:#0f172a;line-height:1.6}` +
+                        `h1,h2,h3,h4{color:#0f172a;line-height:1.25}a{color:#0f766e}code{background:#f1f5f9;` +
+                        `padding:0.15em 0.35em;border-radius:3px;font-size:0.9em}pre{background:#f1f5f9;` +
+                        `padding:1rem;border-radius:6px;overflow-x:auto}ul{padding-left:1.25rem}</style>` +
+                        `</head><body>${markdownToHtml(guideContent)}</body></html>`
+                      );
+                      w.document.close();
+                    }
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M6 2H3a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-3" />
+                    <path d="M9 2h5v5" />
+                    <path d="M14 2L7 9" />
+                  </svg>
+                </button>
+                <button
+                  ref={drawerCloseBtnRef}
+                  type="button"
+                  className="navigator-guide-drawer__close"
+                  onClick={() => setActiveGuide(null)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+            <div
+              className="navigator-guide-drawer__body"
+              onClick={(e) => {
+                const anchor = e.target.closest("a[href^='#']");
+                if (!anchor) return;
+                e.preventDefault();
+                const id = anchor.getAttribute("href").slice(1);
+                const target = e.currentTarget.querySelector(`#${CSS.escape(id)}`);
+                if (target) target.scrollIntoView({ behavior: "smooth" });
+              }}
+            >
+              {guideLoading && <p>Loading guide...</p>}
+              {!guideLoading && guideError && <p>{guideError}</p>}
+              {!guideLoading && !guideError && guideContent && (
+                <div
+                  className="navigator-guide-markdown"
+                  dangerouslySetInnerHTML={{ __html: markdownToHtml(guideContent) }}
+                />
+              )}
+            </div>
+          </aside>
+        </div>
+      )}
     </div>
   );
 }
@@ -336,57 +584,6 @@ export default function NavigatorPage({ employeeId, onLogout }) {
 /* ------------------------------------------------------------------ */
 
 const styles = {
-  page: {
-    minHeight: "100vh",
-    background: "#f5f7fa",
-    fontFamily:
-      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-  },
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "0.75rem 1.5rem",
-    background: "#fff",
-    borderBottom: "1px solid #e5e7eb",
-  },
-  logoutBtn: {
-    padding: "0.3rem 0.75rem",
-    fontSize: "0.85rem",
-    background: "transparent",
-    border: "1px solid #d1d5db",
-    borderRadius: "4px",
-    cursor: "pointer",
-    color: "#374151",
-  },
-  main: {
-    maxWidth: "720px",
-    margin: "2rem auto",
-    padding: "0 1rem",
-  },
-  queryForm: {
-    display: "flex",
-    gap: "0.5rem",
-    marginBottom: "1.5rem",
-  },
-  queryInput: {
-    flex: 1,
-    padding: "0.6rem 0.75rem",
-    fontSize: "1rem",
-    border: "1px solid #ccc",
-    borderRadius: "4px",
-    outline: "none",
-  },
-  submitBtn: {
-    padding: "0.6rem 1.25rem",
-    fontSize: "1rem",
-    background: "#2563eb",
-    color: "#fff",
-    border: "none",
-    borderRadius: "4px",
-    cursor: "pointer",
-    whiteSpace: "nowrap",
-  },
   errorBox: {
     padding: "0.75rem 1rem",
     background: "#fef2f2",
@@ -405,10 +602,11 @@ const styles = {
     fontSize: "0.9rem",
   },
   resultCard: {
-    background: "#fff",
+    background: "#f8fafc",
     padding: "1.5rem",
-    borderRadius: "8px",
-    boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+    borderRadius: "12px",
+    border: "1px solid rgba(15, 23, 42, 0.08)",
+    boxShadow: "0 10px 24px rgba(15, 23, 42, 0.12)",
   },
   fieldGroup: {
     marginBottom: "1rem",
