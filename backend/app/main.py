@@ -11,6 +11,7 @@ from app.api.routes_query import router as query_router
 from app.api.routes_query_orchestrated import router as orchestrated_router
 from app.api.routes_admin import router as admin_router
 from app.api.routes_employee import router as employee_router
+from app.api.routes_employee_crud import router as employee_crud_router
 from app.config import get_settings
 from app.rate_limit import limiter
 from app.middleware.error_handler import (
@@ -80,7 +81,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=_settings.cors_origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],
 )
 
@@ -92,3 +93,4 @@ app.include_router(query_router, prefix="/v1", tags=["query"])
 app.include_router(orchestrated_router, prefix="/v1", tags=["query-orchestrated"])
 app.include_router(admin_router, prefix="/v1", tags=["admin"])
 app.include_router(employee_router, prefix="/v1", tags=["employee"])
+app.include_router(employee_crud_router, prefix="/v1", tags=["employee-crud"])
