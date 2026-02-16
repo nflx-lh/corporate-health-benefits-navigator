@@ -1,10 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "../styles/login.css";
 
 export default function LoginPage({ onLogin }) {
   const [value, setValue] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const employeeInputRef = useRef(null);
+
+  useEffect(() => {
+    employeeInputRef.current?.focus();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -62,17 +67,17 @@ export default function LoginPage({ onLogin }) {
                 Employee ID
               </label>
               <input
-                className="login-page__input"
+                className="login-page__input login-input"
                 id="employee-id-input"
                 type="text"
                 placeholder="e.g. EMP001"
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
-                autoFocus
+                ref={employeeInputRef}
               />
               {error && <div className="login-page__error">{error}</div>}
               <button
-                className="login-page__button"
+                className="login-page__button login-button"
                 type="submit"
                 disabled={!value.trim() || loading}
               >
