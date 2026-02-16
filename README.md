@@ -8,13 +8,13 @@ This solution was developed as an MVP demonstration for a corporate health benef
 
 ## MVP Scope
 - **Benefits:** Outpatient, Dental, Mental Health
-- **Users:** Employee
+- **Users:** Employee, HR Admin
 - **Stack:** FastAPI, React 19 / Vite 5, LangGraph, PostgreSQL, Docker Compose
 - **AI:** OpenAI LLM (explainer/critic agents) + embeddings (policy retrieval)
 
 ## Project Status
-- Multi-Agent Orchestration & Explainability UX completed (Phase 8).
-- Cloud deployment pending (Phase 9).
+- Admin page with employee CRUD management completed (Phase 9 Part A).
+- Cloud deployment pending (Phase 10).
 
 ## Quick Start
 1. Copy `.env.example` to `.env`
@@ -30,6 +30,7 @@ docker compose up --build
 - **Rules-first decisions** — deterministic engine is the single source of truth; AI enriches but never overrides
 - **LLM explainability** — plain-language summaries with critic validation and safety gate
 - **Policy Library** — sidebar with guide cards and slide-in markdown viewer
+- **Admin dashboard** — HR admin login with employee CRUD management (create, edit, delete)
 - **Security hardening** — JWT auth, RBAC, CORS allowlist, rate limiting, input validation, prompt injection guards, and safe error handling
 - **Evaluation harness** — automated test suite with deterministic eval cases and no-drift golden output gates
 

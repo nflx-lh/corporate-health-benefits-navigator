@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import "../styles/login.css";
 
-export default function LoginPage({ onLogin }) {
+export default function LoginPage({ onLogin, onAdminLogin }) {
   const [value, setValue] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -39,6 +39,10 @@ export default function LoginPage({ onLogin }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAdminLogin = () => {
+    if (onAdminLogin) onAdminLogin();
   };
 
   return (
@@ -87,6 +91,15 @@ export default function LoginPage({ onLogin }) {
           </div>
         </main>
       </div>
+      <button
+        className="login-page__admin-fab"
+        type="button"
+        onClick={handleAdminLogin}
+        title="Admin Access"
+        aria-label="Admin Access"
+      >
+        <img src="/images/admin-icon.png" alt="Admin" className="login-page__admin-fab-icon" />
+      </button>
     </>
   );
 }
