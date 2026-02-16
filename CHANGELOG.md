@@ -4,6 +4,36 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [0.10.0] - 17-Feb-2026
+
+### Added
+- Dedicated Admin Page with two-phase flow (login form → employee dashboard)
+  - Admin login form authenticates via `POST /v1/auth/login` with JWT token
+  - Validates `hr_admin` role before granting dashboard access
+  - Employee management table with Create, Edit, Delete operations
+  - Inline employee form with validation (ID pattern, age, employment type, plan tier, tenure, dependents, active status)
+  - Delete confirmation dialog
+  - "Back to Employee Login" navigation from admin login
+- Employee CRUD API endpoints (`/v1/admin/employees`):
+  - `GET` — list all employees (hr_admin only)
+  - `POST` — create employee (409 on duplicate)
+  - `GET /{id}` — read single employee
+  - `PUT /{id}` — update employee fields
+  - `DELETE /{id}` — delete employee
+- Admin icon FAB on login page now opens in-app admin login
+- Admin page styles (`admin.css`) with BEM naming, matching green/dark palette, responsive layout
+- CORS extended to allow PUT and DELETE methods
+- 312 tests across 23 files (up from 301 across 22)
+
+### Changed
+- `App.jsx`: added `adminMode` state; routes to `AdminPage` when active
+- `LoginPage.jsx`: admin FAB wired to `onAdminLogin` prop
+- `main.py`: registered employee CRUD router, added PUT/DELETE to CORS allow_methods
+
+### Notes
+- Checkpoint tag planned: `v0.10.0-phase9-freeze`
+---
+
 ## [0.9.1] - 17-Feb-2026
 
 ### Added
