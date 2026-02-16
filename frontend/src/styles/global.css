@@ -1,0 +1,27 @@
+:root {
+  --app-bg-overlay-top: rgba(10, 20, 15, 0.68);
+  --app-bg-overlay-bottom: rgba(8, 15, 12, 0.74);
+}
+
+html,
+body,
+#app {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background-image:
+    linear-gradient(var(--app-bg-overlay-top), var(--app-bg-overlay-bottom)),
+    url("/textures/bg-grain.svg");
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+@media (max-width: 768px) {
+  body {
+    background-attachment: scroll;
+  }
+}

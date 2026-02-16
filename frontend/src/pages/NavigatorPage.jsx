@@ -281,7 +281,7 @@ export default function NavigatorPage({ employeeId, onLogout }) {
       <header style={styles.header}>
         <span style={{ fontWeight: 600 }}>Benefits Navigator</span>
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <span style={{ fontSize: "0.9rem", color: "#6b7280" }}>
+          <span style={{ fontSize: "0.9rem", color: "#e5e7eb" }}>
             {employeeId}
           </span>
           <button onClick={onLogout} style={styles.logoutBtn}>
@@ -338,7 +338,7 @@ export default function NavigatorPage({ employeeId, onLogout }) {
 const styles = {
   page: {
     minHeight: "100vh",
-    background: "#f5f7fa",
+    background: "transparent",
     fontFamily:
       '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
@@ -347,21 +347,23 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "center",
     padding: "0.75rem 1.5rem",
-    background: "#fff",
-    borderBottom: "1px solid #e5e7eb",
+    background: "rgba(19, 36, 29, 0.62)",
+    borderBottom: "1px solid rgba(236, 253, 245, 0.24)",
+    color: "#f0fdf4",
+    boxShadow: "0 10px 24px rgba(0, 0, 0, 0.24)",
   },
   logoutBtn: {
     padding: "0.3rem 0.75rem",
     fontSize: "0.85rem",
-    background: "transparent",
-    border: "1px solid #d1d5db",
+    background: "rgba(255, 255, 255, 0.12)",
+    border: "1px solid rgba(236, 253, 245, 0.45)",
     borderRadius: "4px",
     cursor: "pointer",
-    color: "#374151",
+    color: "#f8fafc",
   },
   main: {
     maxWidth: "720px",
-    margin: "2rem auto",
+    margin: "2rem auto 3rem",
     padding: "0 1rem",
   },
   queryForm: {
@@ -373,17 +375,19 @@ const styles = {
     flex: 1,
     padding: "0.6rem 0.75rem",
     fontSize: "1rem",
-    border: "1px solid #ccc",
-    borderRadius: "4px",
+    border: "1px solid rgba(255, 255, 255, 0.58)",
+    borderRadius: "8px",
     outline: "none",
+    background: "rgba(248, 250, 252, 0.96)",
+    color: "#0f172a",
   },
   submitBtn: {
     padding: "0.6rem 1.25rem",
     fontSize: "1rem",
-    background: "#2563eb",
+    background: "#1d4ed8",
     color: "#fff",
     border: "none",
-    borderRadius: "4px",
+    borderRadius: "8px",
     cursor: "pointer",
     whiteSpace: "nowrap",
   },
@@ -405,10 +409,11 @@ const styles = {
     fontSize: "0.9rem",
   },
   resultCard: {
-    background: "#fff",
+    background: "rgba(248, 250, 252, 0.97)",
     padding: "1.5rem",
-    borderRadius: "8px",
-    boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+    borderRadius: "12px",
+    border: "1px solid rgba(255, 255, 255, 0.5)",
+    boxShadow: "0 16px 30px rgba(0, 0, 0, 0.3)",
   },
   fieldGroup: {
     marginBottom: "1rem",
