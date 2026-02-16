@@ -12,7 +12,7 @@ from typing import Any
 
 import numpy as np
 
-from app.services.embed_index import DEFAULT_MODEL, LocalIndexStore
+from app.services.embed_index import LocalIndexStore
 
 
 @dataclass(frozen=True)
@@ -41,23 +41,15 @@ class PolicyRetriever:
     def __init__(
         self,
         index_dir: Path,
-        embedding_model_name: str = DEFAULT_MODEL,
+        embedding_model_name: str = "text-embedding-3-small",
     ) -> None:
         self._embedding_model_name = embedding_model_name
-        self._model: Any = None
         self._chunks, self._embeddings, self._meta = LocalIndexStore.load(index_dir)
 
         # Pre-normalise embeddings for cosine similarity.
         norms = np.linalg.norm(self._embeddings, axis=1, keepdims=True)
         norms = np.where(norms == 0, 1.0, norms)
         self._normed = self._embeddings / norms
-
-    def _get_model(self) -> Any:
-        if self._model is None:
-            from sentence_transformers import SentenceTransformer
-
-            self._model = SentenceTransformer(self._embedding_model_name)
-        return self._model
 
     def retrieve(self, query: str, top_k: int = 3) -> list[RetrievalHit]:
         """Return the top-*k* clause hits for *query*.
@@ -69,10 +61,15 @@ class PolicyRetriever:
         Returns:
             List of :class:`RetrievalHit`, sorted by the deterministic
             tie-break ordering described in the class docstring.
+            Returns empty list if embedding fails.
         """
-        model = self._get_model()
-        q_vec: np.ndarray = model.encode([query], show_progress_bar=False)
-        q_vec = q_vec.astype(np.float32).flatten()
+        from app.services import embedding_client
+
+        result = embedding_client.embed([query])
+        if result is None:
+            return []
+
+        q_vec = np.array(result[0], dtype=np.float32)
         q_norm = np.linalg.norm(q_vec)
         if q_norm > 0:
             q_vec = q_vec / q_norm

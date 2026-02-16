@@ -7,6 +7,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from pathlib import Path
 
@@ -33,8 +34,20 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    api_key = os.getenv("OPENAI_API_KEY", "").strip()
+    if not api_key:
+        print(
+            "ERROR: OPENAI_API_KEY environment variable is required to build embeddings.\n"
+            "Set it with: export OPENAI_API_KEY=sk-...",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    from app.config import get_settings
     from app.services.chunker import load_policy_chunks
     from app.services.embed_index import LocalIndexBuilder
+
+    settings = get_settings()
 
     print(f"Loading policies from: {args.policy_dir}")
     chunks = load_policy_chunks(args.policy_dir)
@@ -48,7 +61,8 @@ def main() -> None:
     print(f"  Sample clause IDs: {sample_ids}")
 
     print(f"Building index in: {args.index_dir}")
-    builder = LocalIndexBuilder()
+    print(f"  Embedding model: {settings.EMBEDDING_MODEL}")
+    builder = LocalIndexBuilder(embedding_model_name=settings.EMBEDDING_MODEL)
     builder.build(chunks, args.index_dir)
 
     # Read back meta for summary.

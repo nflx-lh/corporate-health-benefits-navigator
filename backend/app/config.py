@@ -23,6 +23,18 @@ class Settings:
     JWT_EXPIRE_MINUTES: int = int(os.getenv("JWT_EXPIRE_MINUTES", "60"))
     JWT_AUDIENCE: str = os.getenv("JWT_AUDIENCE", "chbn-api")
 
+    # LLM
+    LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "openai")  # openai | none
+    LLM_ENABLED: bool = os.getenv("LLM_ENABLED", "true").lower() in ("true", "1", "yes")
+    LLM_MODEL_NAME: str = os.getenv("LLM_MODEL_NAME", "gpt-4o-mini")
+    LLM_TIMEOUT_MS: int = int(os.getenv("LLM_TIMEOUT_MS", "5000"))
+    MAX_EXPLAINER_RETRIES: int = int(os.getenv("MAX_EXPLAINER_RETRIES", "1"))
+
+    # Embedding
+    EMBEDDING_PROVIDER: str = os.getenv("EMBEDDING_PROVIDER", "openai")  # openai | none
+    EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
+    EMBEDDING_TIMEOUT_MS: int = int(os.getenv("EMBEDDING_TIMEOUT_MS", "10000"))
+
     # Rate limiting
     RATE_LIMIT: str = os.getenv("RATE_LIMIT", "60/minute")
 

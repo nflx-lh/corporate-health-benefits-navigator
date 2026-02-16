@@ -33,14 +33,30 @@ TINY_POLICY = """\
 **CL-003:** Orthodontics are excluded for all plan tiers.
 """
 
+DIM = 8
+
+
+def _fake_embed(texts):
+    """Return deterministic fake embeddings for testing."""
+    rng = np.random.RandomState(42)
+    return [rng.randn(DIM).tolist() for _ in texts]
+
+
+def _constant_embed(texts):
+    """Return constant embeddings (all ones) to force equal scores."""
+    return [np.ones(DIM).tolist() for _ in texts]
+
 
 @pytest.fixture()
 def tiny_index(tmp_path: Path) -> Path:
-    """Build a tiny index in a temp directory using the real model."""
+    """Build a tiny index in a temp directory using mocked embeddings."""
     chunks = extract_chunks_from_markdown(TINY_POLICY, "tiny.md")
-    builder = LocalIndexBuilder()
     index_dir = tmp_path / "index"
-    builder.build(chunks, index_dir)
+
+    with patch("app.services.embedding_client.embed", side_effect=_fake_embed):
+        builder = LocalIndexBuilder()
+        builder.build(chunks, index_dir)
+
     return index_dir
 
 
@@ -53,14 +69,16 @@ class TestRetrievalFields:
     """Verify retrieval returns complete citation-ready hits."""
 
     def test_returns_retrieval_hits(self, tiny_index: Path) -> None:
-        retriever = PolicyRetriever(tiny_index)
-        hits = retriever.retrieve("dental cleaning coverage", top_k=2)
+        with patch("app.services.embedding_client.embed", side_effect=_fake_embed):
+            retriever = PolicyRetriever(tiny_index)
+            hits = retriever.retrieve("dental cleaning coverage", top_k=2)
         assert len(hits) <= 2
         assert all(isinstance(h, RetrievalHit) for h in hits)
 
     def test_hit_has_all_fields(self, tiny_index: Path) -> None:
-        retriever = PolicyRetriever(tiny_index)
-        hits = retriever.retrieve("dental cleaning", top_k=1)
+        with patch("app.services.embedding_client.embed", side_effect=_fake_embed):
+            retriever = PolicyRetriever(tiny_index)
+            hits = retriever.retrieve("dental cleaning", top_k=1)
         assert len(hits) == 1
         hit = hits[0]
         assert hit.clause_id.startswith("CL-")
@@ -71,9 +89,17 @@ class TestRetrievalFields:
         assert hit.chunk_id.startswith("tiny.md::")
 
     def test_top_k_limits_results(self, tiny_index: Path) -> None:
-        retriever = PolicyRetriever(tiny_index)
-        hits = retriever.retrieve("benefits", top_k=2)
+        with patch("app.services.embedding_client.embed", side_effect=_fake_embed):
+            retriever = PolicyRetriever(tiny_index)
+            hits = retriever.retrieve("benefits", top_k=2)
         assert len(hits) <= 2
+
+    def test_embed_failure_returns_empty(self, tiny_index: Path) -> None:
+        with patch("app.services.embedding_client.embed", return_value=_fake_embed(["dummy"])):
+            retriever = PolicyRetriever(tiny_index)
+        with patch("app.services.embedding_client.embed", return_value=None):
+            hits = retriever.retrieve("dental cleaning", top_k=1)
+        assert hits == []
 
 
 # ---------------------------------------------------------------------------
@@ -84,8 +110,8 @@ class TestRetrievalFields:
 class TestDeterministicTieBreak:
     """Verify tie-break ordering when scores are equal.
 
-    Monkeypatches the embedding model to return identical vectors,
-    forcing all scores to be equal so tie-break logic is exercised.
+    Uses constant embeddings (all ones) to force all scores to be equal,
+    so tie-break logic is exercised.
     """
 
     def test_equal_score_ordering(self, tmp_path: Path) -> None:
@@ -117,9 +143,8 @@ class TestDeterministicTieBreak:
         index_dir = tmp_path / "tie_index"
         index_dir.mkdir()
 
-        dim = 8
         n = len(all_chunks)
-        constant_emb = np.ones((n, dim), dtype=np.float32)
+        constant_emb = np.ones((n, DIM), dtype=np.float32)
         np.save(index_dir / "embeddings.npy", constant_emb)
 
         with open(index_dir / "chunks.jsonl", "w", encoding="utf-8") as f:
@@ -132,24 +157,13 @@ class TestDeterministicTieBreak:
                     "text": c.text,
                 }) + "\n")
 
-        meta = {"embedding_model": "mock", "dim": dim, "chunk_count": n, "created_at": "test"}
+        meta = {"embedding_model": "mock", "dim": DIM, "chunk_count": n, "created_at": "test"}
         with open(index_dir / "meta.json", "w", encoding="utf-8") as f:
             json.dump(meta, f)
 
-        # Mock the sentence-transformer model to return a constant query vector.
-        class _MockModel:
-            def encode(self, texts: list[str], **kwargs) -> np.ndarray:  # type: ignore[override]
-                return np.ones((len(texts), dim), dtype=np.float32)
-
-        with patch(
-            "app.services.retriever.SentenceTransformer",
-            return_value=_MockModel(),
-            create=True,
-        ):
+        # Mock embedding_client.embed to return a constant query vector.
+        with patch("app.services.embedding_client.embed", side_effect=_constant_embed):
             retriever = PolicyRetriever(index_dir, embedding_model_name="mock")
-            # Patch in our mock model directly.
-            retriever._model = _MockModel()
-
             hits = retriever.retrieve("anything", top_k=10)
 
         assert len(hits) == 3

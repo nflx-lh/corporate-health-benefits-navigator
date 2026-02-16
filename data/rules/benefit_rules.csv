@@ -10,7 +10,7 @@ R008,dental,premium,full_time,1,18,70,false,100,2000,15,false,,invoice;treatment
 R009,dental,basic,full_time,0,18,65,true,0,0,0,true,Basic plan does not include dental coverage,,2024-01-01,2099-12-31,preventive_dental
 R010,dental,plus,contract,1,18,70,true,0,0,0,true,Contract employees not eligible for dental benefits,,2024-01-01,2099-12-31,preventive_dental
 R011,dental,premium,contract,1,18,70,true,0,0,0,true,Contract employees not eligible for dental benefits,,2024-01-01,2099-12-31,preventive_dental
-R012,dental,premium,full_time,1,18,70,false,50,2000,15,false,,invoice;treatment_summary;xray;dentist_justification;preauth_form,2024-01-01,2099-12-31,major_dental
+R012,dental,premium,full_time,1,18,70,true,50,2000,15,false,,invoice;treatment_summary;xray;dentist_justification;preauth_form,2024-01-01,2099-12-31,major_dental
 R013,mental_health,plus,full_time,6,18,70,false,70,1800,30,false,,therapist_invoice;license_proof;diagnosis_summary,2024-01-01,2099-12-31,therapy_session
 R014,mental_health,premium,full_time,6,18,70,false,85,3500,30,false,,therapist_invoice;license_proof;diagnosis_summary,2024-01-01,2099-12-31,therapy_session
 R015,mental_health,basic,full_time,0,18,65,true,0,0,0,true,Basic plan only provides EAP (3 free sessions),,2024-01-01,2099-12-31,therapy_session
@@ -39,6 +39,9 @@ R037,outpatient,premium,full_time,0,18,70,true,90,5000,10,false,,receipt;mc;prea
 R038,dental,premium,full_time,1,18,70,true,50,2000,15,false,,invoice;treatment_summary;xray;dentist_justification;preauth_form,2024-01-01,2099-12-31,root_canal
 R039,outpatient,plus,full_time,0,18,70,true,80,3000,15,false,,receipt;mc;referral_letter;preauth_form,2024-01-01,2099-12-31,diagnostic_imaging
 R040,outpatient,premium,full_time,60,18,70,false,90,6000,10,false,,receipt;mc,2024-01-01,2099-12-31,general_consult
-R041,dental,premium,full_time,1,18,70,true,50,2000,15,false,,invoice;treatment_summary;xray;dentist_justification;preauth_form,2024-01-01,2099-12-31,major_dental
 R042,mental_health,premium,full_time,6,18,70,true,85,3500,30,false,,therapist_invoice;license_proof;diagnosis_summary;preauth_form,2024-01-01,2099-12-31,intensive_therapy
 R043,outpatient,basic,full_time,0,18,65,true,0,0,0,true,Experimental treatments excluded for all plans,,2024-01-01,2099-12-31,experimental_treatment
+R044,dental,premium,full_time,1,18,70,true,0,0,0,true,Orthodontics excluded for all plans,,2024-01-01,2099-12-31,orthodontics
+R045,dental,basic,full_time,0,18,65,true,0,0,0,true,Orthodontics excluded for all plans,,2024-01-01,2099-12-31,orthodontics
+R046,dental,plus,contract,1,18,70,true,0,0,0,true,Orthodontics excluded for all plans,,2024-01-01,2099-12-31,orthodontics
+R047,dental,premium,contract,1,18,70,true,0,0,0,true,Orthodontics excluded for all plans,,2024-01-01,2099-12-31,orthodontics

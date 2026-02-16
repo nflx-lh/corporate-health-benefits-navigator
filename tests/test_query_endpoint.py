@@ -89,6 +89,24 @@ class TestOrthodonticsExclusion:
         assert body["required_docs"] == []
         assert body["coverage_percent"] is None
 
+    def test_orthodontics_premium(self):
+        """QC4: Premium employee orthodontics must be excluded, not preventive_dental."""
+        resp = client.post("/v1/query", json={"employee_id": "EMP001", "question": "Is orthodontic treatment covered for me?"})
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["decision"] == "not_covered"
+        assert body["service_category"] == "orthodontics"
+        assert "EXCLUSION" in body["reason_codes"]
+        assert "R008" not in body["matched_rule_ids"]
+
+    def test_braces_premium(self):
+        resp = client.post("/v1/query", json={"employee_id": "EMP001", "question": "braces"})
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["decision"] == "not_covered"
+        assert body["service_category"] == "orthodontics"
+        assert "EXCLUSION" in body["reason_codes"]
+
 
 class TestServiceSpecificPrecedence:
     """Service-specific rule beats general rule."""

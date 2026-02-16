@@ -29,6 +29,26 @@ function DecisionBadge({ decision }) {
   );
 }
 
+function SourceBadge({ source }) {
+  const isAI = source === "llm";
+  return (
+    <span
+      style={{
+        display: "inline-block",
+        padding: "0.15rem 0.5rem",
+        borderRadius: "4px",
+        fontSize: "0.75rem",
+        fontWeight: 500,
+        background: isAI ? "#ede9fe" : "#f3f4f6",
+        color: isAI ? "#6d28d9" : "#6b7280",
+        marginLeft: "0.5rem",
+      }}
+    >
+      {isAI ? "AI Summary" : "System"}
+    </span>
+  );
+}
+
 function FieldRow({ label, value, fallback = "\u2014" }) {
   let display;
   if (value === null || value === undefined || value === "") {
@@ -101,13 +121,44 @@ function CitationCard({ citation }) {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Action zone – required docs & pre-auth                             */
+/* ------------------------------------------------------------------ */
+
+function ActionZone({ data }) {
+  const hasActions =
+    (Array.isArray(data.required_docs) && data.required_docs.length > 0) ||
+    data.preauth_required === true;
+
+  if (!hasActions) return null;
+
+  return (
+    <div style={styles.actionZone}>
+      <div style={styles.actionHeader}>Action Required</div>
+      {data.preauth_required === true && (
+        <div style={styles.actionItem}>Pre-authorization is required before treatment.</div>
+      )}
+      {Array.isArray(data.required_docs) && data.required_docs.length > 0 && (
+        <div style={styles.actionItem}>
+          Required documents: {data.required_docs.join(", ")}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Decision result panel                                              */
 /* ------------------------------------------------------------------ */
 
 function ResultPanel({ data }) {
+  const [detailsOpen, setDetailsOpen] = useState(false);
+
+  // Primary zone: AI summary or fallback reason_summary
+  const summaryText = data.ai_summary || data.reason_summary || "\u2014";
+
   return (
     <div style={styles.resultCard}>
-      {/* Decision header */}
+      {/* Primary zone: Summary + decision badge */}
       <div
         style={{
           display: "flex",
@@ -117,66 +168,76 @@ function ResultPanel({ data }) {
         }}
       >
         <DecisionBadge decision={data.decision} />
+        <SourceBadge source={data.ai_summary_source || "fallback"} />
         <span style={{ fontSize: "0.85rem", color: "#6b7280" }}>
           {data.benefit_type || "—"} / {data.service_category || "—"}
         </span>
       </div>
 
-      {/* Reason */}
-      <div style={{ marginBottom: "1rem", color: "#1f2937" }}>
-        {data.reason_summary || "\u2014"}
+      {/* Summary text */}
+      <div style={{ marginBottom: "1rem", color: "#1f2937", lineHeight: 1.6 }}>
+        {summaryText}
       </div>
 
-      {/* Deterministic fields */}
+      {/* Action zone */}
+      <ActionZone data={data} />
+
+      {/* Financial zone */}
       <div style={styles.fieldGroup}>
         <FieldRow label="Coverage" value={data.coverage_percent != null ? `${data.coverage_percent}%` : null} />
         <FieldRow label="Annual Limit" value={(() => { const v = data.annual_limit ?? data.annual_limit_sgd ?? null; return v != null ? `SGD ${v}` : null; })()} />
         <FieldRow label="Remaining Limit" value={data.remaining_limit != null ? `SGD ${data.remaining_limit}` : null} />
         <FieldRow label="Estimated Payout" value={data.estimated_payout != null ? `SGD ${data.estimated_payout}` : null} />
-        <FieldRow label="Pre-auth Required" value={typeof data.preauth_required === "boolean" ? data.preauth_required : null} />
+        <FieldRow label="Co-pay" value={data.co_pay_sgd != null ? `SGD ${data.co_pay_sgd}` : null} />
       </div>
 
-      {/* Reason codes */}
-      <div style={{ marginBottom: "0.75rem" }}>
-        <div style={styles.sectionLabel}>Reason Codes</div>
-        <TagList items={data.reason_codes} emptyText="None" />
-      </div>
+      {/* Collapsible details zone */}
+      <div style={{ marginTop: "1rem" }}>
+        <button
+          onClick={() => setDetailsOpen(!detailsOpen)}
+          style={styles.detailsToggle}
+        >
+          {detailsOpen ? "Hide" : "Show"} Technical Details
+        </button>
 
-      {/* Required docs */}
-      <div style={{ marginBottom: "0.75rem" }}>
-        <div style={styles.sectionLabel}>Required Documents</div>
-        <TagList items={data.required_docs} emptyText="None" />
-      </div>
-
-      {/* Matched rules */}
-      <div style={{ marginBottom: "0.75rem" }}>
-        <div style={styles.sectionLabel}>Matched Rules</div>
-        <TagList items={data.matched_rule_ids} emptyText="None" />
-      </div>
-
-      {/* --- Enrichment section (visually separated) --- */}
-      {(data.explanation || (Array.isArray(data.policy_citations) && data.policy_citations.length > 0)) && (
-        <div style={styles.enrichment}>
-          <div style={styles.enrichmentHeader}>Policy Explanation</div>
-
-          {data.explanation && (
-            <div style={{ marginBottom: "0.75rem", color: "#374151" }}>
-              {data.explanation}
+        {detailsOpen && (
+          <div style={styles.detailsZone}>
+            {/* Reason codes */}
+            <div style={{ marginBottom: "0.75rem" }}>
+              <div style={styles.sectionLabel}>Reason Codes</div>
+              <TagList items={data.reason_codes} emptyText="None" />
             </div>
-          )}
 
-          {Array.isArray(data.policy_citations) && data.policy_citations.length > 0 && (
-            <>
-              <div style={{ ...styles.sectionLabel, marginBottom: "0.5rem" }}>
-                Citations
+            {/* Matched rules */}
+            <div style={{ marginBottom: "0.75rem" }}>
+              <div style={styles.sectionLabel}>Matched Rules</div>
+              <TagList items={data.matched_rule_ids} emptyText="None" />
+            </div>
+
+            {/* Raw explanation (backward compat) */}
+            {data.explanation && (
+              <div style={{ marginBottom: "0.75rem" }}>
+                <div style={styles.sectionLabel}>Raw Citation</div>
+                <div style={{ fontSize: "0.85rem", color: "#374151" }}>
+                  {data.explanation}
+                </div>
               </div>
-              {data.policy_citations.map((c, i) => (
-                <CitationCard key={i} citation={c} />
-              ))}
-            </>
-          )}
-        </div>
-      )}
+            )}
+
+            {/* Citations */}
+            {Array.isArray(data.policy_citations) && data.policy_citations.length > 0 && (
+              <div>
+                <div style={{ ...styles.sectionLabel, marginBottom: "0.5rem" }}>
+                  Policy Citations
+                </div>
+                {data.policy_citations.map((c, i) => (
+                  <CitationCard key={i} citation={c} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -363,17 +424,38 @@ const styles = {
     color: "#6b7280",
     marginBottom: "0.35rem",
   },
-  enrichment: {
-    marginTop: "1.25rem",
-    padding: "1rem",
-    background: "#f5f3ff",
+  actionZone: {
+    marginBottom: "1rem",
+    padding: "0.75rem 1rem",
+    background: "#fefce8",
+    border: "1px solid #fde68a",
     borderRadius: "6px",
-    borderTop: "2px solid #8b5cf6",
   },
-  enrichmentHeader: {
-    fontSize: "0.9rem",
+  actionHeader: {
+    fontSize: "0.85rem",
     fontWeight: 700,
-    color: "#5b21b6",
-    marginBottom: "0.75rem",
+    color: "#854d0e",
+    marginBottom: "0.5rem",
+  },
+  actionItem: {
+    fontSize: "0.9rem",
+    color: "#713f12",
+    marginBottom: "0.25rem",
+  },
+  detailsToggle: {
+    background: "none",
+    border: "1px solid #d1d5db",
+    borderRadius: "4px",
+    padding: "0.35rem 0.75rem",
+    fontSize: "0.85rem",
+    color: "#6b7280",
+    cursor: "pointer",
+  },
+  detailsZone: {
+    marginTop: "0.75rem",
+    padding: "1rem",
+    background: "#f9fafb",
+    borderRadius: "6px",
+    border: "1px solid #e5e7eb",
   },
 };
