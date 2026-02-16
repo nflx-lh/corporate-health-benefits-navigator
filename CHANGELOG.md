@@ -4,6 +4,96 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [0.9.1] - TBD
+
+### Added
+- Phase 8 Part B — Remaining UI Polish:
+  - B-805: Error/loading/empty state standardization (skeleton/spinner during LLM generation, actionable error messages, retry option)
+  - B-806: Citation + trace usability (collapsible policy details, clause source references, HR admin trace view)
+  - B-807: Accessibility & visual consistency (keyboard navigation, WCAG AA contrast, spacing/typography cleanup)
+
+### Notes
+  - Checkpoint tag planned: `v0.9.0-phase8-freeze`
+---
+
+## [0.9.0] - 16-Feb-2026
+
+### Added
+- Phase 8 Part A (Multi-Agent Pipeline) + B-804 (Response UI Redesign):
+  - Provider-agnostic LLM client (`backend/app/services/llm_client.py`)
+    - Abstract `BaseLLMProvider` with `OpenAIProvider` implementation
+    - Lazy client initialization, never raises (returns `None` on any failure)
+    - Returns `None` gracefully when LLM is disabled or API key missing
+    - Configurable timeout, model name, and provider via env vars
+  - Provider-agnostic embedding client (`backend/app/services/embedding_client.py`)
+    - Abstract `BaseEmbeddingProvider` with `OpenAIEmbeddingProvider` implementation
+    - Same lazy/never-raises pattern as LLM client; returns `None` on any failure
+    - Configurable via `EMBEDDING_PROVIDER`, `EMBEDDING_MODEL`, `EMBEDDING_TIMEOUT_MS`
+  - Explainer node (`explainer_node`) in orchestration graph
+    - Generates plain-language AI summary from rule decision + policy citations
+    - Structured prompt includes decision, reason codes, financial fields, and retrieved policy text
+  - Critic node (`critic_node`) for AI summary validation
+    - Verifies LLM output consistency with deterministic decision
+    - Retry loop with configurable max retries (`MAX_EXPLAINER_RETRIES`)
+  - Safety gate in `compose_response_node`
+    - Validates AI summary against rule decision keywords
+    - Checks preauth mention when required
+    - Falls back to `"fallback"` source if validation fails
+  - New response fields on `POST /v1/query-orchestrated`:
+    - `ai_summary`: LLM-generated plain-language explanation (nullable)
+    - `ai_summary_source`: `"llm"` or `"fallback"` indicating summary origin
+  - LLM configuration in `Settings`:
+    - `LLM_PROVIDER` (openai | none), `LLM_ENABLED`, `LLM_MODEL_NAME`
+    - `LLM_TIMEOUT_MS`, `MAX_EXPLAINER_RETRIES`
+  - Embedding configuration in `Settings`:
+    - `EMBEDDING_PROVIDER` (openai | none), `EMBEDDING_MODEL`, `EMBEDDING_TIMEOUT_MS`
+  - Orchestration state extended with `explanation_text`, `critic_result`, `retry_count`
+  - Graph rewired: `retrieve_policy_hits` → conditional → `explainer` → `critic` → conditional (retry/compose)
+  - New benefit rules R044–R047 (orthodontics exclusion for all plan/employment combinations)
+  - Query parser: refined service-category keyword mapping (crown/bridge → `major_dental`; filling/extraction → `restorative_dental`) with debug logging
+  - Frontend UX redesign (`NavigatorPage.jsx`):
+    - Primary zone shows AI summary with `SourceBadge` (AI Summary / System)
+    - `ActionZone` component for required docs and pre-authorization alerts
+    - Collapsible details panel for financial fields, reason codes, matched rules, raw citations
+  - `pytest.ini` with test markers and default options
+  - `Makefile` with new build/test convenience targets
+  - New and extended test files (301 tests across 22 files):
+    - `tests/test_llm_client.py` (LLM client unit tests)
+    - `tests/test_embedding_client.py` (embedding client unit tests)
+    - `tests/test_audit_mapping.py` (service-category ↔ rule coherence tests)
+    - `tests/test_query_parser.py` (parser keyword mapping tests)
+    - Extended `tests/test_rule_engine.py` (rule engine coverage extensions)
+    - Extended `tests/test_orchestration_graph.py` (explainer/critic node tests)
+    - Extended `tests/test_query_endpoint_orchestrated.py` (new response field tests)
+    - Extended `tests/test_retriever_smoke.py` (retriever with embedding client)
+  - `tests/conftest.py` overhaul: env loading via `pytest_configure`, slowapi limiter reset fixture, shared app/client fixtures
+
+### Changed
+- `backend/app/services/embed_index.py`: migrated from local sentence-transformers to OpenAI embeddings API via embedding client
+- `backend/app/services/retriever.py`: migrated from local sentence-transformers to OpenAI embeddings API (returns `[]` on failure)
+- `scripts/build_index.py`: updated for OpenAI embedding API
+- `data/rules/benefit_rules.csv`: R012 `preauth_required` corrected to `true`; removed duplicate R041; added R044–R047 (47 rules total)
+- `backend/app/services/query_parser.py`: keyword map refinements + debug logging
+- `requirements.txt`: added `openai>=1.58.0`; removed `sentence-transformers` (replaced by OpenAI embedding API)
+- `.env.example`: added `LLM_PROVIDER`, `LLM_ENABLED`, `LLM_MODEL_NAME`, `LLM_TIMEOUT_MS`, `MAX_EXPLAINER_RETRIES`, `EMBEDDING_PROVIDER`, `EMBEDDING_MODEL`, `EMBEDDING_TIMEOUT_MS`; removed unused `ANTHROPIC_API_KEY` and `MODEL_NAME`
+- `docker-compose.yml`: updated service configuration
+- `backend/app/orchestration/graph.py`: added explainer/critic nodes and conditional routing
+- `backend/app/orchestration/nodes.py`: added explainer, critic, safety gate, and router functions
+- `backend/app/orchestration/state.py`: added Phase 8 state fields
+- `backend/app/api/routes_query_orchestrated.py`: added `ai_summary` and `ai_summary_source` to response model
+- `frontend/src/pages/NavigatorPage.jsx`: redesigned result panel with summary-first UX
+- `tests/conftest.py`: overhauled with env loading, shared fixtures, limiter reset
+
+### Notes
+- `rules_engine.py` is NOT modified — deterministic decisions remain authoritative
+- AI summary is always validated against deterministic decision before display
+- LLM failures degrade gracefully: `ai_summary=null`, `ai_summary_source="fallback"`
+- Embedding pipeline migrated from local sentence-transformers to OpenAI API; retriever returns empty list on embedding failure
+- 301 tests across 22 test files (up from ~219 across 21)
+- Checkpoint tag planned: `v0.9.0-phase8-freeze` only after Phase 8 Part B concludes.
+
+---
+
 ## [0.8.1] - 15-Feb-2026
 
 ### Added
