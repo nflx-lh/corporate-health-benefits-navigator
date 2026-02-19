@@ -13,8 +13,8 @@ This solution was developed as an MVP demonstration for a corporate health benef
 - **AI:** OpenAI LLM (explainer/critic agents) + embeddings (policy retrieval)
 
 ## Project Status
-- Admin page with employee CRUD management completed (Phase 9 Part A).
-- Cloud deployment pending (Phase 10).
+- Core functionalities completed and stable locally.
+- Cloud deployment (next milestone)
 
 ## Quick Start
 1. Copy `.env.example` to `.env`
