@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 import time
 from pathlib import Path
 from typing import Any
@@ -69,6 +70,8 @@ def run_rules_engine_node(state: OrchestratorState) -> dict[str, Any]:
     )
     response: QueryResponse = evaluate(employee, parsed)
     decision_dict = response.model_dump()
+    raw_plan = getattr(employee, "plan_tier", None) or "your plan"
+    decision_dict["plan_tier"] = raw_plan.title()
     logger.debug(
         "run_rules_engine_node | decision=%s service_category=%s matched_rules=%s",
         decision_dict.get("decision"), decision_dict.get("service_category"),
@@ -301,13 +304,23 @@ def explainer_node(state: OrchestratorState) -> dict[str, Any]:
         citation_text += f"\n- {h.get('clause_id', '')}: {h.get('text', '')[:200]}"
 
     # Build system prompt
+    plan_name = rule_decision.get("plan_tier") or "your plan"
     system_prompt = (
-        "You are a benefits explanation assistant. Given a deterministic coverage decision "
-        "and policy citations, produce a clear, conversational summary for the employee. "
-        "IMPORTANT: You must accurately reflect the decision. "
+        "You are a benefits explanation assistant. Summarise the coverage decision for an employee. "
+        "IMPORTANT: Accurately reflect the decision — do not contradict it. "
         f"The decision is: {rule_decision.get('decision', 'unknown')}. "
-        "If covered, mention coverage percentage, limits, and required documents. "
-        "If not covered, explain why. Do not contradict the decision."
+        "Write in short, natural sentences — NOT a field dump. "
+        "Format example (follow this style exactly):\n"
+        f"Current Plan: {plan_name}\n"
+        "Your [benefit] [service] are covered at [x]%.\n"
+        "Annual limit: SGD [amount].\n"
+        "Co-pay: SGD [amount] per visit.\n"
+        "Please note to retain a copy of the required documents stated below.\n\n"
+        "Rules:\n"
+        "- Start with 'Current Plan: [plan name]' on its own line.\n"
+        "- One fact per line. Use plain language.\n"
+        "- Do NOT mention internal rule IDs (e.g. R008). Do NOT list required documents by name.\n"
+        "- Do NOT add sign-offs like 'let me know' or 'Great news!'. This is a search result, not a chat."
     )
 
     # Build user message
@@ -318,6 +331,10 @@ def explainer_node(state: OrchestratorState) -> dict[str, Any]:
         user_message += f"\n\nPrevious attempt was rejected: {critic_result.get('critic_feedback', '')}. Please fix."
 
     result = chat_completion(system_prompt, user_message)
+
+    # Post-process: ensure line breaks before key fact patterns
+    result = re.sub(r'(?<!\n)((?:Current Plan:|Annual limit:|Co-pay:|Please refer|Please note))', r'\n\1', result)
+    result = result.strip()
 
     return {
         "explanation_text": result,

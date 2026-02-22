@@ -183,27 +183,24 @@ function TagList({ items, emptyText }) {
   );
 }
 
-function CitationCard({ citation }) {
+function CitationBadge({ citation }) {
   return (
-    <div
+    <span
+      title={`${citation.source_file}${citation.section ? ` — ${citation.section}` : ""}`}
       style={{
-        padding: "0.75rem",
-        background: "#f0f4ff",
-        borderLeft: "3px solid #6366f1",
-        borderRadius: "4px",
-        marginBottom: "0.5rem",
-        fontSize: "0.9rem",
+        display: "inline-block",
+        padding: "0.2rem 0.55rem",
+        background: "#e0e7ff",
+        border: "1px solid #c7d2fe",
+        borderRadius: "6px",
+        fontSize: "0.8rem",
+        fontWeight: 600,
+        color: "#4338ca",
+        cursor: "default",
       }}
     >
-      <div style={{ fontWeight: 600, color: "#4338ca", marginBottom: "0.25rem" }}>
-        {citation.clause_id}{" "}
-        <span style={{ fontWeight: 400, color: "#6b7280" }}>
-          — {citation.source_file}
-          {citation.section ? `, ${citation.section}` : ""}
-        </span>
-      </div>
-      <div style={{ color: "#374151" }}>{citation.text}</div>
-    </div>
+      {citation.clause_id}
+    </span>
   );
 }
 
@@ -262,9 +259,19 @@ function ResultPanel({ data }) {
       </div>
 
       {/* Summary text */}
-      <div style={{ marginBottom: "1rem", color: "#1f2937", lineHeight: 1.6 }}>
+      <div style={{ marginBottom: "1rem", color: "#1f2937", lineHeight: 1.6, whiteSpace: "pre-line" }}>
         {summaryText}
       </div>
+
+      {/* Source references for employees */}
+      {Array.isArray(data.policy_citations) && data.policy_citations.length > 0 && (
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.35rem", marginBottom: "1rem" }}>
+          <span style={{ fontSize: "0.8rem", color: "#6b7280", fontWeight: 500 }}>Sources:</span>
+          {data.policy_citations.map((c, i) => (
+            <CitationBadge key={i} citation={c} />
+          ))}
+        </div>
+      )}
 
       {/* Action zone */}
       <ActionZone data={data} />
@@ -306,7 +313,11 @@ function ResultPanel({ data }) {
               <div style={{ marginBottom: "0.75rem" }}>
                 <div style={styles.sectionLabel}>Raw Citation</div>
                 <div style={{ fontSize: "0.85rem", color: "#374151" }}>
-                  {data.explanation}
+                  {data.explanation
+                    .replace(/\*\*([^*]+)\*\*/g, "$1")
+                    .replace(/#{1,6}\s+/g, "")
+                    .replace(/__([^_]+)__/g, "$1")
+                  }
                 </div>
               </div>
             )}
@@ -317,9 +328,11 @@ function ResultPanel({ data }) {
                 <div style={{ ...styles.sectionLabel, marginBottom: "0.5rem" }}>
                   Policy Citations
                 </div>
-                {data.policy_citations.map((c, i) => (
-                  <CitationCard key={i} citation={c} />
-                ))}
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem" }}>
+                  {data.policy_citations.map((c, i) => (
+                    <CitationBadge key={i} citation={c} />
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -437,7 +450,7 @@ export default function NavigatorPage({ employeeId, onLogout }) {
         <aside className="navigator-sidebar" aria-label="Policy Library">
           <h2 className="navigator-sidebar__title">Policy Library</h2>
           <p className="navigator-sidebar__helper">
-            Guides for manual references.
+            Guides for manual references
           </p>
           <ul className="navigator-library-list">
             {POLICY_GUIDES.map((guide) => (
@@ -492,7 +505,7 @@ export default function NavigatorPage({ employeeId, onLogout }) {
 
             {result?.decision === "insufficient_info" && (
               <div style={styles.infoBox}>
-                More details may be required (e.g., treatment type, date, or provider).
+                Your query cannot be found in database.
               </div>
             )}
 

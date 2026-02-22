@@ -13,8 +13,9 @@ This solution was developed as an MVP demonstration for a corporate health benef
 - **AI:** OpenAI LLM (explainer/critic agents) + embeddings (policy retrieval)
 
 ## Project Status
-- Core functionalities completed and stable locally.
-- Cloud deployment (next milestone)
+- **v0.12.1** — Admin UX polish (form validation, modal popups, table formatting, guide backgrounds)
+- Phases 1–11 complete (rules engine, retrieval, orchestration, frontend, security, admin CRUD, password auth, UI polish)
+- Cloud deployment next (Phase 12)
 
 ## Quick Start
 1. Copy `.env.example` to `.env`
@@ -44,4 +45,4 @@ docker compose up --build
 - `scripts/` — seed, eval, build-index, readiness report
 
 ## Attribution
-- Background images sourced from [Freepik](https://www.freepik.com)
+- Images sourced from [Freepik](https://www.freepik.com) & [Unsplash](https://unsplash.com/photos/green-grass-field-under-cloudy-sky-during-daytime-FIBmUBCilEw?utm_source=unsplash&utm_medium=referral&utm_content=creditShareLink)

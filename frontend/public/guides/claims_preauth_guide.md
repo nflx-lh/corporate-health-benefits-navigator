@@ -1,241 +1,156 @@
 # Claims & Pre-authorization Guide
 
-## Table of Contents
 - [Claims Submission Process](#claims-submission-process)
 - [Pre-authorization Guidelines](#pre-authorization-guidelines)
-- [Benefit-specific Required Documents and Timelines](#benefit-specific-required-documents-and-timelines)
-- [FAQ Clarifications](#faq-clarifications)
+- [Required Documents by Benefit Type](#required-documents-by-benefit-type)
+- [Frequently Asked Questions](#frequently-asked-questions)
+
+---
 
 ## Claims Submission Process
 
-### 1. General Submission Guidelines
-_Provenance: Source file: `claims_submission.md` | Clause IDs: `CL-087`, `CL-088`, `CL-089`_
+### How to Submit
 
-**CL-087:** All claims must be submitted through the employee benefits portal or via email to claims@company.sg.
+All claims must be submitted through the employee benefits portal or via email to claims@company.sg. Claims submitted via post must include original receipts (photocopies are not accepted). Incomplete claims will be rejected with feedback, and resubmission must occur within the original 30-day window.
 
-**CL-088:** Claims submitted via post must include original receipts (photocopies not accepted).
+Policy references: CL-087, CL-088, CL-089
 
-**CL-089:** Incomplete claims will be rejected with feedback; resubmission must occur within the original 30-day window.
+### Required Documentation (Standard)
 
-### 2. Required Documentation (Standard)
-_Provenance: Source file: `claims_submission.md` | Clause IDs: `CL-090`, `CL-091`_
+All claims require a completed claim form (downloadable from portal), original itemized receipts, medical certificate or treatment summary, and employee ID with plan tier confirmation.
 
-**CL-090:** All claims require:
-- Completed claim form (downloadable from portal)
-- Original itemized receipts
-- Medical certificate or treatment summary
-- Employee ID and plan tier confirmation
+For dependent claims, you must additionally provide proof of dependent relationship (birth certificate, marriage certificate) and the dependent's identification document.
 
-**CL-091:** Dependent claims additionally require:
-- Proof of dependent relationship (birth certificate, marriage certificate)
-- Dependent's identification document
+Policy references: CL-090, CL-091
 
-### 3. Timelines
-_Provenance: Source file: `claims_submission.md` | Clause IDs: `CL-092`, `CL-093`, `CL-094`_
+### Timelines
 
-**CL-092:** Standard claim window: 30 calendar days from service date. Benefit-specific timelines (such as CL-067 for mental health) override this general rule where specified.
+The standard claim window is 30 calendar days from the date of service. An extended window of 60 days is available for overseas treatment with prior approval. Note that benefit-specific timelines (such as for mental health) override this general rule where specified.
 
-**CL-093:** Extended window for overseas treatment: 60 days with prior approval.
+Reimbursement processing times:
 
-**CL-094:** Reimbursement processing:
-- Simple claims (GP visits, prescriptions): 7 business days
-- Complex claims (specialist, dental major): 10-14 business days
-- Mental health claims: 14 business days (confidential routing)
+- Simple claims (GP visits, prescriptions) - 7 business days
+- Complex claims (specialist, dental major) - 10-14 business days
+- Mental health claims - 14 business days (confidential routing)
 
-### 4. Rejection Reasons
-_Provenance: Source file: `claims_submission.md` | Clause IDs: `CL-095`, `CL-096`_
+Policy references: CL-092, CL-093, CL-094
 
-**CL-095:** Common rejection causes:
-- Missing or illegible receipts
-- Services not covered under plan
-- Claim submitted beyond deadline
-- Pre-authorization not obtained
-- Provider not on panel list
+### Common Rejection Reasons
 
-**CL-096:** Rejected claims may be resubmitted once with corrected documentation within 10 business days of rejection notice.
+Claims are commonly rejected for missing or illegible receipts, services not covered under your plan, submission beyond the deadline, pre-authorization not obtained, or provider not on the panel list. Rejected claims may be resubmitted once with corrected documentation within 10 business days of the rejection notice.
 
-### 5. Payment Methods
-_Provenance: Source file: `claims_submission.md` | Clause IDs: `CL-097`, `CL-098`_
+Policy references: CL-095, CL-096
 
-**CL-097:** Reimbursements credited directly to employee's registered bank account.
+### Payment
 
-**CL-098:** Direct billing available at panel providers for Premium plan holders (outpatient and preventive dental only).
+Reimbursements are credited directly to the employee's registered bank account. Direct billing is available at panel providers for Premium plan holders (outpatient and preventive dental only).
 
-### Notes
-_Provenance: Source file: `claims_submission.md` | Clause IDs: `CL-099`, `CL-100`_
+For claims assistance, contact the benefits helpdesk at +65 6XXX XXXX (Mon-Fri, 9am-6pm). Annual statements showing claims history and remaining balance are available online.
 
-**CL-099:** For claims assistance, contact benefits helpdesk at +65 6XXX XXXX (Mon-Fri, 9am-6pm).
+Policy references: CL-097, CL-098, CL-099, CL-100
 
-**CL-100:** Annual statements available online showing claims history and remaining balance.
+---
 
 ## Pre-authorization Guidelines
 
-### 1. Overview
-_Provenance: Source file: `preauth_rules.md` | Clause IDs: `CL-072`, `CL-073`, `CL-073A`_
+### Overview
 
-**CL-072:** Pre-authorization is a mandatory approval process for certain medical procedures to ensure medical necessity and cost appropriateness.
+Pre-authorization is a mandatory approval process for certain medical procedures to ensure medical necessity and cost appropriateness. Failure to obtain pre-authorization may result in claim denial or reduced reimbursement. When both service-specific and general threshold rules apply, service-specific rules take precedence.
 
-**CL-073:** Failure to obtain pre-authorization may result in claim denial or reduced reimbursement.
+Policy references: CL-072, CL-073, CL-073A
 
-**CL-073A:** When both service-specific pre-authorization rules (CL-074 to CL-076) and general threshold rules (CL-022, CL-044) apply, service-specific rules take precedence.
+### What Requires Pre-authorization
 
-### 2. Pre-authorization Thresholds
-_Provenance: Source file: `preauth_rules.md` | Clause IDs: `CL-074`, `CL-075`, `CL-076`_
-
-**CL-074:** Outpatient services requiring pre-authorization:
-- Diagnostic imaging (MRI, CT scan, PET scan) - mandatory regardless of cost
+**Outpatient services:**
+- Diagnostic imaging (MRI, CT scan, PET scan) — mandatory regardless of cost
 - Day surgery or outpatient procedures
-- Single procedure/consultation exceeding SGD 500 (unless service-specific rule applies)
+- Single procedure/consultation exceeding SGD 500 (unless a service-specific rule applies)
 
-**CL-075:** Dental services requiring pre-authorization:
+**Dental services:**
 - Major restorative work exceeding SGD 300 per treatment
-- Root canal therapy - mandatory regardless of cost
+- Root canal therapy — mandatory regardless of cost
 - Surgical extractions
 
-**CL-076:** Mental health services requiring pre-authorization:
+**Mental health services:**
 - Sessions beyond the 8th visit in a calendar year
 - Intensive therapy programs or residential treatment
 
-### 3. Exemptions from Pre-authorization
-_Provenance: Source file: `preauth_rules.md` | Clause IDs: `CL-077`, `CL-078`, `CL-079`_
+Policy references: CL-074, CL-075, CL-076
 
-**CL-077:** Emergency services (A&E visits, trauma care) are exempt from pre-authorization.
+### Exemptions
 
-**CL-078:** Routine preventive care under covered benefits is exempt.
+Emergency services (A&E visits, trauma care) are exempt from pre-authorization. Routine preventive care under covered benefits is also exempt. Services below threshold amounts specified per benefit category are exempt, unless service-specific mandatory rules apply.
 
-**CL-079:** Services below threshold amounts specified per benefit category are exempt (unless service-specific mandatory rules apply).
+Policy references: CL-077, CL-078, CL-079
 
-### 4. Submission Process
-_Provenance: Source file: `preauth_rules.md` | Clause IDs: `CL-080`, `CL-081`, `CL-082`_
+### How to Apply
 
-**CL-080:** Submit pre-authorization request via online portal or email to benefits@company.sg at least 5 business days before scheduled service.
+Submit your pre-authorization request via the online portal or email to benefits@company.sg at least 5 business days before the scheduled service. You will need to provide your Employee ID and plan tier, provider name and credentials, a detailed treatment plan with cost estimate, and medical justification (diagnosis, necessity). Approval or denial is communicated within 3 business days.
 
-**CL-081:** Required information:
-- Employee ID and plan tier
-- Provider name and credentials
-- Detailed treatment plan with cost estimate
-- Medical justification (diagnosis, necessity)
+Policy references: CL-080, CL-081, CL-082
 
-**CL-082:** Approval or denial communicated within 3 business days.
+### Appeals
 
-### 5. Appeal Process
-_Provenance: Source file: `preauth_rules.md` | Clause IDs: `CL-083`, `CL-084`_
+Denied pre-authorization requests may be appealed within 10 business days with additional medical documentation. Appeals are reviewed by an independent medical advisor within 7 business days.
 
-**CL-083:** Denied pre-authorization requests may be appealed within 10 business days with additional medical documentation.
+Retrospective pre-authorization is accepted for emergency cases if notified within 48 hours of service. Pre-authorization is valid for 30 days from the approval date; you must re-apply if the service is delayed beyond this period.
 
-**CL-084:** Appeals reviewed by independent medical advisor within 7 business days.
+Policy references: CL-083, CL-084, CL-085, CL-086
 
-### Notes
-_Provenance: Source file: `preauth_rules.md` | Clause IDs: `CL-085`, `CL-086`_
+---
 
-**CL-085:** Retrospective pre-authorization accepted for emergency cases if notified within 48 hours of service.
+## Required Documents by Benefit Type
 
-**CL-086:** Pre-authorization validity: 30 days from approval date; must re-apply if service delayed beyond this period.
+### Outpatient Medical
 
-## Benefit-specific Required Documents and Timelines
+**Standard GP visits:** Original itemized receipt and medical certificate (if claiming sick leave concurrently).
 
-### Outpatient Medical Benefits Policy
-#### 5. Required Documents
-_Provenance: Source file: `outpatient_policy.md` | Clause IDs: `CL-016`, `CL-017`, `CL-018`_
+**Specialist visits:** Referral letter from GP, specialist consultation report, and itemized hospital/clinic bill.
 
-**CL-016:** For standard GP visits:
-- Original itemized receipt
-- Medical certificate (MC) if claiming sick leave concurrently
+**Prescription medications:** Pharmacy receipt with medication names and dosages, plus the doctor's prescription slip.
 
-**CL-017:** For specialist visits:
-- Referral letter from GP
-- Specialist consultation report
-- Itemized hospital/clinic bill
+Claims must be submitted within 30 calendar days from date of service. Late claims may be rejected unless accompanied by written justification approved by HR. Reimbursement processing takes 7-10 business days. Procedures exceeding SGD 500 per visit require pre-authorization for non-emergency cases. Emergency room visits are exempt but require retrospective notification within 48 hours.
 
-**CL-018:** For prescription medications:
-- Pharmacy receipt with medication names and dosages
-- Doctor's prescription slip
+Policy references: CL-016, CL-017, CL-018, CL-019, CL-020, CL-021, CL-022, CL-023
 
-#### 6. Claim Timeline
-_Provenance: Source file: `outpatient_policy.md` | Clause IDs: `CL-019`, `CL-020`, `CL-021`_
+### Dental
 
-**CL-019:** Claims must be submitted within 30 calendar days from date of service.
+**All dental claims:** Itemized dental clinic invoice, treatment summary from dentist, and pre-authorization form (if applicable).
 
-**CL-020:** Late claims may be rejected unless accompanied by written justification approved by HR.
+**Major procedures additionally require:** X-ray reports and the dentist's treatment plan with justification.
 
-**CL-021:** Reimbursement processing takes 7-10 business days from submission of complete documentation.
+Submit claims within 30 days of treatment completion. Pre-authorization is required for any single procedure exceeding SGD 300. Reimbursement is processed within 10 business days of approved submission. Emergency dental services (e.g., trauma) may be claimed retrospectively without pre-authorization.
 
-#### 7. Pre-authorization Requirements
-_Provenance: Source file: `outpatient_policy.md` | Clause IDs: `CL-022`, `CL-023`_
+Policy references: CL-041, CL-042, CL-043, CL-044, CL-045, CL-047
 
-**CL-022:** Procedures exceeding SGD 500 per visit require pre-authorization for non-emergency cases, unless a more specific service-level pre-authorization rule applies (see CL-073A for precedence rules and CL-074 for service-specific requirements).
+### Mental Health & Counseling
 
-**CL-023:** Emergency room visits are exempt from pre-authorization but require retrospective notification within 48 hours.
+**All claims:** Therapist's invoice with session date and duration, therapist's license number and credentials, and diagnosis summary (confidentiality protected; submitted directly by provider). A pre-authorization form is required for sessions beyond the 8th session in a calendar year.
 
-### Dental Benefits Policy
-#### 5. Required Documents
-_Provenance: Source file: `dental_policy.md` | Clause IDs: `CL-041`, `CL-042`_
+Claims may be submitted quarterly or after completing a treatment block (minimum 4 sessions). Reimbursement is processed within 14 business days with strict confidentiality protocols. Late claims are accepted up to 60 days with manager's written waiver, overriding the general 30-day claim window.
 
-**CL-041:** For all claims:
-- Itemized dental clinic invoice
-- Treatment summary from dentist
-- Pre-authorization form (if applicable)
+Policy references: CL-063, CL-064, CL-065, CL-066, CL-067
 
-**CL-042:** For major procedures:
-- X-ray reports
-- Dentist's treatment plan and justification
+---
 
-#### 6. Claim Timeline
-_Provenance: Source file: `dental_policy.md` | Clause IDs: `CL-043`, `CL-044`, `CL-045`, `CL-047`_
+## Frequently Asked Questions
 
-**CL-043:** Submit claims within 30 days of treatment completion.
+**What if I miss the 30-day claim deadline?**
+Late claims may be rejected. You can appeal with written justification to HR. Mental health claims have an extended 60-day window with manager approval.
 
-**CL-044:** Pre-authorization required for any single procedure exceeding SGD 300.
+**Can I claim for services at non-panel clinics?**
+Yes, but reimbursement is at 70% of panel rates. Dental services must be at panel clinics.
 
-**CL-045:** Reimbursement within 10 business days of approved submission.
+**How do I check my remaining annual limit?**
+Log into the employee benefits portal to view your real-time balance and claim history.
 
-**CL-047:** Emergency dental services (e.g., trauma) may be claimed retrospectively without pre-auth.
+**Do I need pre-authorization for an emergency?**
+No. Emergency services are exempt, but you must notify HR within 48 hours.
 
-### Mental Health & Counseling Benefits Policy
-#### 5. Required Documents
-_Provenance: Source file: `mental_health_policy.md` | Clause IDs: `CL-063`, `CL-064`_
+**How long does pre-authorization approval take?**
+Typically 3 business days if all documents are complete.
 
-**CL-063:** For all claims:
-- Therapist's invoice with session date and duration
-- Therapist's license number and credentials
-- Diagnosis summary (confidentiality protected; submitted directly by provider)
+**I'm going on an overseas assignment. Is my coverage valid?**
+Overseas treatment requires prior travel approval. Submit claims within 60 days.
 
-**CL-064:** Pre-authorization form required for sessions beyond 8th session in a calendar year.
-
-#### 6. Claim Timeline
-_Provenance: Source file: `mental_health_policy.md` | Clause IDs: `CL-065`, `CL-066`, `CL-067`_
-
-**CL-065:** Claims submitted quarterly or after completing a treatment block (minimum 4 sessions).
-
-**CL-066:** Reimbursement within 14 business days; all claims handled with strict confidentiality protocols.
-
-**CL-067:** Late claims accepted up to 60 days with manager's written waiver; this benefit-specific timeline overrides the general 30-day claim window (see CL-092).
-
-## FAQ Clarifications
-
-### 2. Claims Questions
-_Provenance: Source file: `faq_policy_clarifications.md` | Clause IDs: `CL-146`, `CL-147`, `CL-148`_
-
-**CL-146:** *Q: What if I miss the 30-day claim deadline?*  
-A: Late claims may be rejected. You can appeal with written justification to HR (see CL-092 for general timeline; CL-067 for mental health extended timeline).
-
-**CL-147:** *Q: Can I claim for services at non-panel clinics?*  
-A: Yes, but reimbursement is at 70% of panel rates (CL-025). Dental services must be at panel clinics (CL-032).
-
-**CL-148:** *Q: How do I check my remaining annual limit?*  
-A: Log into the employee benefits portal to view real-time balance and claim history.
-
-### 4. Pre-authorization
-_Provenance: Source file: `faq_policy_clarifications.md` | Clause IDs: `CL-152`, `CL-153`_
-
-**CL-152:** *Q: Do I need pre-auth for an emergency?*  
-A: No. Emergency services are exempt, but notify HR within 48 hours (CL-077, CL-085).
-
-**CL-153:** *Q: How long does pre-auth approval take?*  
-A: Typically 3 business days if all documents are complete (CL-082).
-
-### 5. Special Situations
-_Provenance: Source file: `faq_policy_clarifications.md` | Clause IDs: `CL-154`_
-
-**CL-154:** *Q: I'm going on overseas assignment. Is my coverage valid?*  
-A: Overseas treatment requires prior travel approval. Submit claims within 60 days (CL-093, CL-113).
+Policy references: CL-146, CL-147, CL-148, CL-152, CL-153, CL-154
