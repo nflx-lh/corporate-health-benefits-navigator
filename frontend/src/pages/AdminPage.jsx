@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import PasswordInput from "../components/PasswordInput.jsx";
 import "../styles/admin.css";
 
 const API_BASE = "/v1";
@@ -83,10 +84,9 @@ function AdminLogin({ empId, setEmpId, password, setPassword, error, loading, on
               ref={idRef}
             />
             <label className="admin-login__label" htmlFor="admin-password">Password</label>
-            <input
+            <PasswordInput
               className="admin-login__input"
               id="admin-password"
-              type="password"
               placeholder="Enter password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -114,16 +114,31 @@ function AdminLogin({ empId, setEmpId, password, setPassword, error, loading, on
 /* ------------------------------------------------------------------ */
 
 function AdminDashboard({ token, onLogout }) {
+  const [activeTab, setActiveTab] = useState("employees");
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [tempPasswordModal, setTempPasswordModal] = useState(null);
+  const [pendingResetCount, setPendingResetCount] = useState(0);
 
   const headers = {
     "Content-Type": "application/json",
     Authorization: `Bearer ${token}`,
+  };
+
+  const fetchPendingResetCount = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/admin/password-reset-requests?status=pending`, { headers });
+      if (res.ok) {
+        const data = await res.json();
+        setPendingResetCount(data.length);
+      }
+    } catch {
+      // silent — badge is non-critical
+    }
   };
 
   const fetchEmployees = async () => {
@@ -140,7 +155,7 @@ function AdminDashboard({ token, onLogout }) {
     }
   };
 
-  useEffect(() => { fetchEmployees(); }, []);
+  useEffect(() => { fetchEmployees(); fetchPendingResetCount(); }, []);
 
   const handleCreate = async (data) => {
     const res = await fetch(`${API_BASE}/admin/employees`, {
@@ -152,8 +167,12 @@ function AdminDashboard({ token, onLogout }) {
       const body = await res.json();
       throw new Error(body?.error?.message || "Create failed");
     }
+    const result = await res.json();
     await fetchEmployees();
     setFormOpen(false);
+    if (result.temp_password) {
+      setTempPasswordModal({ employeeId: result.employee_id, tempPassword: result.temp_password });
+    }
   };
 
   const handleUpdate = async (employeeId, data) => {
@@ -191,84 +210,286 @@ function AdminDashboard({ token, onLogout }) {
       </header>
 
       <main className="admin-main">
-        <div className="admin-toolbar">
-          <h2 className="admin-toolbar__title">Employee Management</h2>
+        <div className="admin-tabs">
           <button
-            className="admin-toolbar__create-btn"
-            onClick={() => { setEditing(null); setFormOpen(true); }}
+            className={`admin-tabs__tab ${activeTab === "employees" ? "admin-tabs__tab--active" : ""}`}
+            onClick={() => setActiveTab("employees")}
           >
-            + New Employee
+            Employee Management
+          </button>
+          <button
+            className={`admin-tabs__tab ${activeTab === "resets" ? "admin-tabs__tab--active" : ""}`}
+            onClick={() => setActiveTab("resets")}
+          >
+            Reset Requests
+            {pendingResetCount > 0 && (
+              <span className="admin-tabs__badge">!</span>
+            )}
           </button>
         </div>
 
-        {error && <div className="admin-error">{error}</div>}
-
-        {(formOpen || editing) && (
-          <EmployeeForm
-            initial={editing}
-            onSave={(data) => editing ? handleUpdate(editing.employee_id, data) : handleCreate(data)}
-            onCancel={() => { setFormOpen(false); setEditing(null); }}
-          />
-        )}
-
-        {deleteTarget && (
-          <div className="admin-confirm">
-            <p>Delete employee <strong>{deleteTarget}</strong>?</p>
-            <div className="admin-confirm__actions">
-              <button className="admin-confirm__yes" onClick={() => handleDelete(deleteTarget)}>
-                Yes, Delete
-              </button>
-              <button className="admin-confirm__no" onClick={() => setDeleteTarget(null)}>
-                Cancel
+        {activeTab === "employees" && (
+          <>
+            <div className="admin-toolbar">
+              <h2 className="admin-toolbar__title">Employee Management</h2>
+              <button
+                className="admin-toolbar__create-btn"
+                onClick={() => { setEditing(null); setFormOpen(true); }}
+              >
+                + New Employee
               </button>
             </div>
-          </div>
+
+            {error && <div className="admin-error">{error}</div>}
+
+            {(formOpen || editing) && (
+              <EmployeeForm
+                initial={editing}
+                onSave={(data) => editing ? handleUpdate(editing.employee_id, data) : handleCreate(data)}
+                onCancel={() => { setFormOpen(false); setEditing(null); }}
+              />
+            )}
+
+            {deleteTarget && (
+              <div className="admin-confirm">
+                <p>Delete employee <strong>{deleteTarget}</strong>?</p>
+                <div className="admin-confirm__actions">
+                  <button className="admin-confirm__yes" onClick={() => handleDelete(deleteTarget)}>
+                    Yes, Delete
+                  </button>
+                  <button className="admin-confirm__no" onClick={() => setDeleteTarget(null)}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {loading ? (
+              <p className="admin-loading">Loading employees...</p>
+            ) : (
+              <div className="admin-table-wrap">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Name</th>
+                      <th>Age</th>
+                      <th>Type</th>
+                      <th>Plan</th>
+                      <th>Tenure</th>
+                      <th>Deps</th>
+                      <th>Active</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {employees.length === 0 ? (
+                      <tr><td colSpan="9" className="admin-table__empty">No employees found.</td></tr>
+                    ) : (
+                      employees.map((emp) => (
+                        <tr key={emp.employee_id}>
+                          <td>{emp.employee_id}</td>
+                          <td>{emp.name || "\u2014"}</td>
+                          <td>{emp.age ?? "\u2014"}</td>
+                          <td>{emp.employment_type || "\u2014"}</td>
+                          <td>{emp.plan_tier || "\u2014"}</td>
+                          <td>{emp.tenure_months ?? "\u2014"}</td>
+                          <td>{emp.dependents_count}</td>
+                          <td>{emp.is_active ? "Yes" : "No"}</td>
+                          <td className="admin-table__actions">
+                            <button className="admin-action-btn admin-action-btn--edit" onClick={() => { setFormOpen(false); setEditing(emp); }}>Edit</button>
+                            <button className="admin-action-btn admin-action-btn--delete" onClick={() => setDeleteTarget(emp.employee_id)}>Delete</button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
         )}
 
-        {loading ? (
-          <p className="admin-loading">Loading employees...</p>
-        ) : (
-          <div className="admin-table-wrap">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Age</th>
-                  <th>Type</th>
-                  <th>Plan</th>
-                  <th>Tenure</th>
-                  <th>Deps</th>
-                  <th>Active</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {employees.length === 0 ? (
-                  <tr><td colSpan="9" className="admin-table__empty">No employees found.</td></tr>
-                ) : (
-                  employees.map((emp) => (
-                    <tr key={emp.employee_id}>
-                      <td>{emp.employee_id}</td>
-                      <td>{emp.name || "\u2014"}</td>
-                      <td>{emp.age ?? "\u2014"}</td>
-                      <td>{emp.employment_type || "\u2014"}</td>
-                      <td>{emp.plan_tier || "\u2014"}</td>
-                      <td>{emp.tenure_months ?? "\u2014"}</td>
-                      <td>{emp.dependents_count}</td>
-                      <td>{emp.is_active ? "Yes" : "No"}</td>
-                      <td className="admin-table__actions">
-                        <button className="admin-action-btn admin-action-btn--edit" onClick={() => { setFormOpen(false); setEditing(emp); }}>Edit</button>
-                        <button className="admin-action-btn admin-action-btn--delete" onClick={() => setDeleteTarget(emp.employee_id)}>Delete</button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+        {activeTab === "resets" && (
+          <ResetRequests token={token} headers={headers} onTempPassword={setTempPasswordModal} onCountChange={setPendingResetCount} />
+        )}
+
+        {tempPasswordModal && (
+          <TempPasswordModal
+            employeeId={tempPasswordModal.employeeId}
+            tempPassword={tempPasswordModal.tempPassword}
+            onClose={() => setTempPasswordModal(null)}
+          />
         )}
       </main>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Reset Requests Section                                             */
+/* ------------------------------------------------------------------ */
+
+function ResetRequests({ token, headers, onTempPassword, onCountChange }) {
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [actionLoading, setActionLoading] = useState(null);
+
+  const fetchRequests = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`${API_BASE}/admin/password-reset-requests?status=pending`, { headers });
+      if (!res.ok) throw new Error("Failed to load reset requests");
+      const data = await res.json();
+      setRequests(data);
+      if (onCountChange) onCountChange(data.length);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchRequests(); }, []);
+
+  const handleReset = async (requestId, employeeId) => {
+    setActionLoading(requestId);
+    try {
+      const res = await fetch(`${API_BASE}/admin/password-reset-requests/${requestId}/reset`, {
+        method: "POST",
+        headers,
+      });
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body?.error?.message || "Reset failed");
+      }
+      const data = await res.json();
+      onTempPassword({ employeeId, tempPassword: data.temp_password });
+      await fetchRequests();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleReject = async (requestId) => {
+    setActionLoading(requestId);
+    try {
+      const res = await fetch(`${API_BASE}/admin/password-reset-requests/${requestId}/reject`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({}),
+      });
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body?.error?.message || "Reject failed");
+      }
+      await fetchRequests();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  return (
+    <>
+      <div className="admin-toolbar">
+        <h2 className="admin-toolbar__title">Password Reset Requests</h2>
+        <button className="admin-toolbar__create-btn" onClick={fetchRequests}>
+          Refresh
+        </button>
+      </div>
+
+      {error && <div className="admin-error">{error}</div>}
+
+      {loading ? (
+        <p className="admin-loading">Loading reset requests...</p>
+      ) : (
+        <div className="admin-table-wrap">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Employee</th>
+                <th>Status</th>
+                <th>Requested</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {requests.length === 0 ? (
+                <tr><td colSpan="5" className="admin-table__empty">No pending reset requests.</td></tr>
+              ) : (
+                requests.map((req) => (
+                  <tr key={req.id}>
+                    <td>{req.id}</td>
+                    <td>{req.employee_id}</td>
+                    <td>{req.status}</td>
+                    <td>{req.requested_at ? new Date(req.requested_at).toLocaleString() : "\u2014"}</td>
+                    <td className="admin-table__actions">
+                      <button
+                        className="admin-action-btn admin-action-btn--edit"
+                        onClick={() => handleReset(req.id, req.employee_id)}
+                        disabled={actionLoading === req.id}
+                      >
+                        {actionLoading === req.id ? "..." : "Reset"}
+                      </button>
+                      <button
+                        className="admin-action-btn admin-action-btn--delete"
+                        onClick={() => handleReject(req.id)}
+                        disabled={actionLoading === req.id}
+                      >
+                        Reject
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Temp Password Modal                                                */
+/* ------------------------------------------------------------------ */
+
+function TempPasswordModal({ employeeId, tempPassword, onClose }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(tempPassword);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // fallback: select text
+    }
+  };
+
+  return (
+    <div className="temp-pw-overlay" onClick={onClose}>
+      <div className="temp-pw-modal" onClick={(e) => e.stopPropagation()}>
+        <h3 className="temp-pw-modal__title">Temporary Password</h3>
+        <p className="temp-pw-modal__info">
+          Employee <strong>{employeeId}</strong> has been assigned a temporary password.
+          They will be required to change it on first login.
+        </p>
+        <div className="temp-pw-modal__password-row">
+          <code className="temp-pw-modal__password">{tempPassword}</code>
+          <button className="temp-pw-modal__copy" onClick={handleCopy}>
+            {copied ? "Copied!" : "Copy"}
+          </button>
+        </div>
+        <button className="temp-pw-modal__close" onClick={onClose}>Close</button>
+      </div>
     </div>
   );
 }

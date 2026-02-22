@@ -17,6 +17,7 @@ from app.db.session import Base  # noqa: E402
 # Import all models so Base.metadata has them registered.
 from app.models.employee_db import EmployeeDB  # noqa: E402, F401
 from app.models.rule_db import BenefitRuleDB  # noqa: E402, F401
+from app.models.password_reset_db import PasswordResetRequestDB  # noqa: E402, F401
 
 config = context.config
 config.set_main_option("sqlalchemy.url", os.environ.get("DATABASE_URL", ""))

@@ -16,6 +16,7 @@ from fastapi.testclient import TestClient
 
 from app.db.session import Base
 from app.models.employee_db import EmployeeDB  # noqa: F401 — register model
+from app.models.password_reset_db import PasswordResetRequestDB  # noqa: F401
 from app.api.routes_employee_crud import get_db
 from app.auth.dependencies import get_current_user
 from app.main import app
@@ -82,6 +83,8 @@ class TestCreateEmployee:
         assert data["name"] == "Test User"
         assert data["age"] == 30
         assert data["is_active"] is True
+        assert "temp_password" in data
+        assert len(data["temp_password"]) >= 8
 
     def test_create_duplicate_returns_409(self, client):
         client.post("/v1/admin/employees", json={
