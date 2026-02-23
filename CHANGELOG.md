@@ -15,13 +15,13 @@ All notable changes to this project are documented in this file.
 - **RDS Postgres module** (`terraform/modules/rds/`): `aws_db_instance` (db.t3.micro, PostgreSQL 16.4), `aws_db_subnet_group`, `aws_security_group` (5432 from ECS only), `random_password` for credentials
 - **Private subnets** in VPC module: 2 private subnets (one per AZ) with isolated route table, gated by `enable_private_subnets` — no NAT gateway
 
-**Infrastructure — Docker & CI/CD**
+**Infrastructure — Docker & Deploy-on-Demand**
 - **Production Dockerfiles**: multi-stage builds for backend (`backend/Dockerfile.prod`) and frontend (`frontend/Dockerfile.prod`)
   - Backend: Python 3.11-slim, non-root `appuser`, healthcheck, graceful `data/index/` handling
   - Frontend: Node 20 builder → nginx:alpine runtime with SPA fallback
 - **nginx config** (`frontend/nginx.conf`): SPA fallback, guide markdown serving as `text/plain`, security headers, gzip
 - **docker-compose.prod.yml**: local test of production images (no DB, no volumes)
-- **CI/CD pipeline** (`.github/workflows/deploy.yml`): manual trigger, OIDC auth, build + push to ECR, optional ECS deploy with service stability wait
+- **Deploy-on-demand workflow** (`.github/workflows/deploy.yml`): manual trigger (`workflow_dispatch`), OIDC auth, build + push to ECR, optional ECS deploy with service stability wait
 
 **Backend**
 - **DB auto-initialisation** (`backend/app/db/init_db.py`): on startup, creates tables via `Base.metadata.create_all()` and seeds employees + benefit rules from CSV if tables are empty

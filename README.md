@@ -13,7 +13,7 @@ This solution was developed as an MVP demonstration for a corporate health benef
 - **AI:** OpenAI LLM (explainer/critic agents) + embeddings (policy retrieval)
 
 ## Project Status
-- **v0.13.0** — AWS cloud deployment with RDS persistence (ECS Fargate, RDS PostgreSQL, Terraform IaC, GitHub Actions CI/CD)
+- **v0.13.0** — AWS cloud deployment with RDS persistence (ECS Fargate, RDS PostgreSQL, Terraform IaC, GitHub Actions deploy-on-demand)
 - Phases 1–12 complete (rules engine, retrieval, orchestration, frontend, security, admin CRUD, password auth, UI polish, cloud deployment with RDS)
 
 ## Quick Start
@@ -33,7 +33,7 @@ docker compose up --build
 - **Admin dashboard** — HR admin login, employee CRUD with modal popups and field validation, password reset queue management
 - **Password authentication** — DB-backed bcrypt login, forced password change flow, HR-managed reset queue
 - **Security hardening** — JWT auth, RBAC, CORS allowlist, rate limiting, input validation, prompt injection guards, and safe error handling
-- **Cloud deployment** — AWS ECS Fargate + RDS PostgreSQL, Terraform IaC (persistent/demo split), GitHub Actions CI/CD with OIDC, deploy-on-demand (~$0 when off)
+- **Cloud deployment** — AWS ECS Fargate + RDS PostgreSQL, Terraform IaC (persistent/demo split), GitHub Actions deploy-on-demand with OIDC (~$0 when off)
 - **Production-safe data layer** — PostgreSQL persistence with auto-init on startup (CSV seed → DB), `REPO_MODE` safety switch for graceful degradation and test isolation
 - **Evaluation harness** — ~326 tests across 24 files, deterministic eval cases, no-drift golden output gates
 
@@ -46,7 +46,7 @@ docker compose up --build
 - `eval/` — evaluation cases and timestamped artifacts
 - `scripts/` — seed, eval, build-index, readiness report
 - `terraform/` — IaC (persistent stack + demo stack)
-- `.github/workflows/` — CI/CD pipeline
+- `.github/workflows/` — CI + deploy-on-demand pipeline
 - `docs/DEPLOYMENT.md` — cloud deployment runbook
 
 ## Cloud Deployment
