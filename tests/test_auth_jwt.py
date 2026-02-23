@@ -151,6 +151,7 @@ class TestLoginEndpoint:
         assert "access_token" in data
         assert data["token_type"] == "bearer"
         assert data["role"] == "employee"
+        assert data["must_reset_password"] is False
         # Verify the returned token is valid
         claims = decode_token(data["access_token"], settings)
         assert claims["sub"] == "EMP001"

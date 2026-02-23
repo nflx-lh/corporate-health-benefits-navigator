@@ -18,3 +18,5 @@ class EmployeeDB(Base):
     tenure_months = Column(Integer, nullable=True)
     dependents_count = Column(Integer, nullable=False, default=0)
     is_active = Column(Boolean, nullable=False, default=True)
+    password_hash = Column(String, nullable=True)
+    must_reset_password = Column(Boolean, nullable=False, default=False)

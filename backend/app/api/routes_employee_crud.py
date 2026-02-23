@@ -1,6 +1,7 @@
 """Employee CRUD endpoints — HR Admin only."""
 
 import re
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -8,8 +9,10 @@ from typing import Optional
 from sqlalchemy.orm import Session
 
 from app.auth.rbac import require_role
+from app.auth.password import hash_password, generate_temp_password
 from app.db.session import SessionLocal
 from app.models.employee_db import EmployeeDB
+from app.models.password_reset_db import PasswordResetRequestDB
 
 router = APIRouter()
 
@@ -48,6 +51,24 @@ class EmployeeResponse(BaseModel):
     is_active: bool = True
 
 
+class EmployeeCreateResponse(EmployeeResponse):
+    temp_password: Optional[str] = None
+
+
+class PasswordResetRequestResponse(BaseModel):
+    id: int
+    employee_id: str
+    status: str
+    requested_at: str
+    resolved_at: Optional[str] = None
+    resolved_by: Optional[str] = None
+    notes: Optional[str] = None
+
+
+class RejectBody(BaseModel):
+    notes: Optional[str] = None
+
+
 def get_db():
     """Yield a DB session. Raises 503 if DB is not configured."""
     if SessionLocal is None:
@@ -83,6 +104,10 @@ def _row_to_response(row: EmployeeDB) -> EmployeeResponse:
     )
 
 
+# ---------------------------------------------------------------------------
+# Employee CRUD
+# ---------------------------------------------------------------------------
+
 @router.get("/admin/employees", response_model=list[EmployeeResponse])
 def list_employees(
     user: dict = Depends(require_role("hr_admin")),
@@ -93,19 +118,20 @@ def list_employees(
     return [_row_to_response(r) for r in rows]
 
 
-@router.post("/admin/employees", response_model=EmployeeResponse, status_code=201)
+@router.post("/admin/employees", response_model=EmployeeCreateResponse, status_code=201)
 def create_employee(
     body: EmployeeCreate,
     user: dict = Depends(require_role("hr_admin")),
     db: Session = Depends(get_db),
 ):
-    """Create a new employee record."""
+    """Create a new employee record with a temporary password."""
     existing = db.get(EmployeeDB, body.employee_id)
     if existing is not None:
         raise HTTPException(
             status_code=409,
             detail={"code": "EMPLOYEE_EXISTS", "message": f"Employee {body.employee_id} already exists"},
         )
+    temp_pw = generate_temp_password()
     row = EmployeeDB(
         employee_id=body.employee_id,
         name=body.name,
@@ -115,11 +141,14 @@ def create_employee(
         tenure_months=body.tenure_months,
         dependents_count=body.dependents_count,
         is_active=body.is_active,
+        password_hash=hash_password(temp_pw),
+        must_reset_password=True,
     )
     db.add(row)
     db.commit()
     db.refresh(row)
-    return _row_to_response(row)
+    resp = _row_to_response(row)
+    return EmployeeCreateResponse(**resp.model_dump(), temp_password=temp_pw)
 
 
 @router.get("/admin/employees/{employee_id}", response_model=EmployeeResponse)
@@ -179,3 +208,95 @@ def delete_employee(
     db.delete(row)
     db.commit()
     return {"message": f"Employee {employee_id} deleted"}
+
+
+# ---------------------------------------------------------------------------
+# Password Reset Request Management (HR Admin)
+# ---------------------------------------------------------------------------
+
+def _reset_to_response(row: PasswordResetRequestDB) -> dict:
+    return {
+        "id": row.id,
+        "employee_id": row.employee_id,
+        "status": row.status,
+        "requested_at": row.requested_at.isoformat() if row.requested_at else None,
+        "resolved_at": row.resolved_at.isoformat() if row.resolved_at else None,
+        "resolved_by": row.resolved_by,
+        "notes": row.notes,
+    }
+
+
+@router.get("/admin/password-reset-requests")
+def list_password_reset_requests(
+    status: str = "pending",
+    user: dict = Depends(require_role("hr_admin")),
+    db: Session = Depends(get_db),
+):
+    """List password reset requests filtered by status."""
+    rows = (
+        db.query(PasswordResetRequestDB)
+        .filter_by(status=status)
+        .order_by(PasswordResetRequestDB.id)
+        .all()
+    )
+    return [_reset_to_response(r) for r in rows]
+
+
+@router.post("/admin/password-reset-requests/{request_id}/reset")
+def approve_password_reset(
+    request_id: int,
+    user: dict = Depends(require_role("hr_admin")),
+    db: Session = Depends(get_db),
+):
+    """Approve a password reset: generate temp password, update employee."""
+    req = db.get(PasswordResetRequestDB, request_id)
+    if req is None or req.status != "pending":
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "REQUEST_NOT_FOUND", "message": "Reset request not found or already resolved"},
+        )
+
+    emp = db.get(EmployeeDB, req.employee_id)
+    if emp is None:
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "EMPLOYEE_NOT_FOUND", "message": f"Employee {req.employee_id} not found"},
+        )
+
+    temp_pw = generate_temp_password()
+    emp.password_hash = hash_password(temp_pw)
+    emp.must_reset_password = True
+
+    req.status = "completed"
+    req.resolved_at = datetime.now(timezone.utc)
+    req.resolved_by = user.get("sub", "unknown")
+
+    db.commit()
+
+    return {"temp_password": temp_pw}
+
+
+@router.post("/admin/password-reset-requests/{request_id}/reject")
+def reject_password_reset(
+    request_id: int,
+    body: RejectBody = None,
+    user: dict = Depends(require_role("hr_admin")),
+    db: Session = Depends(get_db),
+):
+    """Reject a password reset request."""
+    req = db.get(PasswordResetRequestDB, request_id)
+    if req is None or req.status != "pending":
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "REQUEST_NOT_FOUND", "message": "Reset request not found or already resolved"},
+        )
+
+    req.status = "rejected"
+    req.resolved_at = datetime.now(timezone.utc)
+    req.resolved_by = user.get("sub", "unknown")
+    if body and body.notes:
+        req.notes = body.notes
+
+    db.commit()
+
+    return {"ok": True}

@@ -2,9 +2,12 @@ import React, { useState } from "react";
 import LoginPage from "./pages/LoginPage.jsx";
 import NavigatorPage from "./pages/NavigatorPage.jsx";
 import AdminPage from "./pages/AdminPage.jsx";
+import ChangePasswordPage from "./pages/ChangePasswordPage.jsx";
 
 export default function App() {
   const [employeeId, setEmployeeId] = useState(null);
+  const [token, setToken] = useState(null);
+  const [mustResetPassword, setMustResetPassword] = useState(false);
   const [adminMode, setAdminMode] = useState(false);
 
   if (adminMode) {
@@ -14,8 +17,21 @@ export default function App() {
   if (!employeeId) {
     return (
       <LoginPage
-        onLogin={setEmployeeId}
+        onLogin={(id, tok, mustReset) => {
+          setEmployeeId(id);
+          setToken(tok);
+          setMustResetPassword(!!mustReset);
+        }}
         onAdminLogin={() => setAdminMode(true)}
+      />
+    );
+  }
+
+  if (mustResetPassword) {
+    return (
+      <ChangePasswordPage
+        token={token}
+        onPasswordChanged={() => setMustResetPassword(false)}
       />
     );
   }
@@ -23,7 +39,11 @@ export default function App() {
   return (
     <NavigatorPage
       employeeId={employeeId}
-      onLogout={() => setEmployeeId(null)}
+      onLogout={() => {
+        setEmployeeId(null);
+        setToken(null);
+        setMustResetPassword(false);
+      }}
     />
   );
 }

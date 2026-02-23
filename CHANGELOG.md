@@ -4,6 +4,51 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [0.11.0] - 22-Feb-2026 — Password Reset & Real Auth
+
+### Added
+- Password-based authentication with bcrypt-hashed DB credentials
+  - DB-first login with demo credential fallback (backward compat for HR001, EMP001-EMP003)
+  - `must_reset_password` flag in login response for forced password change flow
+- Password reset flow (HR-managed, no email/SMS):
+  - `POST /v1/auth/employee/request-password-reset` — public endpoint, no info leak
+  - `GET /v1/admin/password-reset-requests?status=pending` — HR admin list
+  - `POST /v1/admin/password-reset-requests/{id}/reset` — approve, generate temp password
+  - `POST /v1/admin/password-reset-requests/{id}/reject` — reject with optional notes
+- Change password endpoint: `POST /v1/auth/employee/change-password` (authenticated, min 8 chars)
+- Temp password generation on employee creation (returned once in create response)
+- Alembic migration `003_add_password_fields`: `password_hash` + `must_reset_password` on employees, new `password_reset_requests` table
+- `PasswordResetRequestDB` model (`backend/app/models/password_reset_db.py`)
+- Password utility module (`backend/app/auth/password.py`): `hash_password`, `verify_password`, `generate_temp_password`
+- Frontend: password field on employee login page with "Forgot password?" reset request flow
+- Frontend: `ChangePasswordPage` — forced password change before app access
+- Frontend: `PasswordInput` component with eye icon toggle for password visibility
+- Frontend: Admin dashboard tabs (Employee Management / Reset Requests) with notification badge
+- Frontend: Reset Requests management table with Reset/Reject actions
+- Frontend: Temp password modal with copy-to-clipboard after employee creation or reset approval
+- 14 new tests in `tests/test_password_reset.py` (326 total, up from 312)
+
+### Changed
+- `requirements.txt`: added `bcrypt==4.2.1`
+- `routes_auth.py`: rewritten — DB-first login, change-password, request-password-reset endpoints
+- `routes_employee_crud.py`: employee create now returns `temp_password`, added admin reset management endpoints
+- `employee_db.py`: added `password_hash` and `must_reset_password` columns
+- `alembic/env.py`: registered `PasswordResetRequestDB` model
+- `App.jsx`: routes through `ChangePasswordPage` when `mustResetPassword` is true
+- `LoginPage.jsx`: password input field, forgot password inline flow
+- `AdminPage.jsx`: tabbed layout, reset requests section, temp password modal, alert badge
+- `login.css`: styles for password toggle, forgot link, change password page
+- `admin.css`: styles for tabs, notification badge, temp password modal
+- `test_auth_jwt.py`: added `must_reset_password` assertion on login response
+- `test_employee_crud.py`: added `temp_password` assertion on create response
+
+### Notes
+- Demo credentials (HR001, EMP001-EMP003) remain functional for backward compatibility
+- `rules_engine.py` is NOT modified
+- Checkpoint tag planned: `v0.11.0-phase10-freeze`
+
+---
+
 ## [0.10.0] - 17-Feb-2026
 
 ### Added
