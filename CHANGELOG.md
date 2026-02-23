@@ -4,6 +4,23 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [0.12.1] - 23-Feb-2026 — Admin UX & Guide Styling
+
+### Changed
+- **Employee form validation**: Name, Age, Employment Type, and Plan Tier are now required fields (HTML + JS-level validation with inline error messages)
+- **Edit form → modal popup**: clicking Edit on a table row now opens the form in a centered overlay instead of inline above the table
+- **Delete confirmation → modal popup**: delete prompt now appears as a centered overlay with "This action cannot be undone" warning
+- **Table display formatting**: `full_time` → "Full Time", `part_time` → "Part Time", `basic` → "Basic", `premium` → "Premium", etc. via `formatLabel` helper
+- **Guide drawer background**: soft peach (`#fef0e8`) with subtle wave pattern for all 3 policy guides
+- **Guide popup window**: same peach + wave background retained when opening a guide in a new window
+- **Modal animations**: fade-in backdrop + slide-up content for edit and delete modals
+
+### Notes
+- EMP025 seed data intentionally left unchanged (blank name/tenure) — used by `insufficient_info` test cases
+- `rules_engine.py` is NOT modified
+
+---
+
 ## [0.12.0] - 22-Feb-2026 — UI Polish & Content Refinement
 
 ### Changed

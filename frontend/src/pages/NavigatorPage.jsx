@@ -539,7 +539,9 @@ export default function NavigatorPage({ employeeId, onLogout }) {
                       w.document.write(
                         `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${activeGuide.title}</title>` +
                         `<style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;` +
-                        `max-width:780px;margin:2rem auto;padding:0 1.5rem;color:#0f172a;line-height:1.6}` +
+                        `max-width:780px;margin:2rem auto;padding:0 1.5rem;color:#0f172a;line-height:1.6;` +
+                        `min-height:100vh;background-color:#fef0e8;` +
+                        `background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='60' viewBox='0 0 120 60'%3E%3Cpath d='M0 30 Q15 10 30 30 Q45 50 60 30 Q75 10 90 30 Q105 50 120 30' fill='none' stroke='%23d4856a' stroke-opacity='0.12' stroke-width='1.2'/%3E%3Cpath d='M0 50 Q15 30 30 50 Q45 70 60 50 Q75 30 90 50 Q105 70 120 50' fill='none' stroke='%23d4856a' stroke-opacity='0.08' stroke-width='1'/%3E%3Cpath d='M0 10 Q15 -10 30 10 Q45 30 60 10 Q75 -10 90 10 Q105 30 120 10' fill='none' stroke='%23d4856a' stroke-opacity='0.08' stroke-width='1'/%3E%3C/svg%3E")}` +
                         `h1,h2,h3,h4{color:#0f172a;line-height:1.25}a{color:#0f766e}code{background:#f1f5f9;` +
                         `padding:0.15em 0.35em;border-radius:3px;font-size:0.9em}pre{background:#f1f5f9;` +
                         `padding:1rem;border-radius:6px;overflow-x:auto}ul{padding-left:1.25rem}</style>` +

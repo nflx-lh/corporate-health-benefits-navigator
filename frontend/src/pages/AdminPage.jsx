@@ -4,6 +4,9 @@ import "../styles/admin.css";
 
 const API_BASE = "/v1";
 
+const formatLabel = (val) =>
+  val ? val.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) : "\u2014";
+
 export default function AdminPage({ onLogout }) {
   const [token, setToken] = useState(null);
   const [loginError, setLoginError] = useState(null);
@@ -242,24 +245,41 @@ function AdminDashboard({ token, onLogout }) {
 
             {error && <div className="admin-error">{error}</div>}
 
-            {(formOpen || editing) && (
+            {formOpen && !editing && (
               <EmployeeForm
-                initial={editing}
-                onSave={(data) => editing ? handleUpdate(editing.employee_id, data) : handleCreate(data)}
-                onCancel={() => { setFormOpen(false); setEditing(null); }}
+                initial={null}
+                onSave={handleCreate}
+                onCancel={() => setFormOpen(false)}
               />
             )}
 
+            {editing && (
+              <div className="admin-modal-overlay" onClick={() => setEditing(null)}>
+                <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
+                  <EmployeeForm
+                    initial={editing}
+                    onSave={(data) => handleUpdate(editing.employee_id, data)}
+                    onCancel={() => setEditing(null)}
+                  />
+                </div>
+              </div>
+            )}
+
             {deleteTarget && (
-              <div className="admin-confirm">
-                <p>Delete employee <strong>{deleteTarget}</strong>?</p>
-                <div className="admin-confirm__actions">
-                  <button className="admin-confirm__yes" onClick={() => handleDelete(deleteTarget)}>
-                    Yes, Delete
-                  </button>
-                  <button className="admin-confirm__no" onClick={() => setDeleteTarget(null)}>
-                    Cancel
-                  </button>
+              <div className="admin-modal-overlay" onClick={() => setDeleteTarget(null)}>
+                <div className="admin-modal admin-modal--narrow" onClick={(e) => e.stopPropagation()}>
+                  <div className="admin-confirm">
+                    <p>Delete employee <strong>{deleteTarget}</strong>?</p>
+                    <p className="admin-confirm__warning">This action cannot be undone.</p>
+                    <div className="admin-confirm__actions">
+                      <button className="admin-confirm__yes" onClick={() => handleDelete(deleteTarget)}>
+                        Yes, Delete
+                      </button>
+                      <button className="admin-confirm__no" onClick={() => setDeleteTarget(null)}>
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -291,8 +311,8 @@ function AdminDashboard({ token, onLogout }) {
                           <td>{emp.employee_id}</td>
                           <td>{emp.name || "\u2014"}</td>
                           <td>{emp.age ?? "\u2014"}</td>
-                          <td>{emp.employment_type || "\u2014"}</td>
-                          <td>{emp.plan_tier || "\u2014"}</td>
+                          <td>{formatLabel(emp.employment_type)}</td>
+                          <td>{formatLabel(emp.plan_tier)}</td>
                           <td>{emp.tenure_months ?? "\u2014"}</td>
                           <td>{emp.dependents_count}</td>
                           <td>{emp.is_active ? "Yes" : "No"}</td>
@@ -485,7 +505,7 @@ function TempPasswordModal({ employeeId, tempPassword, onClose }) {
         <div className="temp-pw-modal__password-row">
           <code className="temp-pw-modal__password">{tempPassword}</code>
           <button className="temp-pw-modal__copy" onClick={handleCopy}>
-            {copied ? "Copied!" : "Copy"}
+            {copied ? "Copied" : "Copy"}
           </button>
         </div>
         <button className="temp-pw-modal__close" onClick={onClose}>Close</button>
@@ -515,10 +535,26 @@ function EmployeeForm({ initial, onSave, onCancel }) {
 
   const set = (field) => (e) => setFormData({ ...formData, [field]: e.target.value });
 
+  const validate = () => {
+    const errors = [];
+    if (!isEdit && !formData.employee_id.trim()) errors.push("Employee ID is required.");
+    if (!formData.name.trim()) errors.push("Name is required.");
+    if (!formData.employment_type) errors.push("Employment Type is required.");
+    if (!formData.plan_tier) errors.push("Plan Tier is required.");
+    if (formData.age === "" || formData.age === null) errors.push("Age is required.");
+    else if (Number(formData.age) < 16 || Number(formData.age) > 100) errors.push("Age must be between 16 and 100.");
+    return errors;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSaving(true);
     setFormError(null);
+    const errors = validate();
+    if (errors.length) {
+      setFormError(errors.join(" "));
+      return;
+    }
+    setSaving(true);
     try {
       const payload = { ...formData };
       // Convert numeric fields
@@ -550,15 +586,15 @@ function EmployeeForm({ initial, onSave, onCancel }) {
         </label>
         <label className="admin-form__field">
           <span>Name</span>
-          <input type="text" value={formData.name} onChange={set("name")} placeholder="Full name" />
+          <input type="text" value={formData.name} onChange={set("name")} placeholder="Full name" required />
         </label>
         <label className="admin-form__field">
           <span>Age</span>
-          <input type="number" value={formData.age} onChange={set("age")} min="16" max="100" />
+          <input type="number" value={formData.age} onChange={set("age")} min="16" max="100" required />
         </label>
         <label className="admin-form__field">
           <span>Employment Type</span>
-          <select value={formData.employment_type} onChange={set("employment_type")}>
+          <select value={formData.employment_type} onChange={set("employment_type")} required>
             <option value="">-- Select --</option>
             <option value="full_time">Full Time</option>
             <option value="part_time">Part Time</option>
@@ -567,7 +603,7 @@ function EmployeeForm({ initial, onSave, onCancel }) {
         </label>
         <label className="admin-form__field">
           <span>Plan Tier</span>
-          <select value={formData.plan_tier} onChange={set("plan_tier")}>
+          <select value={formData.plan_tier} onChange={set("plan_tier")} required>
             <option value="">-- Select --</option>
             <option value="basic">Basic</option>
             <option value="standard">Standard</option>
