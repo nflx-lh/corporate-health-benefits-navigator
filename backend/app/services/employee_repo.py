@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import csv
 import logging
+import os
 import pathlib
 from typing import Optional
 
@@ -32,8 +33,7 @@ REQUIRED_COLUMNS = {
 }
 
 _DATA_PATH = (
-    pathlib.Path(__file__).resolve().parents[3]
-    / "data"
+    pathlib.Path(os.getenv("DATA_ROOT", pathlib.Path(__file__).resolve().parents[3] / "data"))
     / "fixtures"
     / "employees.csv"
 )

@@ -24,8 +24,8 @@ from app.services.llm_client import chat_completion
 
 logger = logging.getLogger(__name__)
 
-# Default index directory — resolved relative to repo root.
-_DEFAULT_INDEX_DIR = Path(__file__).resolve().parents[3] / "data" / "index"
+# Default index directory — resolved relative to DATA_ROOT (env-overridable for containers).
+_DEFAULT_INDEX_DIR = Path(os.getenv("DATA_ROOT", Path(__file__).resolve().parents[3] / "data")) / "index"
 
 
 # ------------------------------------------------------------------

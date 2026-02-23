@@ -71,7 +71,7 @@ resource "aws_ecs_task_definition" "api" {
     environment = concat(
       [
         { name = "APP_ENV", value = "development" },
-        { name = "REPO_MODE", value = var.enable_rds ? "db_first" : "csv_only" },
+        { name = "REPO_MODE", value = var.enable_rds ? "dual" : "csv_only" },
         { name = "LLM_ENABLED", value = "true" },
         { name = "LLM_PROVIDER", value = "openai" },
         { name = "LLM_MODEL_NAME", value = "gpt-4o-mini" },
