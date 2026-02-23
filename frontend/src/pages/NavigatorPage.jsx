@@ -183,27 +183,24 @@ function TagList({ items, emptyText }) {
   );
 }
 
-function CitationCard({ citation }) {
+function CitationBadge({ citation }) {
   return (
-    <div
+    <span
+      title={`${citation.source_file}${citation.section ? ` — ${citation.section}` : ""}`}
       style={{
-        padding: "0.75rem",
-        background: "#f0f4ff",
-        borderLeft: "3px solid #6366f1",
-        borderRadius: "4px",
-        marginBottom: "0.5rem",
-        fontSize: "0.9rem",
+        display: "inline-block",
+        padding: "0.2rem 0.55rem",
+        background: "#e0e7ff",
+        border: "1px solid #c7d2fe",
+        borderRadius: "6px",
+        fontSize: "0.8rem",
+        fontWeight: 600,
+        color: "#4338ca",
+        cursor: "default",
       }}
     >
-      <div style={{ fontWeight: 600, color: "#4338ca", marginBottom: "0.25rem" }}>
-        {citation.clause_id}{" "}
-        <span style={{ fontWeight: 400, color: "#6b7280" }}>
-          — {citation.source_file}
-          {citation.section ? `, ${citation.section}` : ""}
-        </span>
-      </div>
-      <div style={{ color: "#374151" }}>{citation.text}</div>
-    </div>
+      {citation.clause_id}
+    </span>
   );
 }
 
@@ -262,9 +259,19 @@ function ResultPanel({ data }) {
       </div>
 
       {/* Summary text */}
-      <div style={{ marginBottom: "1rem", color: "#1f2937", lineHeight: 1.6 }}>
+      <div style={{ marginBottom: "1rem", color: "#1f2937", lineHeight: 1.6, whiteSpace: "pre-line" }}>
         {summaryText}
       </div>
+
+      {/* Source references for employees */}
+      {Array.isArray(data.policy_citations) && data.policy_citations.length > 0 && (
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.35rem", marginBottom: "1rem" }}>
+          <span style={{ fontSize: "0.8rem", color: "#6b7280", fontWeight: 500 }}>Sources:</span>
+          {data.policy_citations.map((c, i) => (
+            <CitationBadge key={i} citation={c} />
+          ))}
+        </div>
+      )}
 
       {/* Action zone */}
       <ActionZone data={data} />
@@ -306,7 +313,11 @@ function ResultPanel({ data }) {
               <div style={{ marginBottom: "0.75rem" }}>
                 <div style={styles.sectionLabel}>Raw Citation</div>
                 <div style={{ fontSize: "0.85rem", color: "#374151" }}>
-                  {data.explanation}
+                  {data.explanation
+                    .replace(/\*\*([^*]+)\*\*/g, "$1")
+                    .replace(/#{1,6}\s+/g, "")
+                    .replace(/__([^_]+)__/g, "$1")
+                  }
                 </div>
               </div>
             )}
@@ -317,9 +328,11 @@ function ResultPanel({ data }) {
                 <div style={{ ...styles.sectionLabel, marginBottom: "0.5rem" }}>
                   Policy Citations
                 </div>
-                {data.policy_citations.map((c, i) => (
-                  <CitationCard key={i} citation={c} />
-                ))}
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem" }}>
+                  {data.policy_citations.map((c, i) => (
+                    <CitationBadge key={i} citation={c} />
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -437,7 +450,7 @@ export default function NavigatorPage({ employeeId, onLogout }) {
         <aside className="navigator-sidebar" aria-label="Policy Library">
           <h2 className="navigator-sidebar__title">Policy Library</h2>
           <p className="navigator-sidebar__helper">
-            Guides for manual references.
+            Guides for manual references
           </p>
           <ul className="navigator-library-list">
             {POLICY_GUIDES.map((guide) => (
@@ -492,7 +505,7 @@ export default function NavigatorPage({ employeeId, onLogout }) {
 
             {result?.decision === "insufficient_info" && (
               <div style={styles.infoBox}>
-                More details may be required (e.g., treatment type, date, or provider).
+                Your query cannot be found in database.
               </div>
             )}
 
@@ -526,7 +539,9 @@ export default function NavigatorPage({ employeeId, onLogout }) {
                       w.document.write(
                         `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${activeGuide.title}</title>` +
                         `<style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;` +
-                        `max-width:780px;margin:2rem auto;padding:0 1.5rem;color:#0f172a;line-height:1.6}` +
+                        `max-width:780px;margin:2rem auto;padding:0 1.5rem;color:#0f172a;line-height:1.6;` +
+                        `min-height:100vh;background-color:#fef0e8;` +
+                        `background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='60' viewBox='0 0 120 60'%3E%3Cpath d='M0 30 Q15 10 30 30 Q45 50 60 30 Q75 10 90 30 Q105 50 120 30' fill='none' stroke='%23d4856a' stroke-opacity='0.12' stroke-width='1.2'/%3E%3Cpath d='M0 50 Q15 30 30 50 Q45 70 60 50 Q75 30 90 50 Q105 70 120 50' fill='none' stroke='%23d4856a' stroke-opacity='0.08' stroke-width='1'/%3E%3Cpath d='M0 10 Q15 -10 30 10 Q45 30 60 10 Q75 -10 90 10 Q105 30 120 10' fill='none' stroke='%23d4856a' stroke-opacity='0.08' stroke-width='1'/%3E%3C/svg%3E")}` +
                         `h1,h2,h3,h4{color:#0f172a;line-height:1.25}a{color:#0f766e}code{background:#f1f5f9;` +
                         `padding:0.15em 0.35em;border-radius:3px;font-size:0.9em}pre{background:#f1f5f9;` +
                         `padding:1rem;border-radius:6px;overflow-x:auto}ul{padding-left:1.25rem}</style>` +

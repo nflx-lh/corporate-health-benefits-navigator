@@ -1,224 +1,168 @@
 # Coverage & Eligibility Guide
 
-## Table of Contents
 - [Plan Tiers Overview](#plan-tiers-overview)
-- [Outpatient Medical Benefits Policy](#outpatient-medical-benefits-policy)
-- [Dental Benefits Policy](#dental-benefits-policy)
-- [Mental Health & Counseling Benefits Policy](#mental-health--counseling-benefits-policy)
-- [FAQ Clarifications](#faq-clarifications)
+- [Outpatient Medical Benefits](#outpatient-medical-benefits)
+- [Dental Benefits](#dental-benefits)
+- [Mental Health & Counseling Benefits](#mental-health--counseling-benefits)
+- [Frequently Asked Questions](#frequently-asked-questions)
+
+---
 
 ## Plan Tiers Overview
 
-### 1. Plan Structure
-_Provenance: Source file: `plan_tiers_overview.md` | Clause IDs: `CL-123`, `CL-124`_
+### Plan Structure
 
-**CL-123:** The company offers three health benefit plan tiers: Basic, Plus, and Premium.
+The company offers three health benefit plan tiers: **Basic**, **Plus**, and **Premium**. Plan assignment is determined by employment type, job grade, and tenure.
 
-**CL-124:** Plan assignment is determined by employment type, job grade, and tenure.
+Policy references: CL-123, CL-124
 
-### 2. Basic Plan
-_Provenance: Source file: `plan_tiers_overview.md` | Clause IDs: `CL-125`, `CL-126`, `CL-127`, `CL-128`_
+### Basic Plan
 
-**CL-125:** Eligibility: All full-time employees (entry-level to mid-level grades).
+All full-time employees at entry-level to mid-level grades are eligible for the Basic plan. Coverage includes outpatient medical at 60% co-insurance with a SGD 1,500 annual limit, and access to the Employee Assistance Program (EAP) for mental health (3 free sessions). Dental coverage is not included, and there is no dependent coverage. Pre-authorization is required for services exceeding SGD 500.
 
-**CL-126:** Coverage includes:
-- Outpatient medical: 60% co-insurance, SGD 1,500 annual limit
-- No dental coverage
-- EAP mental health only (3 free sessions)
+Policy references: CL-125, CL-126, CL-127, CL-128
 
-**CL-127:** No dependent coverage.
+### Plus Plan
 
-**CL-128:** Pre-authorization required for services exceeding SGD 500.
+Full-time employees at mid to senior grades and contract employees after 3 months of continuous service are eligible for the Plus plan. Coverage includes:
 
-### 3. Plus Plan
-_Provenance: Source file: `plan_tiers_overview.md` | Clause IDs: `CL-129`, `CL-130`, `CL-131`, `CL-132`_
+- **Outpatient medical:** 80% co-insurance, SGD 3,000 annual limit
+- **Dental:** Preventive at 80%, restorative at 60%, SGD 800 annual limit
+- **Mental health:** 70% co-insurance, 12 sessions, SGD 1,800 annual limit
 
-**CL-129:** Eligibility: Full-time employees (mid to senior grades) and contract employees after 3 months.
+Dependents (spouse and children under 21) are covered for outpatient and dental preventive services only. Pre-authorization is required for services exceeding SGD 500.
 
-**CL-130:** Coverage includes:
-- Outpatient medical: 80% co-insurance, SGD 3,000 annual limit
-- Dental preventive and restorative: 80%/60%, SGD 800 annual limit
-- Mental health: 70% co-insurance, 12 sessions, SGD 1,800 annual limit
+Policy references: CL-129, CL-130, CL-131, CL-132
 
-**CL-131:** Dependent coverage: Dependents (spouse and children under 21) are covered for outpatient and dental preventive only.
+### Premium Plan
 
-**CL-132:** Pre-authorization required for services exceeding SGD 500.
+Senior management, executives, and high-tenure employees (5+ years) are eligible for the Premium plan. Coverage includes:
 
-### 4. Premium Plan
-_Provenance: Source file: `plan_tiers_overview.md` | Clause IDs: `CL-133`, `CL-134`, `CL-135`, `CL-136`, `CL-137`_
+- **Outpatient medical:** 90% co-insurance, SGD 5,000 annual limit
+- **Dental:** Preventive at 100%, restorative at 80%, major at 50%, SGD 2,000 annual limit
+- **Mental health:** 85% co-insurance, 20 sessions, SGD 3,500 annual limit
 
-**CL-133:** Eligibility: Senior management, executives, and high-tenure employees (5+ years).
+Full dependent coverage is provided for spouse and children under 21 (aged 12+ for mental health), including dental major and mental health services. No GP referral is required for specialist consultations, and direct billing is available at panel providers.
 
-**CL-134:** Coverage includes:
-- Outpatient medical: 90% co-insurance, SGD 5,000 annual limit
-- Dental comprehensive: 100%/80%/50% (preventive/restorative/major), SGD 2,000 annual limit
-- Mental health: 85% co-insurance, 20 sessions, SGD 3,500 annual limit
+Policy references: CL-133, CL-134, CL-135, CL-136, CL-137
 
-**CL-135:** Full dependent coverage: Dependents (spouse and children under 21, aged 12+ for mental health) are covered including dental major and mental health.
+### Plan Changes
 
-**CL-136:** No GP referral required for specialist consultations.
+Plan upgrades occur automatically upon promotion or tenure milestone, reviewed quarterly. Downgrades occur upon employment type change or at the employee's written request. All plan changes take effect on the 1st of the following month after approval.
 
-**CL-137:** Direct billing available at panel providers.
+A detailed comparison chart is available on the employee portal. For questions on plan eligibility, please contact your HR Business Partner.
 
-### 5. Plan Changes
-_Provenance: Source file: `plan_tiers_overview.md` | Clause IDs: `CL-138`, `CL-139`, `CL-140`, `CL-141`, `CL-142`_
+Policy references: CL-138, CL-139, CL-140, CL-141, CL-142
 
-**CL-138:** Plan upgrades occur automatically upon promotion or tenure milestone (reviewed quarterly).
+---
 
-**CL-139:** Downgrades occur upon employment type change or at employee's written request.
+## Outpatient Medical Benefits
 
-**CL-140:** Plan changes take effect on the 1st of the following month after approval.
+### Eligibility
 
-**CL-141:** Detailed comparison chart available on employee portal.
+All active full-time employees on Basic, Plus, or Premium plans are eligible for outpatient medical benefits from their first day of employment. Contract employees on Plus or Premium plans are eligible after completing 3 months of continuous service. Dependents (spouse and children under 21) are covered under Plus and Premium plans only.
 
-**CL-142:** Questions on plan eligibility should be directed to HR Business Partner.
+Policy references: CL-001, CL-002, CL-003
 
-## Outpatient Medical Benefits Policy
+### Coverage
 
-### 1. Eligibility
-_Provenance: Source file: `outpatient_policy.md` | Clause IDs: `CL-001`, `CL-002`, `CL-003`_
+Outpatient consultations at panel clinics and hospitals are covered at varying percentages based on your plan tier. Specialist consultations require a GP referral letter, except for Premium plan holders.
 
-**CL-001:** All active full-time employees on Basic, Plus, or Premium plans are eligible for outpatient medical benefits from their first day of employment.
+- **Basic** — Co-insurance: **60%**; Co-pay per visit: **SGD 20**
+- **Plus** — Co-insurance: **80%**; Co-pay per visit: **SGD 15**
+- **Premium** — Co-insurance: **90%**; Co-pay per visit: **SGD 10**
 
-**CL-002:** Contract employees on Plus or Premium plans are eligible after completing 3 months of continuous service.
+Policy references: CL-004, CL-005, CL-006, CL-007, CL-008
 
-**CL-003:** Dependents (spouse and children under 21) are covered under Plus and Premium plans only.
+### Limits
 
-### 2. Coverage Rules
-_Provenance: Source file: `outpatient_policy.md` | Clause IDs: `CL-004`, `CL-005`, `CL-006`, `CL-007`, `CL-008`_
+Annual limits per employee are SGD 1,500 (Basic), SGD 3,000 (Plus), and SGD 5,000 (Premium). The per-visit co-pay is non-waivable and paid directly to the provider. Dependents share the same annual limit pool as the primary employee.
 
-**CL-004:** Outpatient consultations at panel clinics and hospitals are covered at varying percentages based on plan tier.
+Policy references: CL-009, CL-010, CL-011
 
-**CL-005:** Basic plan: 60% co-insurance after SGD 20 co-pay per visit.
+---
 
-**CL-006:** Plus plan: 80% co-insurance after SGD 15 co-pay per visit.
+## Dental Benefits
 
-**CL-007:** Premium plan: 90% co-insurance after SGD 10 co-pay per visit.
+### Eligibility
 
-**CL-008:** Specialist consultations require GP referral letter except for Premium plan holders.
+Full-time employees on Plus and Premium plans are eligible for dental benefits after 1 month of service. Basic plan holders do not have dental coverage, and contract employees are not eligible regardless of plan tier. Dependents (spouse and children under 21) are covered under Premium plans only, with separate annual limits.
 
-### 3. Limits & Co-pay
-_Provenance: Source file: `outpatient_policy.md` | Clause IDs: `CL-009`, `CL-010`, `CL-011`_
+Policy references: CL-026, CL-027, CL-028, CL-029
 
-**CL-009:** Annual limits per employee:
-- Basic: SGD 1,500
-- Plus: SGD 3,000
-- Premium: SGD 5,000
+### Coverage
 
-**CL-010:** Per-visit co-pay is non-waivable and paid directly to provider.
+All dental procedures must be performed at panel dental clinics.
 
-**CL-011:** Dependents share the same annual limit pool as the primary employee.
+- **Preventive** (scaling, polishing, exams)
+  - Plus Plan: **80%**
+  - Premium Plan: **100%**
+- **Restorative** (fillings, extractions)
+  - Plus Plan: **60%**
+  - Premium Plan: **80%**
+- **Major** (crowns, bridges, root canals)
+  - Plus Plan: **Not covered**
+  - Premium Plan: **50%**
 
-## Dental Benefits Policy
+Policy references: CL-030, CL-031, CL-032
 
-### 1. Eligibility
-_Provenance: Source file: `dental_policy.md` | Clause IDs: `CL-026`, `CL-027`, `CL-028`, `CL-029`_
+### Limits & Co-pay
 
-**CL-026:** Full-time employees on Plus and Premium plans are eligible for dental benefits after 1 month of service.
+Annual limits are SGD 800 for Plus (preventive + restorative combined) and SGD 2,000 for Premium (all categories combined). Co-pay is SGD 25 per visit for Plus and SGD 15 per visit for Premium. Dependent limits under Premium are SGD 1,200 per dependent per year.
 
-**CL-027:** Basic plan holders do not have dental coverage.
+Policy references: CL-033, CL-034, CL-035, CL-036
 
-**CL-028:** Contract employees are not eligible for dental benefits regardless of plan tier.
+---
 
-**CL-029:** Dependents (spouse and children under 21) are covered under Premium plans only, with separate annual limits.
+## Mental Health & Counseling Benefits
 
-### 2. Coverage Rules
-_Provenance: Source file: `dental_policy.md` | Clause IDs: `CL-030`, `CL-031`, `CL-032`_
+### Eligibility
 
-**CL-030:** Plus plan covers:
-- Preventive: 80% (scaling, polishing, routine exams)
-- Restorative: 60% (fillings, extractions)
-- Major: Not covered
+All active full-time employees on Plus and Premium plans are eligible for mental health benefits after 6 months of continuous service. Basic plan holders may access the Employee Assistance Program (EAP) only, which provides 3 free sessions per year (non-claimable). Contract employees on Premium plans are eligible after 12 months of service. Dependents (spouse and children aged 12+) are covered under Premium plans with separate session limits.
 
-**CL-031:** Premium plan covers:
-- Preventive: 100%
-- Restorative: 80%
-- Major: 50% (crowns, bridges, root canals)
+Policy references: CL-048, CL-049, CL-050, CL-051
 
-**CL-032:** All dental procedures must be performed at panel dental clinics.
+### Coverage
 
-### 3. Limits & Co-pay
-_Provenance: Source file: `dental_policy.md` | Clause IDs: `CL-033`, `CL-034`, `CL-035`, `CL-036`_
+Plus plan provides 70% co-insurance for up to 12 sessions per calendar year. Premium plan provides 85% co-insurance for up to 20 sessions per calendar year. Sessions must be conducted by licensed psychologists, psychiatrists, or accredited counselors on the panel provider list. Both in-person and telehealth sessions are covered at the same rate.
 
-**CL-033:** Annual limits per employee:
-- Plus: SGD 800 (preventive + restorative combined)
-- Premium: SGD 2,000 (all categories combined)
+Policy references: CL-052, CL-053, CL-054, CL-055
 
-**CL-034:** Co-pay for Plus plan: SGD 25 per visit.
+### Limits & Co-pay
 
-**CL-035:** Co-pay for Premium plan: SGD 15 per visit.
+Annual limits are SGD 1,800 for Plus (up to 12 sessions) and SGD 3,500 for Premium (up to 20 sessions). Co-pay is SGD 30 per session for all eligible plans. Medication prescribed by psychiatrists is covered under outpatient medical benefits, not the mental health category.
 
-**CL-036:** Dependent limits (Premium only): SGD 1,200 per dependent per year.
+Policy references: CL-056, CL-057, CL-058
 
-## Mental Health & Counseling Benefits Policy
+---
 
-### 1. Eligibility
-_Provenance: Source file: `mental_health_policy.md` | Clause IDs: `CL-048`, `CL-049`, `CL-050`, `CL-051`_
+## Frequently Asked Questions
 
-**CL-048:** All active full-time employees on Plus and Premium plans are eligible for mental health benefits after 6 months of continuous service.
+**When does my coverage start?**
+Full-time employees' Basic plan coverage starts on Day 1. Plus and Premium coverage starts after meeting tenure requirements.
 
-**CL-049:** Basic plan holders may access Employee Assistance Program (EAP) only (3 free sessions per year, non-claimable).
+**Can contract employees get dental coverage?**
+No. Contract employees are not eligible for dental benefits regardless of plan tier.
 
-**CL-050:** Contract employees on Premium plans are eligible after 12 months of service.
+**Are my children covered?**
+Dependents (children under 21) are covered under Plus and Premium plans. Plus covers dependents for outpatient and preventive dental only. Premium provides comprehensive dependent coverage including dental major and mental health services (aged 12+).
 
-**CL-051:** Dependents (spouse and children aged 12+) are covered under Premium plans with separate session limits.
+**Is TCM (Traditional Chinese Medicine) covered?**
+No, unless explicitly added to your plan via an optional rider.
 
-### 2. Coverage Rules
-_Provenance: Source file: `mental_health_policy.md` | Clause IDs: `CL-052`, `CL-053`, `CL-054`, `CL-055`_
+**Are vaccinations covered?**
+Routine vaccinations are covered under the separate Wellness Budget, not medical claims.
 
-**CL-052:** Plus plan: 70% co-insurance for up to 12 sessions per calendar year.
+**What about mental health for my spouse?**
+Dependents aged 12+ are covered under Premium plans with separate session limits.
 
-**CL-053:** Premium plan: 85% co-insurance for up to 20 sessions per calendar year.
+**I'm going on an overseas assignment. Is my coverage valid?**
+Overseas treatment requires prior travel approval. Submit claims within 60 days.
 
-**CL-054:** Sessions must be conducted by licensed psychologists, psychiatrists, or accredited counselors on the panel provider list.
+**What happens if I switch from full-time to contract?**
+Your plan will be reviewed and adjusted based on contract employee eligibility rules. Some benefits may be reduced or removed.
 
-**CL-055:** Both in-person and telehealth sessions are covered at the same rate.
+**Can I upgrade my plan?**
+Plan upgrades happen automatically based on promotion or tenure. Voluntary upgrades are not available.
 
-### 3. Limits & Co-pay
-_Provenance: Source file: `mental_health_policy.md` | Clause IDs: `CL-056`, `CL-057`, `CL-058`_
-
-**CL-056:** Annual limits per employee:
-- Plus: SGD 1,800 (up to 12 sessions)
-- Premium: SGD 3,500 (up to 20 sessions)
-
-**CL-057:** Co-pay: SGD 30 per session for all eligible plans.
-
-**CL-058:** Medication prescribed by psychiatrists is covered under outpatient medical benefits, not mental health category.
-
-## FAQ Clarifications
-
-### 1. Eligibility Questions
-_Provenance: Source file: `faq_policy_clarifications.md` | Clause IDs: `CL-143`, `CL-144`, `CL-145`_
-
-**CL-143:** *Q: When does my coverage start?*  
-A: Full-time employees' Basic plan coverage starts on Day 1. Plus and Premium coverage starts after meeting tenure requirements (Plus: immediate, Premium: varies by grade).
-
-**CL-144:** *Q: Can contract employees get dental coverage?*  
-A: No. Contract employees are not eligible for dental benefits regardless of plan tier (see CL-028).
-
-**CL-145:** *Q: Are my children covered?*  
-A: Dependents (children under 21) are covered under Plus and Premium plans. Plus plan covers dependents for outpatient and preventive dental only. Premium plan provides comprehensive dependent coverage including dental major and mental health services (aged 12+).
-
-### 3. Coverage Scope
-_Provenance: Source file: `faq_policy_clarifications.md` | Clause IDs: `CL-149`, `CL-150`, `CL-151`_
-
-**CL-149:** *Q: Is TCM (Traditional Chinese Medicine) covered?*  
-A: No, unless explicitly added to your plan via optional rider (see CL-015).
-
-**CL-150:** *Q: Are vaccinations covered?*  
-A: Routine vaccinations are covered under the separate Wellness Budget, not medical claims (CL-116).
-
-**CL-151:** *Q: What about mental health for my spouse?*  
-A: Dependents aged 12+ are covered under Premium plans with separate session limits (CL-051).
-
-### 5. Special Situations
-_Provenance: Source file: `faq_policy_clarifications.md` | Clause IDs: `CL-154`, `CL-155`, `CL-156`_
-
-**CL-154:** *Q: I'm going on overseas assignment. Is my coverage valid?*  
-A: Overseas treatment requires prior travel approval. Submit claims within 60 days (CL-093, CL-113).
-
-**CL-155:** *Q: What happens if I switch from full-time to contract?*  
-A: Your plan will be reviewed and adjusted based on contract employee eligibility rules. Some benefits may be reduced or removed (see CL-028, CL-139).
-
-**CL-156:** *Q: Can I upgrade my plan?*  
-A: Plan upgrades happen automatically based on promotion or tenure. Voluntary upgrades are not available (CL-138).
+Policy references: CL-143, CL-144, CL-145, CL-149, CL-150, CL-151, CL-154, CL-155, CL-156

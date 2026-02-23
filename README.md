@@ -13,8 +13,9 @@ This solution was developed as an MVP demonstration for a corporate health benef
 - **AI:** OpenAI LLM (explainer/critic agents) + embeddings (policy retrieval)
 
 ## Project Status
-- Core functionalities completed and stable locally.
-- Cloud deployment (next milestone)
+- **v0.12.1** — Admin UX polish (form validation, modal popups, table formatting, guide backgrounds)
+- Phases 1–11 complete (rules engine, retrieval, orchestration, frontend, security, admin CRUD, password auth, UI polish)
+- Cloud deployment next (Phase 12)
 
 ## Quick Start
 1. Copy `.env.example` to `.env`
@@ -30,9 +31,10 @@ docker compose up --build
 - **Rules-first decisions** — deterministic engine is the single source of truth; AI enriches but never overrides
 - **LLM explainability** — plain-language summaries with critic validation and safety gate
 - **Policy Library** — sidebar with guide cards and slide-in markdown viewer
-- **Admin dashboard** — HR admin login with employee CRUD management (create, edit, delete)
+- **Admin dashboard** — HR admin login, employee CRUD with modal popups and field validation, password reset queue management
+- **Password authentication** — DB-backed bcrypt login, forced password change flow, HR-managed reset queue
 - **Security hardening** — JWT auth, RBAC, CORS allowlist, rate limiting, input validation, prompt injection guards, and safe error handling
-- **Evaluation harness** — automated test suite with deterministic eval cases and no-drift golden output gates
+- **Evaluation harness** — ~326 tests across 24 files, deterministic eval cases, no-drift golden output gates
 
 ## Repository Structure
 - `backend/app/` — FastAPI backend (routes, auth, services, orchestration)
@@ -44,4 +46,4 @@ docker compose up --build
 - `scripts/` — seed, eval, build-index, readiness report
 
 ## Attribution
-- Background images sourced from [Freepik](https://www.freepik.com)
+- Images sourced from [Freepik](https://www.freepik.com)

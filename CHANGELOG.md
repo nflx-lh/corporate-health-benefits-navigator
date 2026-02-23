@@ -4,6 +4,43 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [0.12.1] - 23-Feb-2026 — Admin UX & Guide Styling
+
+### Changed
+- **Employee form validation**: Name, Age, Employment Type, and Plan Tier are now required fields (HTML + JS-level validation with inline error messages)
+- **Edit form → modal popup**: clicking Edit on a table row now opens the form in a centered overlay instead of inline above the table
+- **Delete confirmation → modal popup**: delete prompt now appears as a centered overlay with "This action cannot be undone" warning
+- **Table display formatting**: `full_time` → "Full Time", `part_time` → "Part Time", `basic` → "Basic", `premium` → "Premium", etc. via `formatLabel` helper
+- **Guide drawer background**: soft peach (`#fef0e8`) with subtle wave pattern for all 3 policy guides
+- **Guide popup window**: same peach + wave background retained when opening a guide in a new window
+- **Modal animations**: fade-in backdrop + slide-up content for edit and delete modals
+
+### Notes
+- EMP025 seed data intentionally left unchanged (blank name/tenure) — used by `insufficient_info` test cases
+- `rules_engine.py` is NOT modified
+
+---
+
+## [0.12.0] - 22-Feb-2026 — UI Polish & Content Refinement
+
+### Changed
+- **LLM explainer prompt** restructured with format example, one-fact-per-line style, and added "Please note to retain a copy of the required documents stated below" line
+- **`plan_tier` capitalization**: `raw_plan.title()` applied in `run_rules_engine_node` so plan names display as "Premium" instead of "premium"
+- **LLM output post-processing**: regex inserts newlines before key patterns (Current Plan, Annual limit, Co-pay, Please refer, Please note) for proper line-by-line rendering
+- **`import re` moved** to top-level imports in `nodes.py`
+- **Navigator page scroll fix**: removed `overflow: hidden` lockdown on desktop layout; page now scrolls naturally so Technical Details section is fully accessible
+- **Policy guide rewrite**: all 3 guides (`coverage_eligibility_guide.md`, `claims_preauth_guide.md`, `exclusions_clarifications_guide.md`) restructured from clause-per-line format to flowing paragraphs with policy reference codes grouped at the end of each section
+- **Sidebar background**: changed to `grassfield.png`
+- **Guide card backgrounds**: removed image backgrounds, replaced with semi-transparent dark overlay
+- **Helper text**: "Guides for manual references" color changed to white, trailing period removed
+- **Insufficient info message**: updated to "Your query cannot be found in database."
+
+### Notes
+- `rules_engine.py` is NOT modified
+- Checkpoint tag planned: `v0.12.0-phase11-freeze`
+
+---
+
 ## [0.11.0] - 22-Feb-2026 — Password Reset & Real Auth
 
 ### Added

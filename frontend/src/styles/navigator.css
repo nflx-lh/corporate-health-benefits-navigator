@@ -101,7 +101,7 @@
   border-right: 1px solid rgba(148, 163, 184, 0.18);
   background:
     linear-gradient(180deg, rgba(15, 23, 42, 0.35) 0%, rgba(15, 23, 42, 0.35) 100%),
-    url("/images/Page 2 side bar.jpg") center / cover no-repeat;
+    url("/images/greenfield.jpg") center / cover no-repeat;
   box-shadow: 4px 0 16px rgba(2, 6, 23, 0.12);
   padding: calc(60px + 1.5rem) clamp(1rem, 2.5vw, 1.5rem) 1.5rem;
   color: #e2e8f0;
@@ -125,7 +125,7 @@
   margin: 6px 0 1.5rem;
   font-size: 0.84rem;
   line-height: 1.45;
-  color: #78350f;
+  color: #ffffff;
   padding-left: clamp(0rem, 0.5vw, 0.25rem);
 }
 
@@ -148,9 +148,7 @@
   cursor: pointer;
   border-radius: 10px;
   border: 1px solid rgba(148, 163, 184, 0.25);
-  background:
-    linear-gradient(180deg, rgba(15, 23, 42, 0.55) 0%, rgba(15, 23, 42, 0.55) 100%),
-    url("/images/Page 2 side bar_2.jpg") center / cover no-repeat;
+  background: rgba(15, 23, 42, 0.55);
   color: #e2e8f0;
   min-height: 68px;
   padding: 0.75rem 0.8rem 0.75rem calc(0.8rem + 3px);
@@ -158,17 +156,6 @@
   transition: border-color 170ms ease, transform 170ms ease;
 }
 
-.navigator-library-list li:nth-child(1) .navigator-library-link {
-  background-position: center 30%;
-}
-
-.navigator-library-list li:nth-child(2) .navigator-library-link {
-  background-position: center 55%;
-}
-
-.navigator-library-list li:nth-child(3) .navigator-library-link {
-  background-position: center 82%;
-}
 
 .navigator-library-link:hover {
   border-color: rgba(148, 163, 184, 0.45);
@@ -279,7 +266,8 @@
   overflow: auto;
   padding: 1rem 1.05rem 1.25rem;
   color: #0f172a;
-  background: #f8fafc;
+  background-color: #fef0e8;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='60' viewBox='0 0 120 60'%3E%3Cpath d='M0 30 Q15 10 30 30 Q45 50 60 30 Q75 10 90 30 Q105 50 120 30' fill='none' stroke='%23d4856a' stroke-opacity='0.12' stroke-width='1.2'/%3E%3Cpath d='M0 50 Q15 30 30 50 Q45 70 60 50 Q75 30 90 50 Q105 70 120 50' fill='none' stroke='%23d4856a' stroke-opacity='0.08' stroke-width='1'/%3E%3Cpath d='M0 10 Q15 -10 30 10 Q45 30 60 10 Q75 -10 90 10 Q105 30 120 10' fill='none' stroke='%23d4856a' stroke-opacity='0.08' stroke-width='1'/%3E%3C/svg%3E");
 }
 
 .navigator-guide-markdown h1,
@@ -378,6 +366,7 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  padding-bottom: 2rem;
   scrollbar-width: thin;
 }
 
@@ -475,23 +464,7 @@
 }
 
 @media (min-width: 901px) {
-  .navigator-page {
-    height: 100vh;
-    overflow: hidden;
-  }
-
-  .navigator-main {
-    overflow: hidden;
-  }
-
-  .navigator-layout {
-    height: calc(100vh - 60px);
-    min-height: 0;
-  }
-
   .navigator-panel {
-    height: 100%;
-    min-height: 0;
-    overflow-y: auto;
+    min-height: calc(100vh - 60px);
   }
 }
