@@ -1,29 +1,33 @@
 * text=auto
 
-# Shell / scripts
+# Shell / scripts (force LF)
 *.sh text eol=lf
 *.bash text eol=lf
 
-# Config / infra
+# Config / infra (force LF)
 *.yml text eol=lf
 *.yaml text eol=lf
 *.json text eol=lf
 *.toml text eol=lf
 *.ini text eol=lf
-*.env.example text eol=lf
+*.sql text eol=lf
+.env.example text eol=lf
 .gitignore text eol=lf
 .gitattributes text eol=lf
 .dockerignore text eol=lf
 
-# Python
+# Python (force LF)
 *.py text eol=lf
 
-# Docs
+# Docs (force LF)
 *.md text eol=lf
 
-# Dockerfiles
+# Dockerfiles (force LF)
 Dockerfile text eol=lf
 *.Dockerfile text eol=lf
+
+# Extra safety for this repo
+backend/entrypoint.sh text eol=lf
 
 # Windows scripts remain CRLF
 *.bat text eol=crlf
