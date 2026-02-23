@@ -26,9 +26,14 @@ COPY data/fixtures ./data/fixtures
 COPY data/rules ./data/rules
 COPY data/raw ./data/raw
 
-# Copy pre-built embedding index if available; retriever degrades gracefully if empty.
-# To populate: python scripts/build_index.py  then rebuild this image.
-COPY data/index ./data/index
+# Empty index dir — built at container startup if OPENAI_API_KEY is available.
+# Retriever degrades gracefully (returns empty hits) when index is missing.
+RUN mkdir -p ./data/index
+
+# Copy index build script + entrypoint for on-demand index generation
+COPY scripts/build_index.py ./scripts/build_index.py
+COPY backend/entrypoint.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
 
 ENV PYTHONPATH=/app
 ENV DATA_ROOT=/app/data
@@ -42,4 +47,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD curl -f http://localhost:8000/v1/health || exit 1
 
+ENTRYPOINT ["./entrypoint.sh"]
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]

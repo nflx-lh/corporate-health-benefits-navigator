@@ -9,11 +9,12 @@ All notable changes to this project are documented in this file.
 ### Fixed
 - **Container path resolution**: Data-loading code used `Path(__file__).parents[3]` which resolves to `/` in the container instead of `/app`. All four data path sites now use `DATA_ROOT` env var with local fallback (`nodes.py`, `init_db.py`, `employee_repo.py`, `rule_repo.py`).
 - **Invalid `REPO_MODE` in Terraform**: ECS task definition set `REPO_MODE=db_first` (unrecognized); changed to `dual`.
-- **Missing embedding index in container**: Dockerfile replaced `mkdir -p ./data/index` with `COPY data/index ./data/index` to include pre-built index.
+- **CI build failure**: `COPY data/index` failed in GitHub Actions because index artifacts are gitignored. Replaced with `mkdir -p` + startup-time index build via entrypoint.
 
 ### Added
 - `trace_id` (UUID hex) on 500 error responses and matching log line for CloudWatch correlation.
 - `ENV DATA_ROOT=/app/data` in `Dockerfile.prod` — overrides local-only path resolution.
+- **Startup index builder** (`backend/entrypoint.sh`): builds retrieval index on first container boot if `OPENAI_API_KEY` is available; non-fatal on failure (retriever returns empty hits).
 
 ### Changed
 - **Admin temp password modal**: Copy button now shows "Copied" / "Copy failed" for 1.5s with timer cleanup on unmount; repeated clicks reset the timer deterministically.
