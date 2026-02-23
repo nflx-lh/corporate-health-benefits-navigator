@@ -9,13 +9,12 @@ This solution was developed as an MVP demonstration for a corporate health benef
 ## MVP Scope
 - **Benefits:** Outpatient, Dental, Mental Health
 - **Users:** Employee, HR Admin
-- **Stack:** FastAPI, React 19 / Vite 5, LangGraph, PostgreSQL, Docker Compose
+- **Stack:** FastAPI, React 19 / Vite 5, LangGraph, PostgreSQL, Docker Compose, AWS ECS Fargate, Terraform
 - **AI:** OpenAI LLM (explainer/critic agents) + embeddings (policy retrieval)
 
 ## Project Status
-- **v0.12.1** — Admin UX polish (form validation, modal popups, table formatting, guide backgrounds)
-- Phases 1–11 complete (rules engine, retrieval, orchestration, frontend, security, admin CRUD, password auth, UI polish)
-- Cloud deployment next (Phase 12)
+- **v0.13.0** — AWS cloud deployment with RDS persistence (ECS Fargate, RDS PostgreSQL, Terraform IaC, GitHub Actions deploy-on-demand)
+- Phases 1–12 complete (rules engine, retrieval, orchestration, frontend, security, admin CRUD, password auth, UI polish, cloud deployment with RDS)
 
 ## Quick Start
 1. Copy `.env.example` to `.env`
@@ -34,6 +33,8 @@ docker compose up --build
 - **Admin dashboard** — HR admin login, employee CRUD with modal popups and field validation, password reset queue management
 - **Password authentication** — DB-backed bcrypt login, forced password change flow, HR-managed reset queue
 - **Security hardening** — JWT auth, RBAC, CORS allowlist, rate limiting, input validation, prompt injection guards, and safe error handling
+- **Cloud deployment** — AWS ECS Fargate + RDS PostgreSQL, Terraform IaC (persistent/demo split), GitHub Actions deploy-on-demand with OIDC (~$0 when off)
+- **Production-safe data layer** — PostgreSQL persistence with auto-init on startup (CSV seed → DB), `REPO_MODE` safety switch for graceful degradation and test isolation
 - **Evaluation harness** — ~326 tests across 24 files, deterministic eval cases, no-drift golden output gates
 
 ## Repository Structure
@@ -44,6 +45,21 @@ docker compose up --build
 - `tests/` — automated test suites
 - `eval/` — evaluation cases and timestamped artifacts
 - `scripts/` — seed, eval, build-index, readiness report
+- `terraform/` — IaC (persistent stack + demo stack)
+- `.github/workflows/` — CI + deploy-on-demand pipeline
+- `docs/DEPLOYMENT.md` — cloud deployment runbook
+
+## Cloud Deployment
+
+Deploy-on-demand to AWS ECS Fargate. See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for the full runbook.
+
+```bash
+# Spin up for demo
+cd terraform/demo && terraform apply
+
+# Tear down after
+cd terraform/demo && terraform destroy
+```
 
 ## Attribution
 - Images sourced from [Freepik](https://www.freepik.com)

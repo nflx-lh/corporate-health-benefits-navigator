@@ -331,6 +331,8 @@ def explainer_node(state: OrchestratorState) -> dict[str, Any]:
         user_message += f"\n\nPrevious attempt was rejected: {critic_result.get('critic_feedback', '')}. Please fix."
 
     result = chat_completion(system_prompt, user_message)
+    if not isinstance(result, str) or not result.strip():
+        return {"explanation_text": None, "retry_count": retry_count + 1}
 
     # Post-process: ensure line breaks before key fact patterns
     result = re.sub(r'(?<!\n)((?:Current Plan:|Annual limit:|Co-pay:|Please refer|Please note))', r'\n\1', result)

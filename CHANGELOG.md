@@ -4,6 +4,68 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [0.13.0] - 23-Feb-2026 — AWS Cloud Deployment & RDS Persistence (Phase 12)
+
+### Added
+
+**Infrastructure — Terraform**
+- **Terraform persistent stack** (`terraform/persistent/`): ECR repos (chbn-api, chbn-web), IAM roles (ECS exec + GitHub Actions OIDC), SSM params (JWT secret + OpenAI API key)
+- **Terraform demo stack** (`terraform/demo/`): VPC, ALB, ECS Fargate, CloudWatch logs — fully destroyable ephemeral resources
+- **7 Terraform modules** (`terraform/modules/`): `ecr`, `iam`, `ssm`, `vpc`, `alb`, `ecs`, `rds` — 21 files total
+- **RDS Postgres module** (`terraform/modules/rds/`): `aws_db_instance` (db.t3.micro, PostgreSQL 16.4), `aws_db_subnet_group`, `aws_security_group` (5432 from ECS only), `random_password` for credentials
+- **Private subnets** in VPC module: 2 private subnets (one per AZ) with isolated route table, gated by `enable_private_subnets` — no NAT gateway
+
+**Infrastructure — Docker & Deploy-on-Demand**
+- **Production Dockerfiles**: multi-stage builds for backend (`backend/Dockerfile.prod`) and frontend (`frontend/Dockerfile.prod`)
+  - Backend: Python 3.11-slim, non-root `appuser`, healthcheck, graceful `data/index/` handling
+  - Frontend: Node 20 builder → nginx:alpine runtime with SPA fallback
+- **nginx config** (`frontend/nginx.conf`): SPA fallback, guide markdown serving as `text/plain`, security headers, gzip
+- **docker-compose.prod.yml**: local test of production images (no DB, no volumes)
+- **Deploy-on-demand workflow** (`.github/workflows/deploy.yml`): manual trigger (`workflow_dispatch`), OIDC auth, build + push to ECR, optional ECS deploy with service stability wait
+
+**Backend**
+- **DB auto-initialisation** (`backend/app/db/init_db.py`): on startup, creates tables via `Base.metadata.create_all()` and seeds employees + benefit rules from CSV if tables are empty
+- **Startup hook** in `main.py`: `@app.on_event("startup")` calls `init_db()` — safe no-op when `REPO_MODE=csv_only`
+- **Deployment runbook** (`docs/DEPLOYMENT.md`): first-time setup, demo day spin-up (CSV-only and RDS modes), persistence test steps, teardown checklist, cost guardrails
+
+### Changed
+
+**Terraform**
+- `terraform/demo/main.tf`: conditionally creates RDS module and VPC private subnets when `enable_rds=true`; added `random` provider
+- `terraform/modules/ecs/main.tf`: API task image uses `var.api_image` directly (no `:latest` suffix); environment uses `concat()` to conditionally inject `DATABASE_URL`; `REPO_MODE` switches to `dual` when RDS enabled
+- `terraform/modules/alb/main.tf`: ALB listener rule forwards `/docs*`, `/openapi.json`, `/redoc*` to API target group (Swagger UI accessible via ALB)
+
+**Backend — Repository hardening**
+- `backend/app/db/session.py`: `REPO_MODE` standardised to three values (`csv_only`, `dual`, `db_only`; default `dual`); exported as public constant
+- `backend/app/services/employee_repo.py`: removed import-time CSV loading; CSV now loaded lazily on first access; `get_employee()` respects `REPO_MODE` (`csv_only` → CSV only, `db_only` → DB only with RuntimeError on missing DB, `dual` → DB-first with CSV fallback)
+- `backend/app/services/rule_repo.py`: same lazy-loading and `REPO_MODE`-aware refactor as employee_repo
+- `backend/app/orchestration/nodes.py`: explainer node returns `None` gracefully when LLM returns empty/non-string result
+
+**Config & Docs**
+- `.gitignore`: added Terraform entries (`.terraform/`, `*.tfstate*`, `*.tfvars`, `.terraform.lock.hcl`)
+- `README.md`: updated project status to v0.13.0, added cloud deployment section
+- `docs/DEPLOYMENT.md`: full rewrite with dual-mode architecture (CSV-only and RDS), cost tables, persistence test steps, RDS technical details
+
+**Tests**
+- `tests/conftest.py`: added `REPO_MODE=csv_only` default for test environment
+- `tests/test_rule_engine_db_parity.py`: fallback tests now patch `REPO_MODE` to `dual`; employee db_empty test expects CSV fallback (not None); added `TestEmployeeRepoFallbackDbEmptyNotInCsv` for unknown-ID case
+- 326 tests pass (up from 325)
+
+### Architecture
+- **Deploy-on-demand**: ~$0.90/day CSV-only, ~$1.25/day with RDS; ~$0.50/month when off (ECR storage only)
+- **No NAT Gateway**: ECS in public subnets, RDS in private subnets (reachable only from ECS)
+- **Separate Terraform states**: persistent (ECR/IAM/SSM) and demo (VPC/ALB/ECS/RDS) with independent lifecycles — `terraform destroy` in demo/ does NOT touch persistent resources
+- **RDS cleanup**: `skip_final_snapshot=true`, `deletion_protection=false`, `backup_retention_period=0` — `terraform destroy` removes RDS cleanly
+- **Lazy CSV repos**: importing `employee_repo` or `rule_repo` no longer reads CSV at import time — production-safe for containers where fixtures may not exist
+
+### Notes
+- `rules_engine.py` is NOT modified
+- `docker-compose.yml` (dev workflow) unchanged
+- CloudWatch log retention: 7 days
+- Checkpoint tag planned: `v0.13.0-phase12-freeze`
+
+---
+
 ## [0.12.1] - 23-Feb-2026 — Admin UX & Guide Styling
 
 ### Changed
