@@ -1,10 +1,9 @@
-"""Employee repository – loads employees.csv at import time, with optional
-DB-first lookup when DATABASE_URL is configured and REPO_MODE != csv_only.
+"""Employee repository — lazy CSV loading, REPO_MODE-aware lookups.
 
-Dual-read contract:
-  - DB-first: query Postgres by employee_id.
-  - CSV fallback: if DB unavailable, empty, or errored.
-  - Structured warning on fallback (see FALLBACK_EVENT).
+REPO_MODE semantics:
+  - "csv_only": DB never touched; CSV loaded lazily on first call.
+  - "dual" (default): DB-first with CSV fallback on error/empty.
+  - "db_only": DB only; raises on DB misconfigured or error.
 """
 
 from __future__ import annotations
@@ -14,7 +13,7 @@ import logging
 import pathlib
 from typing import Optional
 
-from app.db.session import SessionLocal
+from app.db.session import SessionLocal, REPO_MODE
 from app.models.employee_db import EmployeeDB
 
 logger = logging.getLogger(__name__)
@@ -102,33 +101,76 @@ def _load(path: pathlib.Path) -> dict[str, EmployeeRecord]:
     return records
 
 
-_EMPLOYEES: dict[str, EmployeeRecord] = _load(_DATA_PATH)
+# --- Lazy CSV cache (loaded on first access, not at import time) ---
+
+_csv_cache: dict[str, EmployeeRecord] | None = None
+
+
+def _get_csv() -> dict[str, EmployeeRecord]:
+    """Return cached CSV data, loading lazily on first call."""
+    global _csv_cache
+    if _csv_cache is None:
+        _csv_cache = _load(_DATA_PATH)
+    return _csv_cache
+
+
+# --- Public API ---
 
 
 def get_employee(employee_id: str) -> Optional[EmployeeRecord]:
-    """Lookup employee by ID. DB-first with CSV fallback."""
-    if SessionLocal is not None:
-        try:
-            with SessionLocal() as session:
-                row = session.get(EmployeeDB, employee_id)
-                if row is not None:
-                    return _db_to_record(row)
-                # Employee not in DB — return None (not a fallback scenario)
-                return None
-        except Exception as exc:
-            logger.warning(
-                {
-                    "event": FALLBACK_EVENT,
-                    "repo": "employee_repo",
-                    "reason": "db_error",
-                    "exception_type": type(exc).__name__,
-                }
+    """Lookup employee by ID, respecting REPO_MODE."""
+
+    if REPO_MODE == "csv_only":
+        return _get_csv().get(employee_id)
+
+    if REPO_MODE == "db_only":
+        if SessionLocal is None:
+            raise RuntimeError(
+                "REPO_MODE=db_only but database is not configured "
+                "(DATABASE_URL missing or empty)"
             )
-    # CSV fallback
-    return _EMPLOYEES.get(employee_id)
+        with SessionLocal() as session:
+            row = session.get(EmployeeDB, employee_id)
+            return _db_to_record(row) if row is not None else None
+
+    # --- dual mode (default) ---
+
+    if SessionLocal is None:
+        # DB not configured — silent CSV fallback (expected in dev/test)
+        return _get_csv().get(employee_id)
+
+    try:
+        with SessionLocal() as session:
+            row = session.get(EmployeeDB, employee_id)
+            if row is not None:
+                return _db_to_record(row)
+
+            # DB returned nothing — check CSV for fallback
+            csv_data = _get_csv()
+            if employee_id in csv_data:
+                logger.warning(
+                    {
+                        "event": FALLBACK_EVENT,
+                        "repo": "employee_repo",
+                        "reason": "db_empty",
+                    }
+                )
+                return csv_data[employee_id]
+            return None
+
+    except Exception as exc:
+        logger.warning(
+            {
+                "event": FALLBACK_EVENT,
+                "repo": "employee_repo",
+                "reason": "db_error",
+                "exception_type": type(exc).__name__,
+            }
+        )
+        return _get_csv().get(employee_id)
 
 
 def reload(path: Optional[pathlib.Path] = None) -> None:
     """Re-read CSV (useful for tests)."""
-    global _EMPLOYEES
-    _EMPLOYEES = _load(path or _DATA_PATH)
+    global _csv_cache
+    _csv_cache = _load(path or _DATA_PATH)

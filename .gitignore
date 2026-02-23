@@ -126,3 +126,14 @@ cypress/screenshots/
 
 # QC artifacts
 artifacts/qc/
+
+# =========================
+# Terraform
+# =========================
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+.terraform.lock.hcl
+tfplan

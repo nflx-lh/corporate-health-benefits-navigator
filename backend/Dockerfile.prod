@@ -1,0 +1,46 @@
+# ---- builder stage ----
+FROM python:3.11-slim AS builder
+
+WORKDIR /build
+COPY requirements.txt ./
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+
+# ---- runtime stage ----
+FROM python:3.11-slim
+
+RUN useradd --create-home --shell /bin/bash appuser
+
+WORKDIR /app
+
+# Install curl for healthcheck
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+
+# Copy installed packages from builder
+COPY --from=builder /install /usr/local
+
+# Copy application code
+COPY backend/app ./app
+
+# Copy data files (fixtures, rules, policies)
+COPY data/fixtures ./data/fixtures
+COPY data/rules ./data/rules
+COPY data/raw ./data/raw
+
+# Create empty index directory — retriever returns empty results when missing.
+# If you want full policy citations, build the index locally first:
+#   python scripts/build_index.py
+# then rebuild this image.
+RUN mkdir -p ./data/index
+
+ENV PYTHONPATH=/app
+# REPO_MODE defaults to csv_only; override via ECS task env when RDS is enabled
+ENV REPO_MODE=csv_only
+
+USER appuser
+
+EXPOSE 8000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD curl -f http://localhost:8000/v1/health || exit 1
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]

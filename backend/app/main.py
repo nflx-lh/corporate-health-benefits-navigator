@@ -18,6 +18,7 @@ from app.middleware.error_handler import (
     global_exception_handler,
     http_exception_handler,
 )
+from app.db.init_db import init_db
 
 import logging
 
@@ -30,9 +31,18 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname
 for handler in logging.root.handlers:
     handler.addFilter(SensitiveDataFilter())
 
-app = FastAPI(title="Corporate Health Benefits Navigator API", version="0.1.0")
+app = FastAPI(
+    title="Corporate Health Benefits Navigator API",
+    version="0.1.0",
+)
 app.state.limiter = limiter
 app.add_middleware(SlowAPIMiddleware)
+
+
+@app.on_event("startup")
+def _startup_init_db():
+    init_db()
+
 
 # --- Exception handlers (order: most specific first) ---
 

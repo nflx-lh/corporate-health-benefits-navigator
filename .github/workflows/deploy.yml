@@ -1,0 +1,90 @@
+name: Build & Deploy to AWS
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: "Also update ECS services after push"
+        required: false
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ap-southeast-1
+  ECR_API_REPO: chbn-api
+  ECR_WEB_REPO: chbn-web
+  ECS_CLUSTER: chbn-cluster
+  ECS_API_SERVICE: chbn-api
+  ECS_WEB_SERVICE: chbn-web
+
+jobs:
+  build-and-push:
+    name: Build & Push Images
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & push API image
+        env:
+          REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -f backend/Dockerfile.prod -t $REGISTRY/$ECR_API_REPO:$IMAGE_TAG -t $REGISTRY/$ECR_API_REPO:latest .
+          docker push $REGISTRY/$ECR_API_REPO:$IMAGE_TAG
+          docker push $REGISTRY/$ECR_API_REPO:latest
+
+      - name: Build & push Web image
+        env:
+          REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -f frontend/Dockerfile.prod -t $REGISTRY/$ECR_WEB_REPO:$IMAGE_TAG -t $REGISTRY/$ECR_WEB_REPO:latest ./frontend
+          docker push $REGISTRY/$ECR_WEB_REPO:$IMAGE_TAG
+          docker push $REGISTRY/$ECR_WEB_REPO:latest
+
+  deploy:
+    name: Deploy to ECS
+    needs: build-and-push
+    if: github.event.inputs.deploy == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Force new deployment
+        run: |
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_API_SERVICE --force-new-deployment
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_WEB_SERVICE --force-new-deployment
+
+      - name: Wait for API service stability
+        run: |
+          aws ecs wait services-stable --cluster $ECS_CLUSTER --services $ECS_API_SERVICE
+          echo "API service stable"
+
+      - name: Wait for Web service stability
+        run: |
+          aws ecs wait services-stable --cluster $ECS_CLUSTER --services $ECS_WEB_SERVICE
+          echo "Web service stable"

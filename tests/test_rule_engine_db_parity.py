@@ -116,23 +116,46 @@ def _assert_fallback_warning(log_msg: dict, expected_repo: str) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Helper: dual-mode patch context for employee repo
+# ---------------------------------------------------------------------------
+
+def _dual_employee_patch(mock_session_cls):
+    """Return a combined patch context that sets REPO_MODE=dual + SessionLocal."""
+    return (
+        patch("app.services.employee_repo.REPO_MODE", "dual"),
+        patch("app.services.employee_repo.SessionLocal", mock_session_cls),
+    )
+
+
+def _dual_rule_patch(mock_session_cls):
+    """Return a combined patch context that sets REPO_MODE=dual + SessionLocal."""
+    return (
+        patch("app.services.rule_repo.REPO_MODE", "dual"),
+        patch("app.services.rule_repo.SessionLocal", mock_session_cls),
+    )
+
+
+# ---------------------------------------------------------------------------
 # Employee repo fallback tests
 # ---------------------------------------------------------------------------
 
 
-class TestEmployeeRepoFallbackDbUnavailable:
-    """DB connection fails -> fallback to CSV with db_unavailable warning."""
+class TestEmployeeRepoFallbackDbError:
+    """DB session __enter__ or query raises exception -> fallback with db_error."""
 
     @SKIP_EMPLOYEE_FALLBACK
-    def test_employee_repo_fallback_db_unavailable(self, caplog: pytest.LogCaptureFixture) -> None:
+    def test_employee_repo_fallback_db_error_on_enter(self, caplog: pytest.LogCaptureFixture) -> None:
+        """Session creation / connection error -> db_error fallback."""
         mock_session_cls = MagicMock()
         mock_session_cls.return_value.__enter__ = MagicMock(
             side_effect=Exception("connection refused")
         )
         mock_session_cls.return_value.__exit__ = MagicMock(return_value=False)
 
+        p_mode, p_session = _dual_employee_patch(mock_session_cls)
         with (
-            patch("app.services.employee_repo.SessionLocal", mock_session_cls),
+            p_mode,
+            p_session,
             caplog.at_level(logging.WARNING, logger="app.services.employee_repo"),
         ):
             result = get_employee("EMP001")
@@ -140,20 +163,19 @@ class TestEmployeeRepoFallbackDbUnavailable:
         assert result is not None
         assert result.employee_id == "EMP001"
 
-
-class TestEmployeeRepoFallbackDbError:
-    """DB query raises exception -> fallback with db_error + exception_type."""
-
     @SKIP_EMPLOYEE_FALLBACK
-    def test_employee_repo_fallback_db_error(self, caplog: pytest.LogCaptureFixture) -> None:
+    def test_employee_repo_fallback_db_error_on_query(self, caplog: pytest.LogCaptureFixture) -> None:
+        """Query-level exception -> db_error fallback."""
         mock_session = MagicMock()
         mock_session.get.side_effect = RuntimeError("unexpected db error")
         mock_session_cls = MagicMock()
         mock_session_cls.return_value.__enter__ = MagicMock(return_value=mock_session)
         mock_session_cls.return_value.__exit__ = MagicMock(return_value=False)
 
+        p_mode, p_session = _dual_employee_patch(mock_session_cls)
         with (
-            patch("app.services.employee_repo.SessionLocal", mock_session_cls),
+            p_mode,
+            p_session,
             caplog.at_level(logging.WARNING, logger="app.services.employee_repo"),
         ):
             result = get_employee("EMP001")
@@ -163,8 +185,8 @@ class TestEmployeeRepoFallbackDbError:
 
 
 class TestEmployeeRepoFallbackDbEmpty:
-    """DB connected but employee not found in DB -> returns None (not a
-    fallback scenario for per-key lookup; db_empty applies to bulk loads)."""
+    """DB connected, query returns None for a key that exists in CSV ->
+    fallback to CSV with db_empty warning."""
 
     @SKIP_EMPLOYEE_FALLBACK
     def test_employee_repo_fallback_db_empty(self, caplog: pytest.LogCaptureFixture) -> None:
@@ -174,13 +196,38 @@ class TestEmployeeRepoFallbackDbEmpty:
         mock_session_cls.return_value.__enter__ = MagicMock(return_value=mock_session)
         mock_session_cls.return_value.__exit__ = MagicMock(return_value=False)
 
+        p_mode, p_session = _dual_employee_patch(mock_session_cls)
         with (
-            patch("app.services.employee_repo.SessionLocal", mock_session_cls),
+            p_mode,
+            p_session,
             caplog.at_level(logging.WARNING, logger="app.services.employee_repo"),
         ):
             result = get_employee("EMP001")
 
-        # Per-key lookup: DB says "not found" -> return None (correct, not fallback)
+        # In dual mode, DB empty + CSV has EMP001 -> fallback to CSV
+        assert result is not None
+        assert result.employee_id == "EMP001"
+
+
+class TestEmployeeRepoFallbackDbEmptyNotInCsv:
+    """DB returns None for an ID that is NOT in CSV -> return None (no fallback)."""
+
+    @SKIP_EMPLOYEE_FALLBACK
+    def test_employee_repo_no_fallback_unknown_id(self, caplog: pytest.LogCaptureFixture) -> None:
+        mock_session = MagicMock()
+        mock_session.get.return_value = None
+        mock_session_cls = MagicMock()
+        mock_session_cls.return_value.__enter__ = MagicMock(return_value=mock_session)
+        mock_session_cls.return_value.__exit__ = MagicMock(return_value=False)
+
+        p_mode, p_session = _dual_employee_patch(mock_session_cls)
+        with (
+            p_mode,
+            p_session,
+            caplog.at_level(logging.WARNING, logger="app.services.employee_repo"),
+        ):
+            result = get_employee("NONEXIST1")
+
         assert result is None
 
 
@@ -189,39 +236,39 @@ class TestEmployeeRepoFallbackDbEmpty:
 # ---------------------------------------------------------------------------
 
 
-class TestRuleRepoFallbackDbUnavailable:
-    """DB connection fails -> fallback to CSV with db_unavailable warning."""
+class TestRuleRepoFallbackDbError:
+    """DB connection or query fails -> fallback to CSV."""
 
     @SKIP_RULE_FALLBACK
-    def test_rule_repo_fallback_db_unavailable(self, caplog: pytest.LogCaptureFixture) -> None:
+    def test_rule_repo_fallback_db_error_on_enter(self, caplog: pytest.LogCaptureFixture) -> None:
         mock_session_cls = MagicMock()
         mock_session_cls.return_value.__enter__ = MagicMock(
             side_effect=Exception("connection refused")
         )
         mock_session_cls.return_value.__exit__ = MagicMock(return_value=False)
 
+        p_mode, p_session = _dual_rule_patch(mock_session_cls)
         with (
-            patch("app.services.rule_repo.SessionLocal", mock_session_cls),
+            p_mode,
+            p_session,
             caplog.at_level(logging.WARNING, logger="app.services.rule_repo"),
         ):
             rules = get_rules()
 
         assert len(rules) > 0
 
-
-class TestRuleRepoFallbackDbError:
-    """DB query raises exception -> fallback with db_error + exception_type."""
-
     @SKIP_RULE_FALLBACK
-    def test_rule_repo_fallback_db_error(self, caplog: pytest.LogCaptureFixture) -> None:
+    def test_rule_repo_fallback_db_error_on_query(self, caplog: pytest.LogCaptureFixture) -> None:
         mock_session = MagicMock()
         mock_session.query.side_effect = RuntimeError("unexpected db error")
         mock_session_cls = MagicMock()
         mock_session_cls.return_value.__enter__ = MagicMock(return_value=mock_session)
         mock_session_cls.return_value.__exit__ = MagicMock(return_value=False)
 
+        p_mode, p_session = _dual_rule_patch(mock_session_cls)
         with (
-            patch("app.services.rule_repo.SessionLocal", mock_session_cls),
+            p_mode,
+            p_session,
             caplog.at_level(logging.WARNING, logger="app.services.rule_repo"),
         ):
             rules = get_rules()
@@ -242,8 +289,10 @@ class TestRuleRepoFallbackDbEmpty:
         mock_session_cls.return_value.__enter__ = MagicMock(return_value=mock_session)
         mock_session_cls.return_value.__exit__ = MagicMock(return_value=False)
 
+        p_mode, p_session = _dual_rule_patch(mock_session_cls)
         with (
-            patch("app.services.rule_repo.SessionLocal", mock_session_cls),
+            p_mode,
+            p_session,
             caplog.at_level(logging.WARNING, logger="app.services.rule_repo"),
         ):
             rules = get_rules()
