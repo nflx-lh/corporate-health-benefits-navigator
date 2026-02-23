@@ -4,6 +4,26 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [0.13.1] - 23-Feb-2026 — Fix /v1/query-orchestrated 500 on ECS
+
+### Fixed
+- **Container path resolution**: Data-loading code used `Path(__file__).parents[3]` which resolves to `/` in the container instead of `/app`. All four data path sites now use `DATA_ROOT` env var with local fallback (`nodes.py`, `init_db.py`, `employee_repo.py`, `rule_repo.py`).
+- **Invalid `REPO_MODE` in Terraform**: ECS task definition set `REPO_MODE=db_first` (unrecognized); changed to `dual`.
+- **Missing embedding index in container**: Dockerfile replaced `mkdir -p ./data/index` with `COPY data/index ./data/index` to include pre-built index.
+
+### Added
+- `trace_id` (UUID hex) on 500 error responses and matching log line for CloudWatch correlation.
+- `ENV DATA_ROOT=/app/data` in `Dockerfile.prod` — overrides local-only path resolution.
+
+### Changed
+- **Admin temp password modal**: Copy button now shows "Copied" / "Copy failed" for 1.5s with timer cleanup on unmount; repeated clicks reset the timer deterministically.
+
+### Notes
+- 327 tests pass (no regressions)
+- `rules_engine.py` is NOT modified
+
+---
+
 ## [0.13.0] - 23-Feb-2026 — AWS Cloud Deployment & RDS Persistence (Phase 12)
 
 ### Added

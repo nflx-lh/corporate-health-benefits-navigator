@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import uuid
 
 from fastapi import HTTPException, Request
 from fastapi.exceptions import RequestValidationError
@@ -24,14 +25,19 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 
 
 async def global_exception_handler(request: Request, exc: Exception):
-    """Catch-all: log the real error, return a safe 500."""
-    logger.exception("Unhandled exception on %s %s", request.method, request.url.path)
+    """Catch-all: log the real error, return a safe 500 with trace_id."""
+    trace_id = uuid.uuid4().hex
+    logger.exception(
+        "Unhandled exception on %s %s [trace_id=%s]",
+        request.method, request.url.path, trace_id,
+    )
     return JSONResponse(
         status_code=500,
         content={
             "error": {
                 "code": "INTERNAL_ERROR",
                 "message": "An unexpected error occurred",
+                "trace_id": trace_id,
             }
         },
     )

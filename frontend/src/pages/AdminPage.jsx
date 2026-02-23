@@ -482,15 +482,23 @@ function ResetRequests({ token, headers, onTempPassword, onCountChange }) {
 /* ------------------------------------------------------------------ */
 
 function TempPasswordModal({ employeeId, tempPassword, onClose }) {
-  const [copied, setCopied] = useState(false);
+  const [copyLabel, setCopyLabel] = useState("Copy");
+  const timerRef = useRef(null);
+
+  useEffect(() => () => clearTimeout(timerRef.current), []);
+
+  const resetLabel = (label, ms = 1500) => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    setCopyLabel(label);
+    timerRef.current = setTimeout(() => setCopyLabel("Copy"), ms);
+  };
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(tempPassword);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      resetLabel("Copied");
     } catch {
-      // fallback: select text
+      resetLabel("Copy failed");
     }
   };
 
@@ -505,7 +513,7 @@ function TempPasswordModal({ employeeId, tempPassword, onClose }) {
         <div className="temp-pw-modal__password-row">
           <code className="temp-pw-modal__password">{tempPassword}</code>
           <button className="temp-pw-modal__copy" onClick={handleCopy}>
-            {copied ? "Copied" : "Copy"}
+            {copyLabel}
           </button>
         </div>
         <button className="temp-pw-modal__close" onClick={onClose}>Close</button>
