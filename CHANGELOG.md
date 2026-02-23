@@ -15,6 +15,9 @@ All notable changes to this project are documented in this file.
 - `trace_id` (UUID hex) on 500 error responses and matching log line for CloudWatch correlation.
 - `ENV DATA_ROOT=/app/data` in `Dockerfile.prod` — overrides local-only path resolution.
 
+### Changed
+- **Admin temp password modal**: Copy button now shows "Copied" / "Copy failed" for 1.5s with timer cleanup on unmount; repeated clicks reset the timer deterministically.
+
 ### Notes
 - 327 tests pass (no regressions)
 - `rules_engine.py` is NOT modified
