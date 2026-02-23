@@ -1,10 +1,9 @@
-"""Benefit-rules repository – loads benefit_rules.csv at import time, with
-optional DB-first lookup when DATABASE_URL is configured and REPO_MODE != csv_only.
+"""Benefit-rules repository — lazy CSV loading, REPO_MODE-aware lookups.
 
-Dual-read contract:
-  - DB-first: query Postgres, ORDER BY rule_id ASC (deterministic ordering).
-  - CSV fallback: if DB unavailable, empty, or errored.
-  - Structured warning on fallback (see FALLBACK_EVENT).
+REPO_MODE semantics:
+  - "csv_only": DB never touched; CSV loaded lazily on first call.
+  - "dual" (default): DB-first with CSV fallback on error/empty.
+  - "db_only": DB only; raises on DB misconfigured or error.
 """
 
 from __future__ import annotations
@@ -15,7 +14,7 @@ import pathlib
 from dataclasses import dataclass, field
 from typing import Optional
 
-from app.db.session import SessionLocal
+from app.db.session import SessionLocal, REPO_MODE
 from app.models.rule_db import BenefitRuleDB
 
 logger = logging.getLogger(__name__)
@@ -139,47 +138,83 @@ def _load(path: pathlib.Path) -> list[BenefitRule]:
         return [_parse_rule(row) for row in reader]
 
 
-_RULES: list[BenefitRule] = _load(_DATA_PATH)
+# --- Lazy CSV cache (loaded on first access, not at import time) ---
+
+_csv_cache: list[BenefitRule] | None = None
+
+
+def _get_csv() -> list[BenefitRule]:
+    """Return cached CSV data, loading lazily on first call."""
+    global _csv_cache
+    if _csv_cache is None:
+        _csv_cache = _load(_DATA_PATH)
+    return _csv_cache
+
+
+# --- Public API ---
 
 
 def get_rules() -> list[BenefitRule]:
-    """Return all rules. DB-first with CSV fallback.
+    """Return all rules, respecting REPO_MODE.
 
     DB ordering: ORDER BY rule_id ASC — preserves CSV iteration order
     (R001..R043 zero-padded) for deterministic precedence behaviour.
     """
-    if SessionLocal is not None:
-        try:
-            with SessionLocal() as session:
-                rows = (
-                    session.query(BenefitRuleDB)
-                    .order_by(BenefitRuleDB.rule_id)
-                    .all()
-                )
-                if rows:
-                    return [_db_to_rule(r) for r in rows]
-                # DB connected but table empty -> fallback
-                logger.warning(
-                    {
-                        "event": FALLBACK_EVENT,
-                        "repo": "rule_repo",
-                        "reason": "db_empty",
-                    }
-                )
-        except Exception as exc:
+
+    if REPO_MODE == "csv_only":
+        return _get_csv()
+
+    if REPO_MODE == "db_only":
+        if SessionLocal is None:
+            raise RuntimeError(
+                "REPO_MODE=db_only but database is not configured "
+                "(DATABASE_URL missing or empty)"
+            )
+        with SessionLocal() as session:
+            rows = (
+                session.query(BenefitRuleDB)
+                .order_by(BenefitRuleDB.rule_id)
+                .all()
+            )
+            return [_db_to_rule(r) for r in rows]
+
+    # --- dual mode (default) ---
+
+    if SessionLocal is None:
+        # DB not configured — silent CSV fallback (expected in dev/test)
+        return _get_csv()
+
+    try:
+        with SessionLocal() as session:
+            rows = (
+                session.query(BenefitRuleDB)
+                .order_by(BenefitRuleDB.rule_id)
+                .all()
+            )
+            if rows:
+                return [_db_to_rule(r) for r in rows]
+            # DB connected but table empty -> fallback
             logger.warning(
                 {
                     "event": FALLBACK_EVENT,
                     "repo": "rule_repo",
-                    "reason": "db_error",
-                    "exception_type": type(exc).__name__,
+                    "reason": "db_empty",
                 }
             )
-    # CSV fallback
-    return _RULES
+    except Exception as exc:
+        logger.warning(
+            {
+                "event": FALLBACK_EVENT,
+                "repo": "rule_repo",
+                "reason": "db_error",
+                "exception_type": type(exc).__name__,
+            }
+        )
+
+    return _get_csv()
 
 
 def reload(path: Optional[pathlib.Path] = None) -> None:
     """Re-read CSV (useful for tests)."""
-    global _RULES
-    _RULES = _load(path or _DATA_PATH)
+    global _csv_cache
+    _csv_cache = _load(path or _DATA_PATH)

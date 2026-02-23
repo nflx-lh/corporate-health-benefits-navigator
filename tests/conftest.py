@@ -34,6 +34,9 @@ def pytest_configure(config):
     os.environ.setdefault("APP_ENV", "test")
     os.environ.setdefault("CORS_ORIGINS", "http://localhost:5173")
 
+    # No DB in test env — repos use CSV only (fallback tests patch to "dual")
+    os.environ.setdefault("REPO_MODE", "csv_only")
+
     # Critical: avoid cross-test 429 pollution
     os.environ.setdefault("RATE_LIMIT", "100000/minute")
 
