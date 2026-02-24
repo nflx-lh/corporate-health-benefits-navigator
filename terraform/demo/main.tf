@@ -55,8 +55,8 @@ module "ecs" {
   web_target_group_arn = module.alb.web_target_group_arn
 
   # RDS integration
-  enable_rds   = var.enable_rds
-  database_url = var.enable_rds ? module.rds[0].database_url : ""
+  enable_rds       = var.enable_rds
+  database_url_arn = var.enable_rds ? module.rds[0].database_url_arn : ""
 }
 
 # --- RDS (conditional) ---

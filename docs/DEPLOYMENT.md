@@ -23,7 +23,7 @@ Internet → ALB (HTTP, public subnets)
               └── /*     → ECS Fargate (web/nginx, public subnet)
 
 No NAT Gateway. RDS in private subnets (no internet access — only reachable from ECS).
-REPO_MODE=db_first, APP_ENV=development (demo credentials)
+REPO_MODE=db_only, APP_ENV=development (demo credentials)
 ```
 
 ## Cost
@@ -76,19 +76,29 @@ aws ssm put-parameter --name "/chbn/dev/openai-api-key" \
 aws ecr get-login-password --region ap-southeast-1 | \
   docker login --username AWS --password-stdin <ACCOUNT_ID>.dkr.ecr.ap-southeast-1.amazonaws.com
 
+# Pick a tag (use git SHA for traceability)
+TAG=$(git rev-parse HEAD)
+
 # Build and push API
-docker build -f backend/Dockerfile.prod -t <ACCOUNT_ID>.dkr.ecr.ap-southeast-1.amazonaws.com/chbn-api:latest .
-docker push <ACCOUNT_ID>.dkr.ecr.ap-southeast-1.amazonaws.com/chbn-api:latest
+docker build -f backend/Dockerfile.prod -t <ACCOUNT_ID>.dkr.ecr.ap-southeast-1.amazonaws.com/chbn-api:$TAG .
+docker push <ACCOUNT_ID>.dkr.ecr.ap-southeast-1.amazonaws.com/chbn-api:$TAG
 
 # Build and push Web
-docker build -f frontend/Dockerfile.prod -t <ACCOUNT_ID>.dkr.ecr.ap-southeast-1.amazonaws.com/chbn-web:latest ./frontend
-docker push <ACCOUNT_ID>.dkr.ecr.ap-southeast-1.amazonaws.com/chbn-web:latest
+docker build -f frontend/Dockerfile.prod -t <ACCOUNT_ID>.dkr.ecr.ap-southeast-1.amazonaws.com/chbn-web:$TAG ./frontend
+docker push <ACCOUNT_ID>.dkr.ecr.ap-southeast-1.amazonaws.com/chbn-web:$TAG
 ```
 
 ### 5. Configure GitHub Actions
 
-Add this secret to GitHub repo settings:
+Add these secrets to GitHub repo settings (Settings → Secrets → Actions):
 - `AWS_ROLE_ARN` — the `github_actions_role_arn` output from the persistent stack
+- `TF_VAR_ECR_API_URL` — ECR repo URL for API (e.g. `<ACCOUNT_ID>.dkr.ecr.ap-southeast-1.amazonaws.com/chbn-api`)
+- `TF_VAR_ECR_WEB_URL` — ECR repo URL for web (e.g. `<ACCOUNT_ID>.dkr.ecr.ap-southeast-1.amazonaws.com/chbn-web`)
+- `TF_VAR_ECS_EXEC_ROLE_ARN` — ECS task execution role ARN
+- `TF_VAR_JWT_SECRET_ARN` — SSM parameter ARN for JWT secret
+- `TF_VAR_OPENAI_API_KEY_ARN` — SSM parameter ARN for OpenAI API key
+
+RDS is enabled by default in the workflow (`TF_VAR_enable_rds=true`) — no secret needed for this.
 
 ---
 
@@ -98,16 +108,21 @@ Add this secret to GitHub repo settings:
 cd terraform/demo
 terraform init
 
-# Pass persistent stack outputs as variables
+# Use git SHA as the image tag
+TAG=$(git rev-parse HEAD)
+
+# Pass persistent stack outputs and SHA-tagged images
 terraform apply \
   -var="ecr_api_url=<ACCOUNT_ID>.dkr.ecr.ap-southeast-1.amazonaws.com/chbn-api" \
   -var="ecr_web_url=<ACCOUNT_ID>.dkr.ecr.ap-southeast-1.amazonaws.com/chbn-web" \
+  -var="api_image=<ACCOUNT_ID>.dkr.ecr.ap-southeast-1.amazonaws.com/chbn-api:$TAG" \
+  -var="web_image=<ACCOUNT_ID>.dkr.ecr.ap-southeast-1.amazonaws.com/chbn-web:$TAG" \
   -var="ecs_exec_role_arn=arn:aws:iam::<ACCOUNT_ID>:role/chbn-ecs-exec" \
   -var="jwt_secret_arn=arn:aws:ssm:ap-southeast-1:<ACCOUNT_ID>:parameter/chbn/dev/jwt-secret" \
   -var="openai_api_key_arn=arn:aws:ssm:ap-southeast-1:<ACCOUNT_ID>:parameter/chbn/dev/openai-api-key"
 ```
 
-**Tip:** Save these in a `terraform.tfvars` file (gitignored) so you only need `terraform apply`.
+**Tip:** Save the persistent values in a `terraform.tfvars` file (gitignored) and only pass `-var="api_image=..." -var="web_image=..."` on each apply.
 
 ### Smoke test
 
@@ -129,10 +144,14 @@ Add `enable_rds=true` to deploy with a PostgreSQL database:
 cd terraform/demo
 terraform init
 
+TAG=$(git rev-parse HEAD)
+
 terraform apply \
   -var="enable_rds=true" \
   -var="ecr_api_url=<ACCOUNT_ID>.dkr.ecr.ap-southeast-1.amazonaws.com/chbn-api" \
   -var="ecr_web_url=<ACCOUNT_ID>.dkr.ecr.ap-southeast-1.amazonaws.com/chbn-web" \
+  -var="api_image=<ACCOUNT_ID>.dkr.ecr.ap-southeast-1.amazonaws.com/chbn-api:$TAG" \
+  -var="web_image=<ACCOUNT_ID>.dkr.ecr.ap-southeast-1.amazonaws.com/chbn-web:$TAG" \
   -var="ecs_exec_role_arn=arn:aws:iam::<ACCOUNT_ID>:role/chbn-ecs-exec" \
   -var="jwt_secret_arn=arn:aws:ssm:ap-southeast-1:<ACCOUNT_ID>:parameter/chbn/dev/jwt-secret" \
   -var="openai_api_key_arn=arn:aws:ssm:ap-southeast-1:<ACCOUNT_ID>:parameter/chbn/dev/openai-api-key"
@@ -140,7 +159,7 @@ terraform apply \
 
 **What happens on first boot:**
 1. Terraform creates RDS Postgres (db.t3.micro) in private subnets
-2. ECS API task gets `DATABASE_URL` and `REPO_MODE=db_first`
+2. ECS API task gets `DATABASE_URL` (via SSM SecureString) and `REPO_MODE=db_only`
 3. On startup, the API auto-creates tables and seeds employees + benefit rules from CSV
 4. All subsequent CRUD operations persist to Postgres
 
@@ -237,7 +256,8 @@ This destroys **all** demo resources: VPC, ALB, ECS, CloudWatch logs, and RDS (i
 - For full citations, build the index locally first: `python scripts/build_index.py`, then rebuild the Docker image
 
 ### RDS-enabled mode
-- `REPO_MODE=db_first` — app reads/writes Postgres, falls back to CSV on error
+- `REPO_MODE=db_only` — app reads/writes Postgres only; no CSV fallback; fails fast if DATABASE_URL is missing
+- `DATABASE_URL` injected via SSM Parameter Store (SecureString at `/chbn/dev/database-url`) — never in plaintext env vars or logs
 - `APP_ENV=development` — same demo auth behaviour
 - On startup, API auto-creates tables (`CREATE TABLE IF NOT EXISTS`) and seeds from CSV if tables are empty
 - CRUD operations (create/update/delete employees) persist across task restarts
@@ -245,19 +265,45 @@ This destroys **all** demo resources: VPC, ALB, ECS, CloudWatch logs, and RDS (i
 
 ---
 
-## CI/CD
+## Deploy-on-Demand Workflow
 
 The GitHub Actions workflow (`.github/workflows/deploy.yml`) supports:
 
 - **Manual trigger** (`workflow_dispatch`) — build & push images, optionally deploy to ECS
 - **OIDC authentication** — no long-lived AWS credentials stored in GitHub
-- Images are tagged with both git SHA and `latest`
+- **Immutable SHA tags** — images are tagged with `github.sha`, never `:latest`
+
+### How it works
+
+1. **Build job** builds Docker images and pushes to ECR with SHA tags:
+   - `chbn-api:<github.sha>`
+   - `chbn-web:<github.sha>`
+2. **Deploy job** runs `terraform apply` with `-var="api_image=..."` and `-var="web_image=..."` using the exact SHA-tagged URIs
+3. Terraform updates ECS task definitions with the pinned image URIs
+4. ECS pulls the exact images — no ambiguity, no tagless references
 
 ### Usage
 
 1. Go to Actions → "Build & Deploy to AWS" → Run workflow
 2. Set `deploy` to `true` to also update running ECS services
 3. The workflow waits for ECS service stability before completing
+
+### Verify deployed image
+
+```bash
+# Check which image the running task definition uses
+aws ecs describe-task-definition \
+  --task-definition chbn-api \
+  --query "taskDefinition.containerDefinitions[].image" \
+  --region ap-southeast-1
+
+aws ecs describe-task-definition \
+  --task-definition chbn-web \
+  --query "taskDefinition.containerDefinitions[].image" \
+  --region ap-southeast-1
+
+# Both should show: <account>.dkr.ecr.<region>.amazonaws.com/chbn-api:<sha>
+```
 
 ---
 
@@ -268,7 +314,7 @@ When `enable_rds=true`:
 - **Engine**: PostgreSQL 16.4
 - **Networking**: Private subnets (2 AZs), no public access, no NAT gateway
 - **Security**: Ingress on port 5432 from ECS security group only
-- **Credentials**: Auto-generated 24-char password via Terraform `random_password`
+- **Credentials**: Auto-generated 24-char password via Terraform `random_password`; full `DATABASE_URL` written to SSM SecureString (`/chbn/dev/database-url`) and injected into ECS via `secrets`
 - **Cleanup**: `skip_final_snapshot=true`, `deletion_protection=false` — `terraform destroy` is fast and clean
 - **Backups**: Disabled (`backup_retention_period=0`) for demo cost savings
 

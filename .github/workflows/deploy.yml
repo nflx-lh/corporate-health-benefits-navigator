@@ -77,6 +77,7 @@ jobs:
       TF_VAR_ecs_exec_role_arn: ${{ secrets.TF_VAR_ECS_EXEC_ROLE_ARN }}
       TF_VAR_jwt_secret_arn: ${{ secrets.TF_VAR_JWT_SECRET_ARN }}
       TF_VAR_openai_api_key_arn: ${{ secrets.TF_VAR_OPENAI_API_KEY_ARN }}
+      TF_VAR_enable_rds: "true"
 
     steps:
       - name: Checkout

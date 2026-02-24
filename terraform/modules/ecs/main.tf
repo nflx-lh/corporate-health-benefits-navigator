@@ -68,22 +68,22 @@ resource "aws_ecs_task_definition" "api" {
       protocol      = "tcp"
     }]
 
-    environment = concat(
-      [
-        { name = "APP_ENV", value = "development" },
-        { name = "REPO_MODE", value = var.enable_rds ? "db_first" : "csv_only" },
-        { name = "LLM_ENABLED", value = "true" },
-        { name = "LLM_PROVIDER", value = "openai" },
-        { name = "LLM_MODEL_NAME", value = "gpt-4o-mini" },
-        { name = "CORS_ORIGINS", value = "*" },
-      ],
-      var.enable_rds ? [{ name = "DATABASE_URL", value = var.database_url }] : [],
-    )
-
-    secrets = [
-      { name = "JWT_SECRET", valueFrom = var.jwt_secret_arn },
-      { name = "OPENAI_API_KEY", valueFrom = var.openai_api_key_arn },
+    environment = [
+      { name = "APP_ENV", value = "development" },
+      { name = "REPO_MODE", value = var.enable_rds ? "db_only" : "csv_only" },
+      { name = "LLM_ENABLED", value = "true" },
+      { name = "LLM_PROVIDER", value = "openai" },
+      { name = "LLM_MODEL_NAME", value = "gpt-4o-mini" },
+      { name = "CORS_ORIGINS", value = "*" },
     ]
+
+    secrets = concat(
+      [
+        { name = "JWT_SECRET", valueFrom = var.jwt_secret_arn },
+        { name = "OPENAI_API_KEY", valueFrom = var.openai_api_key_arn },
+      ],
+      var.enable_rds ? [{ name = "DATABASE_URL", valueFrom = var.database_url_arn }] : [],
+    )
 
     logConfiguration = {
       logDriver = "awslogs"

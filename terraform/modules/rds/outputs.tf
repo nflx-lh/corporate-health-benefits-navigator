@@ -31,3 +31,8 @@ output "database_url" {
   value       = "postgresql://${aws_db_instance.this.username}:${random_password.db.result}@${aws_db_instance.this.address}:${aws_db_instance.this.port}/${aws_db_instance.this.db_name}"
   sensitive   = true
 }
+
+output "database_url_arn" {
+  description = "ARN of the DATABASE_URL SSM parameter"
+  value       = aws_ssm_parameter.database_url.arn
+}

@@ -27,7 +27,10 @@ resource "aws_iam_role_policy" "ecs_exec_ssm" {
     Statement = [{
       Effect   = "Allow"
       Action   = ["ssm:GetParameters", "ssm:GetParameter"]
-      Resource = var.ssm_param_arns
+      Resource = concat(
+        var.ssm_param_arns,
+        ["arn:aws:ssm:*:*:parameter/${var.project}/*/database-url"],
+      )
     }]
   })
 }
@@ -80,13 +83,13 @@ resource "aws_iam_role_policy" "github_actions" {
     Version = "2012-10-17"
     Statement = [
       {
+        Sid    = "ECRAuth"
         Effect = "Allow"
-        Action = [
-          "ecr:GetAuthorizationToken",
-        ]
+        Action = ["ecr:GetAuthorizationToken"]
         Resource = "*"
       },
       {
+        Sid    = "ECRPush"
         Effect = "Allow"
         Action = [
           "ecr:BatchCheckLayerAvailability",
@@ -100,11 +103,111 @@ resource "aws_iam_role_policy" "github_actions" {
         Resource = var.ecr_repo_arns
       },
       {
+        Sid    = "TerraformState"
         Effect = "Allow"
         Action = [
-          "ecs:UpdateService",
-          "ecs:DescribeServices",
-          "ecs:DescribeClusters",
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:ListBucket",
+        ]
+        Resource = [
+          "arn:aws:s3:::${var.project}-tfstate",
+          "arn:aws:s3:::${var.project}-tfstate/*",
+        ]
+      },
+      {
+        Sid    = "ECS"
+        Effect = "Allow"
+        Action = [
+          "ecs:*",
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "EC2Networking"
+        Effect = "Allow"
+        Action = [
+          "ec2:Describe*",
+          "ec2:CreateSecurityGroup",
+          "ec2:DeleteSecurityGroup",
+          "ec2:AuthorizeSecurityGroupIngress",
+          "ec2:AuthorizeSecurityGroupEgress",
+          "ec2:RevokeSecurityGroupIngress",
+          "ec2:RevokeSecurityGroupEgress",
+          "ec2:CreateTags",
+          "ec2:DeleteTags",
+          "ec2:CreateVpc",
+          "ec2:DeleteVpc",
+          "ec2:ModifyVpcAttribute",
+          "ec2:CreateSubnet",
+          "ec2:DeleteSubnet",
+          "ec2:CreateInternetGateway",
+          "ec2:DeleteInternetGateway",
+          "ec2:AttachInternetGateway",
+          "ec2:DetachInternetGateway",
+          "ec2:CreateRouteTable",
+          "ec2:DeleteRouteTable",
+          "ec2:CreateRoute",
+          "ec2:DeleteRoute",
+          "ec2:AssociateRouteTable",
+          "ec2:DisassociateRouteTable",
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "ALB"
+        Effect = "Allow"
+        Action = [
+          "elasticloadbalancing:*",
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "RDS"
+        Effect = "Allow"
+        Action = [
+          "rds:*",
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "SSM"
+        Effect = "Allow"
+        Action = [
+          "ssm:GetParameter",
+          "ssm:GetParameters",
+          "ssm:PutParameter",
+          "ssm:DeleteParameter",
+          "ssm:DescribeParameters",
+          "ssm:AddTagsToResource",
+          "ssm:ListTagsForResource",
+          "ssm:RemoveTagsFromResource",
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "CloudWatchLogs"
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:DeleteLogGroup",
+          "logs:DescribeLogGroups",
+          "logs:PutRetentionPolicy",
+          "logs:TagLogGroup",
+          "logs:ListTagsLogGroup",
+          "logs:ListTagsForResource",
+          "logs:TagResource",
+          "logs:UntagResource",
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "IAMPassRole"
+        Effect = "Allow"
+        Action = [
+          "iam:PassRole",
+          "iam:GetRole",
         ]
         Resource = "*"
       },

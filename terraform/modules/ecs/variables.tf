@@ -68,11 +68,10 @@ variable "web_target_group_arn" {
   type        = string
 }
 
-variable "database_url" {
-  description = "PostgreSQL connection string. When set, REPO_MODE switches to db_first."
+variable "database_url_arn" {
+  description = "ARN of the DATABASE_URL SSM parameter (SecureString)"
   type        = string
   default     = ""
-  sensitive   = true
 }
 
 variable "enable_rds" {
