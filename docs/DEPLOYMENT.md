@@ -273,6 +273,27 @@ The GitHub Actions workflow (`.github/workflows/deploy.yml`) supports:
 - **OIDC authentication** — no long-lived AWS credentials stored in GitHub
 - **Immutable SHA tags** — images are tagged with `github.sha`, never `:latest`
 
+### GitHub Actions role permissions (`chbn-github-actions`)
+
+The OIDC role used by the workflow requires these IAM permissions (managed in `terraform/modules/iam/main.tf`):
+
+| Scope | Actions | Why |
+|-------|---------|-----|
+| ECR | `ecr:GetAuthorizationToken`, push/pull actions | Build & push Docker images |
+| S3 | `s3:GetObject`, `s3:PutObject`, `s3:ListBucket` | Terraform state (chbn-tfstate) |
+| ECS | `ecs:*` | Create/update clusters, services, task definitions |
+| EC2 | VPC, subnet, route table, security group, IGW CRUD | Terraform creates VPC + private subnets for RDS |
+| ALB | `elasticloadbalancing:*` | Create/manage ALB + target groups |
+| RDS | `rds:*` | Create/destroy RDS instances |
+| SSM | `ssm:GetParameter`, `ssm:PutParameter`, etc. | DATABASE_URL SSM parameter management |
+| CloudWatch | `logs:CreateLogGroup`, `logs:PutRetentionPolicy`, etc. | ECS log groups |
+| IAM | `iam:PassRole`, `iam:GetRole` | Pass ECS execution role to task definitions |
+
+**Important:** After updating the IAM module, you must re-apply the persistent stack to push changes to AWS:
+```bash
+cd terraform/persistent && terraform apply
+```
+
 ### How it works
 
 1. **Build job** builds Docker images and pushes to ECR with SHA tags:
