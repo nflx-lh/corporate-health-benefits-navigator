@@ -46,8 +46,8 @@ module "ecs" {
   alb_sg_id          = module.alb.alb_sg_id
   execution_role_arn = var.ecs_exec_role_arn
 
-  api_image          = var.ecr_api_url
-  web_image          = var.ecr_web_url
+  api_image          = var.api_image
+  web_image          = var.web_image
   jwt_secret_arn     = var.jwt_secret_arn
   openai_api_key_arn = var.openai_api_key_arn
 

@@ -22,6 +22,20 @@ variable "ecr_web_url" {
   type        = string
 }
 
+# --- Image tags (passed by CI or manually) ---
+
+variable "api_image" {
+  description = "Full API image URI with SHA tag (e.g. <account>.dkr.ecr.<region>.amazonaws.com/chbn-api:<sha>)"
+  type        = string
+  default     = ""
+}
+
+variable "web_image" {
+  description = "Full Web image URI with SHA tag (e.g. <account>.dkr.ecr.<region>.amazonaws.com/chbn-web:<sha>)"
+  type        = string
+  default     = ""
+}
+
 variable "ecs_exec_role_arn" {
   description = "ECS task execution role ARN (from persistent stack output)"
   type        = string
