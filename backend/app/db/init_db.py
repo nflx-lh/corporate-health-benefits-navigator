@@ -15,6 +15,7 @@ from app.db.session import engine, SessionLocal, Base
 from app.models.employee_db import EmployeeDB
 from app.models.rule_db import BenefitRuleDB
 from app.models.password_reset_db import PasswordResetRequestDB  # noqa: F401 — register model
+from app.models.query_log_db import QueryLogDB  # noqa: F401 — register model (Phase 17 analytics)
 
 logger = logging.getLogger(__name__)
 
