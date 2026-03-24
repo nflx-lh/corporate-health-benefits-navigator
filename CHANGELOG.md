@@ -4,6 +4,69 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [0.16.0] - 24-Mar-2026 — Cloud RAG & Production Hardening (Phase 15)
+
+### Fixed
+
+**Cloud RAG Pipeline**
+- **Policy index not found in Docker**: `_DEFAULT_INDEX_DIR` in `nodes.py` used `parents[3]` which resolves to `/` inside the container (missing `backend/` directory level). Fixed via `DATA_ROOT` env var (`ENV DATA_ROOT=/app/data` in `Dockerfile.prod`) with local fallback.
+- **Index not bundled in Docker image**: `Dockerfile.prod` only created an empty `data/index/` directory. Changed to `COPY data/index ./data/index` — pre-built index (chunks.jsonl, embeddings.npy, meta.json) now baked into the image. LLM now receives policy citations in cloud.
+
+**DB Seeding**
+- **employees.csv / benefit_rules.csv not found in Docker**: `init_db.py` used `parents[3]` (same bug) resolving to `/data/fixtures/` instead of `/app/data/fixtures/`. Fixed via `DATA_ROOT` env var.
+- **seed_rules.py same path bug**: `_DEFAULT_CSV` used `parents[3]` — same fix applied.
+
+**Rules Engine**
+- **Cosmetic surgery incorrectly returned Covered**: `cosmetic_procedure` exclusion rule (R024) only existed for `plus/full_time`. For Premium and Basic plan employees, the rules engine fell back to `general_consult` (covered at 90%). Added R048–R052 covering all missing plan/employment combinations. Rules table now has 52 rows (up from 46).
+
+**LLM Response Quality**
+- **Rigid template-style responses**: System prompt used "Format example (follow this style exactly)" which caused slot-filling behaviour. Replaced with conversational guidance — LLM now leads with a direct yes/no and uses natural language.
+
+**Frontend**
+- **Copy button silent fail on HTTP**: `navigator.clipboard.writeText()` requires HTTPS. On the HTTP ALB endpoint, the call silently failed. Added `document.execCommand('copy')` fallback in `TempPasswordModal`.
+
+### Added
+- `backend/app/scripts/seed_rules.py` — one-off ECS task to upsert benefit rules from CSV into RDS. Idempotent (upsert by rule_id). Referenced in `docs/DEPLOYMENT.md`.
+- `tests/test_seed_rules.py` — tests for the seed_rules script.
+
+### Changed
+- `docs/DEPLOYMENT.md`: added seed rules one-off ECS task runbook section.
+
+### Architecture Notes
+- `DATA_ROOT=/app/data` is the canonical path inside Docker for all data file lookups (fixtures, rules, index). Local dev uses `parents[N]` fallback.
+- Rules count: 46 → 52 (added cosmetic_procedure exclusions for all plan/employment tiers).
+- Version follows `phase + 1` convention: Phase 13 = v0.14.0, Phase 14 = v0.15.0, Phase 15 = v0.16.0.
+
+---
+
+## [0.15.0] - 24-Feb-2026 — Deterministic Deploy & DB-Only Production (Phase 14)
+
+### Changed
+- **SHA-tagged images enforced**: ECS task definitions pinned to exact Git SHA — `:latest` never used for deployment
+- **db_only enforcement**: When `enable_rds=true`, `REPO_MODE` forced to `db_only` — no CSV fallback in production
+- **DATABASE_URL via SSM**: Wired as ECS secret from SSM SecureString (`/chbn/dev/database-url`) — never in plaintext env vars
+- **IAM hardening**: Added EC2 networking permissions (`ec2:Describe*`, route table, subnet, IGW ops) to GitHub Actions role for Terraform VPC management
+
+### Infrastructure
+- `terraform/modules/ecs/main.tf`: `REPO_MODE=db_only` injected when RDS enabled; `DATABASE_URL` injected via `secrets` from SSM ARN
+- `terraform/modules/iam/main.tf`: Extended EC2 permissions for full Terraform VPC lifecycle management
+- `.github/workflows/deploy.yml`: `TF_INPUT=false`, `-lock-timeout=5m`, `TF_LOG=INFO` with artifact upload, 20-minute job timeout
+
+---
+
+## [0.14.0] - 24-Feb-2026 — CI/CD Fix & ECS Runtime Hardening (Phase 13)
+
+### Fixed
+- **Deploy workflow secrets**: `TF_VAR_*` secrets now passed as environment variables to Terraform apply step
+- **Terraform prompts disabled**: `TF_INPUT=false` prevents workflow from hanging on interactive prompts
+- **Deploy timeout**: Added 20-minute job timeout to prevent runaway workflows
+
+### Changed
+- **Terraform logging**: `TF_LOG=INFO` + `TF_LOG_PATH=terraform.log` with artifact upload on every run for debugging
+- **Lock timeout**: `-lock-timeout=5m` added to `terraform apply` to handle state lock contention
+
+---
+
 ## [0.13.0] - 23-Feb-2026 — AWS Cloud Deployment & RDS Persistence (Phase 12)
 
 ### Added
