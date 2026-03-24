@@ -13,8 +13,8 @@ This solution was developed as an MVP demonstration for a corporate health benef
 - **AI:** OpenAI LLM (explainer/critic agents) + embeddings (policy retrieval)
 
 ## Project Status
-- **v0.13.0** — AWS cloud deployment with RDS persistence (ECS Fargate, RDS PostgreSQL, Terraform IaC, deploy-on-demand via GitHub Actions)
-- Phases 1–12 complete (rules engine, retrieval, orchestration, frontend, security, admin CRUD, password auth, UI polish, cloud deployment with RDS)
+- **v0.16.0** — Cloud production hardening (RAG pipeline verified in cloud, DATA_ROOT path fixes, cosmetic procedure exclusion rules, LLM tone improvement, HTTP clipboard fallback)
+- Phases 1–15 complete (rules engine, retrieval, orchestration, frontend, security, admin CRUD, password auth, UI polish, cloud deployment with RDS, production hardening)
 
 ## Quick Start
 1. Copy `.env.example` to `.env`

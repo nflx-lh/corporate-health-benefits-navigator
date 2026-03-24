@@ -45,3 +45,8 @@ R044,dental,premium,full_time,1,18,70,true,0,0,0,true,Orthodontics excluded for 
 R045,dental,basic,full_time,0,18,65,true,0,0,0,true,Orthodontics excluded for all plans,,2024-01-01,2099-12-31,orthodontics
 R046,dental,plus,contract,1,18,70,true,0,0,0,true,Orthodontics excluded for all plans,,2024-01-01,2099-12-31,orthodontics
 R047,dental,premium,contract,1,18,70,true,0,0,0,true,Orthodontics excluded for all plans,,2024-01-01,2099-12-31,orthodontics
+R048,outpatient,premium,full_time,0,18,70,true,0,0,0,true,Cosmetic/elective procedures excluded unless medically necessary,,2024-01-01,2099-12-31,cosmetic_procedure
+R049,outpatient,basic,full_time,0,18,65,true,0,0,0,true,Cosmetic/elective procedures excluded unless medically necessary,,2024-01-01,2099-12-31,cosmetic_procedure
+R050,outpatient,premium,contract,0,18,70,true,0,0,0,true,Cosmetic/elective procedures excluded unless medically necessary,,2024-01-01,2099-12-31,cosmetic_procedure
+R051,outpatient,plus,contract,0,18,70,true,0,0,0,true,Cosmetic/elective procedures excluded unless medically necessary,,2024-01-01,2099-12-31,cosmetic_procedure
+R052,outpatient,basic,contract,0,18,65,true,0,0,0,true,Cosmetic/elective procedures excluded unless medically necessary,,2024-01-01,2099-12-31,cosmetic_procedure

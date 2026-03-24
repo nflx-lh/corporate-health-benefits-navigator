@@ -26,13 +26,12 @@ COPY data/fixtures ./data/fixtures
 COPY data/rules ./data/rules
 COPY data/raw ./data/raw
 
-# Create empty index directory — retriever returns empty results when missing.
-# If you want full policy citations, build the index locally first:
-#   python scripts/build_index.py
-# then rebuild this image.
-RUN mkdir -p ./data/index
+# Copy pre-built policy index (chunks.jsonl, embeddings.npy, meta.json).
+# To rebuild: python scripts/build_index.py (requires OPENAI_API_KEY), then redeploy.
+COPY data/index ./data/index
 
 ENV PYTHONPATH=/app
+ENV DATA_ROOT=/app/data
 # REPO_MODE defaults to csv_only; override via ECS task env when RDS is enabled
 ENV REPO_MODE=csv_only
 

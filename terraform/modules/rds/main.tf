@@ -65,3 +65,13 @@ resource "aws_db_instance" "this" {
 
   tags = { Name = "${var.project}-postgres" }
 }
+
+# --- Write DATABASE_URL to SSM (SecureString) ---
+
+resource "aws_ssm_parameter" "database_url" {
+  name  = "/${var.project}/${var.env}/database-url"
+  type  = "SecureString"
+  value = "postgresql://${aws_db_instance.this.username}:${random_password.db.result}@${aws_db_instance.this.address}:${aws_db_instance.this.port}/${aws_db_instance.this.db_name}"
+
+  tags = { Name = "${var.project}-database-url" }
+}

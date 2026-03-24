@@ -28,6 +28,9 @@ jobs:
   build-and-push:
     name: Build & Push Images
     runs-on: ubuntu-latest
+    outputs:
+      api_image: ${{ steps.images.outputs.api_image }}
+      web_image: ${{ steps.images.outputs.web_image }}
 
     steps:
       - name: Checkout
@@ -43,41 +46,73 @@ jobs:
         id: ecr-login
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build & push API image
+      - name: Set image URIs
+        id: images
         env:
           REGISTRY: ${{ steps.ecr-login.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -f backend/Dockerfile.prod -t $REGISTRY/$ECR_API_REPO:$IMAGE_TAG -t $REGISTRY/$ECR_API_REPO:latest .
-          docker push $REGISTRY/$ECR_API_REPO:$IMAGE_TAG
-          docker push $REGISTRY/$ECR_API_REPO:latest
+          echo "api_image=$REGISTRY/$ECR_API_REPO:${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          echo "web_image=$REGISTRY/$ECR_WEB_REPO:${{ github.sha }}" >> "$GITHUB_OUTPUT"
+
+      - name: Build & push API image
+        run: |
+          docker build -f backend/Dockerfile.prod -t ${{ steps.images.outputs.api_image }} .
+          docker push ${{ steps.images.outputs.api_image }}
 
       - name: Build & push Web image
-        env:
-          REGISTRY: ${{ steps.ecr-login.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -f frontend/Dockerfile.prod -t $REGISTRY/$ECR_WEB_REPO:$IMAGE_TAG -t $REGISTRY/$ECR_WEB_REPO:latest ./frontend
-          docker push $REGISTRY/$ECR_WEB_REPO:$IMAGE_TAG
-          docker push $REGISTRY/$ECR_WEB_REPO:latest
+          docker build -f frontend/Dockerfile.prod -t ${{ steps.images.outputs.web_image }} ./frontend
+          docker push ${{ steps.images.outputs.web_image }}
 
   deploy:
     name: Deploy to ECS
     needs: build-and-push
     if: github.event.inputs.deploy == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      TF_INPUT: "false"
+      TF_VAR_ecr_api_url: ${{ secrets.TF_VAR_ECR_API_URL }}
+      TF_VAR_ecr_web_url: ${{ secrets.TF_VAR_ECR_WEB_URL }}
+      TF_VAR_ecs_exec_role_arn: ${{ secrets.TF_VAR_ECS_EXEC_ROLE_ARN }}
+      TF_VAR_jwt_secret_arn: ${{ secrets.TF_VAR_JWT_SECRET_ARN }}
+      TF_VAR_openai_api_key_arn: ${{ secrets.TF_VAR_OPENAI_API_KEY_ARN }}
+      TF_VAR_enable_rds: "true"
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Force new deployment
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform init
+        working-directory: terraform/demo
+        run: terraform init -input=false
+
+      - name: Terraform apply (SHA-tagged images)
+        working-directory: terraform/demo
+        env:
+          TF_LOG: INFO
+          TF_LOG_PATH: terraform.log
         run: |
-          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_API_SERVICE --force-new-deployment
-          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_WEB_SERVICE --force-new-deployment
+          terraform apply -auto-approve -input=false -lock-timeout=5m \
+            -var="api_image=${{ needs.build-and-push.outputs.api_image }}" \
+            -var="web_image=${{ needs.build-and-push.outputs.web_image }}"
+
+      - name: Upload terraform log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-log
+          path: terraform/demo/terraform.log
+          if-no-files-found: warn
 
       - name: Wait for API service stability
         run: |

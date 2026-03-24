@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import csv
 import logging
+import os
 import pathlib
 
 from app.db.session import engine, SessionLocal, Base
@@ -17,7 +18,7 @@ from app.models.password_reset_db import PasswordResetRequestDB  # noqa: F401 â€
 
 logger = logging.getLogger(__name__)
 
-_DATA_ROOT = pathlib.Path(__file__).resolve().parents[3] / "data"
+_DATA_ROOT = pathlib.Path(os.environ["DATA_ROOT"]) if "DATA_ROOT" in os.environ else pathlib.Path(__file__).resolve().parents[3] / "data"
 
 
 def _safe_int(val: str | None) -> int | None:

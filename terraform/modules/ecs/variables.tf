@@ -29,13 +29,23 @@ variable "execution_role_arn" {
 }
 
 variable "api_image" {
-  description = "ECR image URL for the API (without tag)"
+  description = "Full ECR image URI with tag (e.g. 123456.dkr.ecr.region.amazonaws.com/chbn-api:sha)"
   type        = string
+
+  validation {
+    condition     = can(regex(".+:.+", var.api_image))
+    error_message = "api_image must include a tag (e.g. :abc123). Tagless images are not allowed."
+  }
 }
 
 variable "web_image" {
-  description = "ECR image URL for the web frontend (without tag)"
+  description = "Full ECR image URI with tag (e.g. 123456.dkr.ecr.region.amazonaws.com/chbn-web:sha)"
   type        = string
+
+  validation {
+    condition     = can(regex(".+:.+", var.web_image))
+    error_message = "web_image must include a tag (e.g. :abc123). Tagless images are not allowed."
+  }
 }
 
 variable "jwt_secret_arn" {
@@ -58,11 +68,10 @@ variable "web_target_group_arn" {
   type        = string
 }
 
-variable "database_url" {
-  description = "PostgreSQL connection string. When set, REPO_MODE switches to db_first."
+variable "database_url_arn" {
+  description = "ARN of the DATABASE_URL SSM parameter (SecureString)"
   type        = string
   default     = ""
-  sensitive   = true
 }
 
 variable "enable_rds" {
