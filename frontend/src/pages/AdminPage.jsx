@@ -592,8 +592,8 @@ function AnalyticsDashboard({ headers }) {
 
 function PolicyGapsTable({ rows }) {
   const [showAll, setShowAll] = useState(false);
-  const entries = Object.entries(rows || {}).sort((a, b) => a[0].localeCompare(b[0]));
-  const visible = showAll ? entries : entries.slice(0, 5);
+  const entries = Object.entries(rows || {}).sort((a, b) => b[1] - a[1]);
+  const visible = showAll ? entries : entries.slice(0, 3);
   return (
     <div className="analytics-section">
       <h3 className="analytics-section__title">Policy Gaps</h3>
@@ -616,12 +616,9 @@ function PolicyGapsTable({ rows }) {
               </tbody>
             </table>
           </div>
-          {entries.length > 5 && (
-            <button
-              onClick={() => setShowAll(v => !v)}
-              style={{ marginTop: "0.5rem", fontSize: "0.8rem", background: "none", border: "none", color: "#0f766e", cursor: "pointer", padding: 0 }}
-            >
-              {showAll ? "Show less ▲" : `Show all ${entries.length} ▼`}
+          {entries.length > 3 && (
+            <button className="analytics-toggle-btn" onClick={() => setShowAll(v => !v)}>
+              {showAll ? "Show less ▲" : "Show all ▼"}
             </button>
           )}
         </>
