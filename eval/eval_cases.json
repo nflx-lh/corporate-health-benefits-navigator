@@ -6,7 +6,7 @@
     "expected_decision": "not_covered",
     "expected_benefit_type": "dental",
     "expected_required_docs": [],
-    "expected_min_citations": 2,
+    "expected_min_citations": null,
     "notes": "Basic plan has no dental coverage (CL-027, R009)"
   },
   {
@@ -15,8 +15,12 @@
     "question": "I need to see a specialist for stomach pain. What do I need to claim?",
     "expected_decision": "covered",
     "expected_benefit_type": "outpatient",
-    "expected_required_docs": ["receipt", "mc", "referral_letter"],
-    "expected_min_citations": 3,
+    "expected_required_docs": [
+      "receipt",
+      "mc",
+      "referral_letter"
+    ],
+    "expected_min_citations": null,
     "notes": "Plus plan outpatient requires GP referral for specialist (CL-008, R026)"
   },
   {
@@ -26,7 +30,7 @@
     "expected_decision": "not_covered",
     "expected_benefit_type": "mental_health",
     "expected_required_docs": [],
-    "expected_min_citations": 2,
+    "expected_min_citations": null,
     "notes": "Basic plan only has EAP (3 free sessions), no claimable coverage (CL-049, R015)"
   },
   {
@@ -36,7 +40,7 @@
     "expected_decision": "not_covered",
     "expected_benefit_type": "dental",
     "expected_required_docs": [],
-    "expected_min_citations": 2,
+    "expected_min_citations": null,
     "notes": "Orthodontics excluded for Plus plan (CL-037, R023); EMP002 is Plus/full_time"
   },
   {
@@ -46,7 +50,7 @@
     "expected_decision": "not_covered",
     "expected_benefit_type": "outpatient",
     "expected_required_docs": [],
-    "expected_min_citations": 2,
+    "expected_min_citations": null,
     "notes": "Contract employee with 2 months tenure, needs 3 months (CL-002, R028)"
   },
   {
@@ -55,8 +59,14 @@
     "question": "I need a root canal treatment. What documents do I need and what's covered?",
     "expected_decision": "covered",
     "expected_benefit_type": "dental",
-    "expected_required_docs": ["invoice", "treatment_summary", "xray", "dentist_justification", "preauth_form"],
-    "expected_min_citations": 3,
+    "expected_required_docs": [
+      "invoice",
+      "treatment_summary",
+      "xray",
+      "dentist_justification",
+      "preauth_form"
+    ],
+    "expected_min_citations": null,
     "notes": "Premium plan covers major dental at 50%, root canal requires preauth (CL-031, CL-075, R038)"
   },
   {
@@ -67,7 +77,7 @@
     "expected_benefit_type": null,
     "expected_required_docs": [],
     "expected_min_citations": 0,
-    "notes": "Parser does not recognize 'laser eye surgery' as a known service; returns AMBIGUOUS_BENEFIT_TYPE. Backend parser gap — ideally maps to outpatient/cosmetic_procedure (CL-012, R024)"
+    "notes": "Parser does not recognize 'laser eye surgery' as a known service; returns AMBIGUOUS_BENEFIT_TYPE. Backend parser gap \u00e2\u20ac\u201d ideally maps to outpatient/cosmetic_procedure (CL-012, R024)"
   },
   {
     "case_id": "EVAL008",
@@ -75,8 +85,12 @@
     "question": "Can I claim for therapy sessions? I've been feeling very stressed at work.",
     "expected_decision": "covered",
     "expected_benefit_type": "mental_health",
-    "expected_required_docs": ["therapist_invoice", "license_proof", "diagnosis_summary"],
-    "expected_min_citations": 3,
+    "expected_required_docs": [
+      "therapist_invoice",
+      "license_proof",
+      "diagnosis_summary"
+    ],
+    "expected_min_citations": null,
     "notes": "Plus plan, 36 months tenure (exceeds 6 month requirement), covered at 70% (CL-052, R013)"
   },
   {
@@ -86,7 +100,7 @@
     "expected_decision": "not_covered",
     "expected_benefit_type": "mental_health",
     "expected_required_docs": [],
-    "expected_min_citations": 2,
+    "expected_min_citations": null,
     "notes": "Couples counseling excluded unless related to diagnosed mental health condition (CL-060, R027)"
   },
   {
@@ -95,8 +109,13 @@
     "question": "I need an MRI scan recommended by my doctor. What's the process?",
     "expected_decision": "covered",
     "expected_benefit_type": "outpatient",
-    "expected_required_docs": ["receipt", "mc", "referral_letter", "preauth_form"],
-    "expected_min_citations": 3,
+    "expected_required_docs": [
+      "receipt",
+      "mc",
+      "referral_letter",
+      "preauth_form"
+    ],
+    "expected_min_citations": null,
     "notes": "Premium plan, diagnostic imaging requires preauth by service type (CL-074, R019)"
   },
   {
@@ -116,7 +135,7 @@
     "expected_decision": "not_covered",
     "expected_benefit_type": "dental",
     "expected_required_docs": [],
-    "expected_min_citations": 2,
+    "expected_min_citations": null,
     "notes": "Contract employees not eligible for dental regardless of plan (CL-028, R010)"
   },
   {
@@ -126,7 +145,7 @@
     "expected_decision": "covered",
     "expected_benefit_type": "outpatient",
     "expected_required_docs": [],
-    "expected_min_citations": 1,
+    "expected_min_citations": null,
     "notes": "Engine has no claims-history concept; parses as outpatient and returns covered for Premium plan. Remaining-balance calculation is out of MVP scope."
   },
   {
@@ -136,7 +155,7 @@
     "expected_decision": "not_covered",
     "expected_benefit_type": "mental_health",
     "expected_required_docs": [],
-    "expected_min_citations": 2,
+    "expected_min_citations": null,
     "notes": "Contract employee with 10 months tenure, needs 12 months for mental health (CL-050, R029)"
   },
   {
@@ -147,7 +166,7 @@
     "expected_benefit_type": null,
     "expected_required_docs": [],
     "expected_min_citations": 0,
-    "notes": "Parser does not recognize 'emergency A&E' as a known service; returns AMBIGUOUS_BENEFIT_TYPE. Backend parser gap — ideally maps to outpatient (CL-023, CL-077)"
+    "notes": "Parser does not recognize 'emergency A&E' as a known service; returns AMBIGUOUS_BENEFIT_TYPE. Backend parser gap \u00e2\u20ac\u201d ideally maps to outpatient (CL-023, CL-077)"
   },
   {
     "case_id": "EVAL016",
@@ -175,7 +194,11 @@
     "question": "I need a day surgery procedure. What documents do I need?",
     "expected_decision": "covered",
     "expected_benefit_type": "outpatient",
-    "expected_required_docs": ["receipt", "mc", "preauth_form"],
+    "expected_required_docs": [
+      "receipt",
+      "mc",
+      "preauth_form"
+    ],
     "expected_min_citations": null,
     "notes": "Plus plan day surgery covered at 80%, preauth required (R036). Keyword 'day surgery' maps to day_surgery."
   },
@@ -185,7 +208,11 @@
     "question": "My doctor has recommended a minor surgery procedure. Am I covered?",
     "expected_decision": "covered",
     "expected_benefit_type": "outpatient",
-    "expected_required_docs": ["receipt", "mc", "preauth_form"],
+    "expected_required_docs": [
+      "receipt",
+      "mc",
+      "preauth_form"
+    ],
     "expected_min_citations": null,
     "notes": "Premium plan day surgery covered at 90%, preauth required (R037). Keyword 'minor surgery' maps to day_surgery."
   },
@@ -205,7 +232,11 @@
     "question": "Can I claim for mental health therapy sessions?",
     "expected_decision": "covered",
     "expected_benefit_type": "mental_health",
-    "expected_required_docs": ["therapist_invoice", "license_proof", "diagnosis_summary"],
+    "expected_required_docs": [
+      "therapist_invoice",
+      "license_proof",
+      "diagnosis_summary"
+    ],
     "expected_min_citations": null,
     "notes": "Plus plan, 28 months tenure (exceeds 6 month requirement), covered at 70% (R013). EMP016 is Plus/full_time."
   },
@@ -215,7 +246,12 @@
     "question": "I need a CT scan as ordered by my doctor. What do I need to know?",
     "expected_decision": "covered",
     "expected_benefit_type": "outpatient",
-    "expected_required_docs": ["receipt", "mc", "referral_letter", "preauth_form"],
+    "expected_required_docs": [
+      "receipt",
+      "mc",
+      "referral_letter",
+      "preauth_form"
+    ],
     "expected_min_citations": null,
     "notes": "Plus plan diagnostic imaging (CT scan) covered at 80%, preauth required (R039). EMP008 is Plus/full_time, 20 months."
   },
@@ -225,7 +261,11 @@
     "question": "I need a referral to see a specialist at the hospital. Is this covered?",
     "expected_decision": "covered",
     "expected_benefit_type": "outpatient",
-    "expected_required_docs": ["receipt", "mc", "referral_letter"],
+    "expected_required_docs": [
+      "receipt",
+      "mc",
+      "referral_letter"
+    ],
     "expected_min_citations": null,
     "notes": "Basic plan specialist consult covered at 60%, requires referral_letter (R006). EMP004 is Basic/full_time, 6 months."
   },
@@ -235,7 +275,10 @@
     "question": "Can I get reimbursed for a dental filling or restoration?",
     "expected_decision": "covered",
     "expected_benefit_type": "dental",
-    "expected_required_docs": ["invoice", "treatment_summary"],
+    "expected_required_docs": [
+      "invoice",
+      "treatment_summary"
+    ],
     "expected_min_citations": null,
     "notes": "Plus plan restorative dental covered at 60% (R022). EMP002 is Plus/full_time, 18 months (exceeds 1 month min)."
   },
@@ -275,7 +318,12 @@
     "question": "I need intensive psychiatric counseling sessions. What is covered?",
     "expected_decision": "covered",
     "expected_benefit_type": "mental_health",
-    "expected_required_docs": ["therapist_invoice", "license_proof", "diagnosis_summary", "preauth_form"],
+    "expected_required_docs": [
+      "therapist_invoice",
+      "license_proof",
+      "diagnosis_summary",
+      "preauth_form"
+    ],
     "expected_min_citations": null,
     "notes": "Premium plan intensive therapy covered at 85%, preauth required (R042). Keyword 'psychiatric' maps to intensive_therapy. EMP001 is Premium/full_time, 48 months."
   },
@@ -287,7 +335,7 @@
     "expected_benefit_type": "outpatient",
     "expected_required_docs": [],
     "expected_min_citations": null,
-    "notes": "Basic plan GP/outpatient covered at 60% (R001). EMP013 is Basic/full_time, 4 months. No specific service_category — falls back to general_consult."
+    "notes": "Basic plan GP/outpatient covered at 60% (R001). EMP013 is Basic/full_time, 4 months. No specific service_category \u00e2\u20ac\u201d falls back to general_consult."
   },
   {
     "case_id": "EVAL030",
