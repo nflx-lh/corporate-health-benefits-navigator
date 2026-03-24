@@ -13,9 +13,10 @@ This solution was developed as an MVP demonstration for a corporate health benef
 - **AI:** OpenAI LLM (explainer/critic agents) + embeddings (policy retrieval)
 
 ## Project Status
-- **v0.17.0** — Evaluation suite complete (30 golden eval cases wired into CI, human eval scorecard with first completed review — 90% pass rate)
-- Phases 1–16 complete; Phase 17 (multilingual support, voice input, HR analytics dashboard) in progress
+- **v0.19.0** — Phases 1–18 complete; Phase 17 (multilingual + voice input) and Phase 18 (HR analytics dashboard) shipped
 - Phases 1–16: rules engine, retrieval, orchestration, frontend, security, admin CRUD, password auth, UI polish, cloud deployment with RDS, production hardening, evaluation suite
+- Phase 17: multilingual query support (7 languages), voice input via Web Speech API
+- Phase 18: anonymous query logging, admin analytics tab (decision/benefit/language breakdowns)
 
 ## Quick Start
 1. Copy `.env.example` to `.env`
@@ -36,6 +37,9 @@ docker compose up --build
 - **Security hardening** — JWT auth, RBAC, CORS allowlist, rate limiting, input validation, prompt injection guards, and safe error handling
 - **Cloud deployment** — AWS ECS Fargate + RDS PostgreSQL, Terraform IaC (persistent/demo split), deploy-on-demand via GitHub Actions with OIDC (~$0 when off)
 - **Production-safe data layer** — PostgreSQL persistence with auto-init on startup (CSV seed → DB), `REPO_MODE` safety switch for graceful degradation and test isolation
+- **Multilingual support** — 7 languages (EN, ZH, MS, TA, VI, JA, KO); query translated to English for rules engine, LLM responds in detected language; language badge on result card
+- **Voice input** — microphone button with Web Speech API, real-time transcription, pulse animation while recording
+- **HR Analytics dashboard** — anonymous query logging, admin Analytics tab with decision/benefit/language breakdowns
 - **Evaluation harness** — 327 tests across 24 files, 30 golden eval cases wired into CI, no-drift regression gates
 
 ## Repository Structure

@@ -229,6 +229,12 @@ function AdminDashboard({ token, onLogout }) {
               <span className="admin-tabs__badge">!</span>
             )}
           </button>
+          <button
+            className={`admin-tabs__tab ${activeTab === "analytics" ? "admin-tabs__tab--active" : ""}`}
+            onClick={() => setActiveTab("analytics")}
+          >
+            Analytics
+          </button>
         </div>
 
         {activeTab === "employees" && (
@@ -332,6 +338,10 @@ function AdminDashboard({ token, onLogout }) {
 
         {activeTab === "resets" && (
           <ResetRequests token={token} headers={headers} onTempPassword={setTempPasswordModal} onCountChange={setPendingResetCount} />
+        )}
+
+        {activeTab === "analytics" && (
+          <AnalyticsDashboard headers={headers} />
         )}
 
         {tempPasswordModal && (
@@ -520,6 +530,90 @@ function TempPasswordModal({ employeeId, tempPassword, onClose }) {
         </div>
         <button className="temp-pw-modal__close" onClick={onClose}>Close</button>
       </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Analytics Dashboard (B-1703)                                       */
+/* ------------------------------------------------------------------ */
+
+function AnalyticsDashboard({ headers }) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchAnalytics = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`${API_BASE}/admin/analytics`, { headers });
+      if (!res.ok) throw new Error("Failed to load analytics");
+      setData(await res.json());
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchAnalytics(); }, []);
+
+  if (loading) return <p className="admin-loading">Loading analytics...</p>;
+  if (error) return <div className="admin-error">{error}</div>;
+  if (!data) return null;
+
+  return (
+    <>
+      <div className="admin-toolbar">
+        <h2 className="admin-toolbar__title">Query Analytics</h2>
+        <button className="admin-toolbar__create-btn" onClick={fetchAnalytics}>Refresh</button>
+      </div>
+
+      <div className="analytics-grid">
+        <div className="analytics-card">
+          <div className="analytics-card__label">Total Queries</div>
+          <div className="analytics-card__value">{data.total_queries}</div>
+        </div>
+        <div className="analytics-card">
+          <div className="analytics-card__label">Last 7 Days</div>
+          <div className="analytics-card__value">{data.recent_7_days}</div>
+        </div>
+      </div>
+
+      <div className="analytics-tables">
+        <AnalyticsTable title="By Decision" rows={data.by_decision} />
+        <AnalyticsTable title="By Benefit Type" rows={data.by_benefit_type} />
+        <AnalyticsTable title="By Language" rows={data.by_language} />
+      </div>
+    </>
+  );
+}
+
+function AnalyticsTable({ title, rows }) {
+  const entries = Object.entries(rows || {}).sort((a, b) => b[1] - a[1]);
+  return (
+    <div className="analytics-section">
+      <h3 className="analytics-section__title">{title}</h3>
+      {entries.length === 0 ? (
+        <p className="admin-loading">No data yet.</p>
+      ) : (
+        <div className="admin-table-wrap">
+          <table className="admin-table">
+            <thead>
+              <tr><th>Category</th><th>Count</th></tr>
+            </thead>
+            <tbody>
+              {entries.map(([key, count]) => (
+                <tr key={key}>
+                  <td>{formatLabel(key)}</td>
+                  <td>{count}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

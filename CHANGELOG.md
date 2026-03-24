@@ -4,6 +4,17 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [0.19.0] - 24-Mar-2026 — HR Analytics Dashboard (Phase 18)
+
+### Added
+- **Anonymous query logging**: Every `/v1/query-orchestrated` call logs benefit_type, service_category, decision, and response_language to a new `query_logs` DB table — no employee PII stored.
+- **`QueryLogDB` model**: New SQLAlchemy model auto-created on startup via `Base.metadata.create_all()`.
+- **`GET /v1/admin/analytics`**: New HR admin-only endpoint returning total queries, last-7-days count, and breakdowns by decision, benefit type, and language.
+- **Analytics tab**: New tab in the admin dashboard with stat cards (Total Queries, Last 7 Days) and breakdown tables (By Decision, By Benefit Type, By Language).
+- **Graceful degradation**: Analytics logging and retrieval are silent on failure — `csv_only` mode returns empty stats without error.
+
+---
+
 ## [0.18.1] - 24-Mar-2026 — Voice Input (Phase 17, B-1702)
 
 ### Added

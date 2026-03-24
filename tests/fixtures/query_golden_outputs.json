@@ -32,7 +32,7 @@
         "check_profile_completeness: PASS",
         "parse_benefit_type: outpatient",
         "check_active_status: ACTIVE",
-        "candidate_rules_count: 6",
+        "candidate_rules_count: 7",
         "service_category_match: diagnostic_imaging",
         "winning_rule: R019"
       ]
