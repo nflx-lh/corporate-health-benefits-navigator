@@ -584,9 +584,49 @@ function AnalyticsDashboard({ headers }) {
       <div className="analytics-tables">
         <AnalyticsTable title="By Decision" rows={data.by_decision} />
         <AnalyticsTable title="By Benefit Type" rows={data.by_benefit_type} />
-        <AnalyticsTable title="Policy Gaps (Insufficient Info)" rows={data.insufficient_info_by_category} />
+        <PolicyGapsTable rows={data.insufficient_info_by_category} />
       </div>
     </>
+  );
+}
+
+function PolicyGapsTable({ rows }) {
+  const [showAll, setShowAll] = useState(false);
+  const entries = Object.entries(rows || {}).sort((a, b) => a[0].localeCompare(b[0]));
+  const visible = showAll ? entries : entries.slice(0, 5);
+  return (
+    <div className="analytics-section">
+      <h3 className="analytics-section__title">Policy Gaps</h3>
+      {entries.length === 0 ? (
+        <p className="admin-loading">No data yet.</p>
+      ) : (
+        <>
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead>
+                <tr><th>Category</th><th>Count</th></tr>
+              </thead>
+              <tbody>
+                {visible.map(([key, count]) => (
+                  <tr key={key}>
+                    <td>{formatLabel(key)}</td>
+                    <td>{count}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {entries.length > 5 && (
+            <button
+              onClick={() => setShowAll(v => !v)}
+              style={{ marginTop: "0.5rem", fontSize: "0.8rem", background: "none", border: "none", color: "#0f766e", cursor: "pointer", padding: 0 }}
+            >
+              {showAll ? "Show less ▲" : `Show all ${entries.length} ▼`}
+            </button>
+          )}
+        </>
+      )}
+    </div>
   );
 }
 

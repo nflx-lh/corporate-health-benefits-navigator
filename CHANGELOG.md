@@ -12,7 +12,8 @@ All notable changes to this project are documented in this file.
 - **Sidebar width**: Increased from 22% to 26% to prevent guide button text from wrapping.
 
 ### Added
-- **Policy Gaps breakdown**: New "Policy Gaps (Insufficient Info)" table in Analytics tab showing which service categories most often return insufficient info — helps HR identify policy gaps to address.
+- **Policy Gaps breakdown**: New "Policy Gaps" table in Analytics tab — for `insufficient_info` queries, the LLM extracts an anonymous 2–4 word benefit topic (e.g. "Yoga Classes", "Weight Management") and logs it, so HR can see exactly what benefit areas employees are asking about that the system cannot answer.
+- **LLM topic extraction**: When a query returns `insufficient_info` and has no parsed service category, a lightweight LLM call extracts the benefit topic anonymously before logging. Silent on failure — falls back gracefully if LLM is unavailable.
 
 ---
 

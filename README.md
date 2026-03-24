@@ -34,7 +34,7 @@ docker compose up --build
 - **Security hardening** — JWT auth, RBAC, CORS allowlist, rate limiting, input validation, prompt injection guards, and safe error handling
 - **Cloud deployment** — AWS ECS Fargate + RDS PostgreSQL, Terraform IaC (persistent/demo split), deploy-on-demand via GitHub Actions with OIDC (~$0 when off)
 - **Production-safe data layer** — PostgreSQL persistence with auto-init on startup (CSV seed → DB), `REPO_MODE` safety switch for graceful degradation and test isolation
-- **HR Analytics dashboard** — anonymous query logging, admin Analytics tab with decision, benefit type, and policy gap (insufficient info by category) breakdowns
+- **HR Analytics dashboard** — anonymous query logging, admin Analytics tab with decision, benefit type, and Policy Gaps breakdowns; LLM extracts benefit topic from unrecognised queries so HR can identify coverage gaps
 - **Evaluation harness** — 327 tests across 24 files, 30 golden eval cases wired into CI, no-drift regression gates
 
 ## Repository Structure
