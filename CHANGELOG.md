@@ -4,6 +4,28 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [0.18.1] - 24-Mar-2026 — Voice Input (Phase 17, B-1702)
+
+### Added
+- **Voice input**: Microphone button added to the query form. Uses the browser Web Speech API — clicking the mic starts speech recognition, transcribed text populates the query input in real time. Supports auto language detection by the browser.
+- **Recording indicator**: Mic button pulses red while recording; stops on silence or second click.
+- **Graceful degradation**: Mic button is hidden on browsers that do not support the Web Speech API.
+- **Mobile layout**: On small screens, mic button stays visible alongside the input; Search button spans the full row.
+
+---
+
+## [0.18.0] - 24-Mar-2026 — Multilingual Query Support (Phase 17, B-1701)
+
+### Added
+- **Multilingual query support**: Language detection via script analysis (Japanese kana, Korean hangul, Tamil script, CJK characters) with `langdetect` statistical fallback. Supports English, Mandarin (Simplified), Malay, Tamil, Vietnamese, Japanese, and Korean.
+- **Translation pipeline**: Non-English queries are translated to English before the rules engine and query parser, ensuring deterministic decisions are unaffected by query language.
+- **Multilingual LLM responses**: Explainer node instructed to respond in the detected language; safety gate bypassed for non-English responses (keyword checks are English-only).
+- **`response_language` field**: Added to `/v1/query-orchestrated` response payload (BCP-47 language code, e.g. `"ja"`, `"ko"`).
+- **Language badge**: Displayed on the result card in the frontend when a non-English language is detected.
+- **`langdetect==1.0.9`** added to `requirements.txt`.
+
+---
+
 ## [0.17.0] - 24-Mar-2026 — Evaluation Suite (Phase 16)
 
 ### Added

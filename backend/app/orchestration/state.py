@@ -35,5 +35,9 @@ class OrchestratorState(TypedDict, total=False):
     # --- final assembled response ---
     final_response: dict[str, Any]
 
+    # --- multilingual support (Phase 17 B-1701) ---
+    detected_language: Optional[str]      # BCP-47 code e.g. "en", "ja", "ko"
+    query_text_original: Optional[str]    # original (potentially non-English) query
+
     # --- error accumulator (non-fatal) ---
     errors: list[str]

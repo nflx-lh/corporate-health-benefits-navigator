@@ -49,6 +49,9 @@ class OrchestratedQueryResponse(BaseModel):
     ai_summary: Optional[str] = None
     ai_summary_source: str = Field(default="fallback")
 
+    # --- Phase 17 multilingual field ---
+    response_language: Optional[str] = Field(default="en")
+
 
 @router.post("/query-orchestrated", response_model=OrchestratedQueryResponse)
 @limiter.limit(_settings.RATE_LIMIT)
