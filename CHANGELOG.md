@@ -4,6 +4,18 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [0.18.1] `v0.18.1-phase17-freeze` - 24-Mar-2026 — Analytics & UI Fixes
+
+### Fixed
+- **Analytics logging**: `log_query()` was defined but never called — wired into `/v1/query-orchestrated` route so queries are now actually recorded.
+- **Required documents formatting**: Displayed in Title Case without underscores (e.g. `Invoice, Treatment Summary` instead of `invoice, treatment_summary`).
+- **Sidebar width**: Increased from 22% to 26% to prevent guide button text from wrapping.
+
+### Added
+- **Policy Gaps breakdown**: New "Policy Gaps (Insufficient Info)" table in Analytics tab showing which service categories most often return insufficient info — helps HR identify policy gaps to address.
+
+---
+
 ## [0.18.0] - 24-Mar-2026 — HR Analytics Dashboard (Phase 17)
 
 ### Added

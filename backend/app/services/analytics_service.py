@@ -45,6 +45,7 @@ def get_analytics() -> dict[str, Any]:
         "by_decision": {},
         "by_benefit_type": {},
         "by_service_category": {},
+        "insufficient_info_by_category": {},
         "recent_7_days": 0,
     }
 
@@ -66,6 +67,7 @@ def get_analytics() -> dict[str, Any]:
         by_decision: Counter = Counter()
         by_benefit: Counter = Counter()
         by_category: Counter = Counter()
+        insufficient_by_category: Counter = Counter()
         recent = 0
 
         for row in rows:
@@ -75,6 +77,8 @@ def get_analytics() -> dict[str, Any]:
                 by_benefit[row.benefit_type] += 1
             if row.service_category:
                 by_category[row.service_category] += 1
+            if row.decision == "insufficient_info" and row.service_category:
+                insufficient_by_category[row.service_category] += 1
             if row.logged_at and row.logged_at >= cutoff:
                 recent += 1
 
@@ -83,6 +87,7 @@ def get_analytics() -> dict[str, Any]:
             "by_decision": dict(by_decision),
             "by_benefit_type": dict(by_benefit),
             "by_service_category": dict(by_category),
+            "insufficient_info_by_category": dict(insufficient_by_category),
             "recent_7_days": recent,
         }
 
