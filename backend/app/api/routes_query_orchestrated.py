@@ -14,6 +14,7 @@ from app.models.decision import QueryRequest
 from app.orchestration.graph import orchestration_graph
 from app.auth.rbac import require_role
 from app.services.input_sanitizer import sanitize_question
+from app.services.analytics_service import log_query
 from app.config import get_settings
 from app.rate_limit import limiter
 
@@ -49,6 +50,9 @@ class OrchestratedQueryResponse(BaseModel):
     ai_summary: Optional[str] = None
     ai_summary_source: str = Field(default="fallback")
 
+    # --- Phase 17 multilingual field ---
+    response_language: Optional[str] = Field(default="en")
+
 
 @router.post("/query-orchestrated", response_model=OrchestratedQueryResponse)
 @limiter.limit(_settings.RATE_LIMIT)
@@ -73,5 +77,13 @@ def query_orchestrated(request: Request, req: QueryRequest, _user: dict = Depend
                 }
             },
         )
+
+    # Log anonymous query event for analytics (B-1703) — non-blocking
+    log_query(
+        benefit_type=final.get("benefit_type"),
+        service_category=final.get("service_category"),
+        decision=final.get("decision"),
+        response_language=final.get("response_language", "en"),
+    )
 
     return final
