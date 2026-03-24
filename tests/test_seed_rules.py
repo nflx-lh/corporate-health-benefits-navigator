@@ -21,7 +21,7 @@ class TestParseCSV:
 
     def test_parse_returns_all_rows(self):
         rows = parse_csv(_CSV_PATH)
-        assert len(rows) == 46
+        assert len(rows) == 51
 
     def test_parse_row_has_required_fields(self):
         rows = parse_csv(_CSV_PATH)
@@ -47,8 +47,8 @@ class TestSeedIdempotent:
     def test_seed_inserts_all_rules(self, db_url):
         result = seed(db_url, _CSV_PATH)
         assert result["before_count"] == 0
-        assert result["upserted_count"] == 46
-        assert result["after_count"] == 46
+        assert result["upserted_count"] == 51
+        assert result["after_count"] == 51
 
     def test_seed_is_idempotent(self, db_url):
         # First run
@@ -62,12 +62,12 @@ class TestSeedIdempotent:
         db_url = f"sqlite:///{db_path}"
 
         result1 = seed(db_url, _CSV_PATH)
-        assert result1["after_count"] == 46
+        assert result1["after_count"] == 51
 
         result2 = seed(db_url, _CSV_PATH)
-        assert result2["before_count"] == 46
-        assert result2["upserted_count"] == 46  # all upserted (updated)
-        assert result2["after_count"] == 46  # no duplicates
+        assert result2["before_count"] == 51
+        assert result2["upserted_count"] == 51  # all upserted (updated)
+        assert result2["after_count"] == 51  # no duplicates
 
     def test_seed_updates_existing_rule(self, tmp_path):
         db_path = tmp_path / "test.db"
