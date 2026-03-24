@@ -25,7 +25,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger("seed_rules")
 
-_DEFAULT_CSV = pathlib.Path(__file__).resolve().parents[3] / "data" / "rules" / "benefit_rules.csv"
+_DEFAULT_CSV = (
+    pathlib.Path(os.environ["DATA_ROOT"]) / "rules" / "benefit_rules.csv"
+    if "DATA_ROOT" in os.environ
+    else pathlib.Path(__file__).resolve().parents[3] / "data" / "rules" / "benefit_rules.csv"
+)
 
 
 def _parse_bool(val: str) -> bool:
