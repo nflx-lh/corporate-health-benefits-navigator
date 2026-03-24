@@ -4,6 +4,21 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [0.17.0] - 24-Mar-2026 — Evaluation Suite (Phase 16)
+
+### Added
+- **Golden eval dataset expanded**: `eval/eval_cases.json` grown from 15 → 30 cases (EVAL016–EVAL030), covering cosmetic procedure exclusions (all plan tiers), day surgery with preauth, mental health tenure gates, diagnostic imaging, restorative dental, cosmetic dental, orthodontic exclusions, intensive therapy, and contract employee edge cases.
+- **CI golden eval step**: `.github/workflows/ci.yml` now starts the backend in `REPO_MODE=csv_only` / `LLM_ENABLED=false` after the smoke import and runs `scripts/run_eval.py` against it. CI fails if any golden case regresses.
+
+### Fixed
+- **`test_seed_rules.py` row count**: Updated assertions from 46 → 51 to match the current `benefit_rules.csv` (R048–R052 added in Phase 15).
+
+### Architecture Notes
+- Layer 1 eval (golden cases + CI) is now active. Layer 2 (DeepEval LLM quality metrics) and Layer 4 (human eval scorecard) are planned for this branch.
+- Eval cases run deterministically — LLM is disabled in CI. LLM quality evaluation (faithfulness, hallucination) is a separate concern for Layer 2.
+
+---
+
 ## [0.16.0] - 24-Mar-2026 — Cloud RAG & Production Hardening (Phase 15)
 
 ### Fixed

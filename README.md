@@ -13,8 +13,8 @@ This solution was developed as an MVP demonstration for a corporate health benef
 - **AI:** OpenAI LLM (explainer/critic agents) + embeddings (policy retrieval)
 
 ## Project Status
-- **v0.16.0** — Cloud production hardening (RAG pipeline verified in cloud, DATA_ROOT path fixes, cosmetic procedure exclusion rules, LLM tone improvement, HTTP clipboard fallback)
-- Phases 1–15 complete (rules engine, retrieval, orchestration, frontend, security, admin CRUD, password auth, UI polish, cloud deployment with RDS, production hardening)
+- **v0.17.0** — Evaluation suite (golden eval expanded to 30 cases, CI golden eval gate, Layer 2 DeepEval LLM metrics and Layer 4 human scorecard in progress)
+- Phases 1–16 complete (rules engine, retrieval, orchestration, frontend, security, admin CRUD, password auth, UI polish, cloud deployment with RDS, production hardening, evaluation suite)
 
 ## Quick Start
 1. Copy `.env.example` to `.env`
@@ -35,7 +35,7 @@ docker compose up --build
 - **Security hardening** — JWT auth, RBAC, CORS allowlist, rate limiting, input validation, prompt injection guards, and safe error handling
 - **Cloud deployment** — AWS ECS Fargate + RDS PostgreSQL, Terraform IaC (persistent/demo split), deploy-on-demand via GitHub Actions with OIDC (~$0 when off)
 - **Production-safe data layer** — PostgreSQL persistence with auto-init on startup (CSV seed → DB), `REPO_MODE` safety switch for graceful degradation and test isolation
-- **Evaluation harness** — 327 tests across 24 files, deterministic eval cases, no-drift golden output gates
+- **Evaluation harness** — 327 tests across 24 files, 30 golden eval cases wired into CI, no-drift regression gates
 
 ## Repository Structure
 - `backend/app/` — FastAPI backend (routes, auth, services, orchestration)

@@ -148,5 +148,155 @@
     "expected_required_docs": [],
     "expected_min_citations": 0,
     "notes": "Parser does not recognize 'emergency A&E' as a known service; returns AMBIGUOUS_BENEFIT_TYPE. Backend parser gap — ideally maps to outpatient (CL-023, CL-077)"
+  },
+  {
+    "case_id": "EVAL016",
+    "employee_id": "EMP001",
+    "question": "I want a nose job cosmetic surgery. Is this covered?",
+    "expected_decision": "not_covered",
+    "expected_benefit_type": "outpatient",
+    "expected_required_docs": [],
+    "expected_min_citations": null,
+    "notes": "Cosmetic/elective procedures excluded for all plans including Premium (R048). Keyword 'cosmetic' maps to cosmetic_procedure."
+  },
+  {
+    "case_id": "EVAL017",
+    "employee_id": "EMP004",
+    "question": "Can I claim for elective cosmetic surgery?",
+    "expected_decision": "not_covered",
+    "expected_benefit_type": "outpatient",
+    "expected_required_docs": [],
+    "expected_min_citations": null,
+    "notes": "Cosmetic/elective procedures excluded for all plans including Basic (R049). EMP004 is Basic/full_time."
+  },
+  {
+    "case_id": "EVAL018",
+    "employee_id": "EMP002",
+    "question": "I need a day surgery procedure. What documents do I need?",
+    "expected_decision": "covered",
+    "expected_benefit_type": "outpatient",
+    "expected_required_docs": ["receipt", "mc", "preauth_form"],
+    "expected_min_citations": null,
+    "notes": "Plus plan day surgery covered at 80%, preauth required (R036). Keyword 'day surgery' maps to day_surgery."
+  },
+  {
+    "case_id": "EVAL019",
+    "employee_id": "EMP001",
+    "question": "My doctor has recommended a minor surgery procedure. Am I covered?",
+    "expected_decision": "covered",
+    "expected_benefit_type": "outpatient",
+    "expected_required_docs": ["receipt", "mc", "preauth_form"],
+    "expected_min_citations": null,
+    "notes": "Premium plan day surgery covered at 90%, preauth required (R037). Keyword 'minor surgery' maps to day_surgery."
+  },
+  {
+    "case_id": "EVAL020",
+    "employee_id": "EMP024",
+    "question": "I would like to see a therapist for work stress. Am I eligible?",
+    "expected_decision": "not_covered",
+    "expected_benefit_type": "mental_health",
+    "expected_required_docs": [],
+    "expected_min_citations": null,
+    "notes": "Plus plan requires 6 months tenure for mental health; EMP024 has only 5 months (R031). Keyword 'therapist' maps to therapy_session."
+  },
+  {
+    "case_id": "EVAL021",
+    "employee_id": "EMP016",
+    "question": "Can I claim for mental health therapy sessions?",
+    "expected_decision": "covered",
+    "expected_benefit_type": "mental_health",
+    "expected_required_docs": ["therapist_invoice", "license_proof", "diagnosis_summary"],
+    "expected_min_citations": null,
+    "notes": "Plus plan, 28 months tenure (exceeds 6 month requirement), covered at 70% (R013). EMP016 is Plus/full_time."
+  },
+  {
+    "case_id": "EVAL022",
+    "employee_id": "EMP008",
+    "question": "I need a CT scan as ordered by my doctor. What do I need to know?",
+    "expected_decision": "covered",
+    "expected_benefit_type": "outpatient",
+    "expected_required_docs": ["receipt", "mc", "referral_letter", "preauth_form"],
+    "expected_min_citations": null,
+    "notes": "Plus plan diagnostic imaging (CT scan) covered at 80%, preauth required (R039). EMP008 is Plus/full_time, 20 months."
+  },
+  {
+    "case_id": "EVAL023",
+    "employee_id": "EMP004",
+    "question": "I need a referral to see a specialist at the hospital. Is this covered?",
+    "expected_decision": "covered",
+    "expected_benefit_type": "outpatient",
+    "expected_required_docs": ["receipt", "mc", "referral_letter"],
+    "expected_min_citations": null,
+    "notes": "Basic plan specialist consult covered at 60%, requires referral_letter (R006). EMP004 is Basic/full_time, 6 months."
+  },
+  {
+    "case_id": "EVAL024",
+    "employee_id": "EMP002",
+    "question": "Can I get reimbursed for a dental filling or restoration?",
+    "expected_decision": "covered",
+    "expected_benefit_type": "dental",
+    "expected_required_docs": ["invoice", "treatment_summary"],
+    "expected_min_citations": null,
+    "notes": "Plus plan restorative dental covered at 60% (R022). EMP002 is Plus/full_time, 18 months (exceeds 1 month min)."
+  },
+  {
+    "case_id": "EVAL025",
+    "employee_id": "EMP001",
+    "question": "Can I claim for teeth whitening at a dental clinic?",
+    "expected_decision": "not_covered",
+    "expected_benefit_type": "dental",
+    "expected_required_docs": [],
+    "expected_min_citations": null,
+    "notes": "Cosmetic dentistry excluded for all plans (R035). Keyword 'teeth whitening' maps to cosmetic_dental."
+  },
+  {
+    "case_id": "EVAL026",
+    "employee_id": "EMP001",
+    "question": "I want to get orthodontic treatment. Is this covered under my plan?",
+    "expected_decision": "not_covered",
+    "expected_benefit_type": "dental",
+    "expected_required_docs": [],
+    "expected_min_citations": null,
+    "notes": "Orthodontics excluded for all plans including Premium (R044). Keyword 'orthodontic' maps to orthodontics."
+  },
+  {
+    "case_id": "EVAL027",
+    "employee_id": "EMP015",
+    "question": "I want to start counseling sessions for mental health. Am I covered?",
+    "expected_decision": "not_covered",
+    "expected_benefit_type": "mental_health",
+    "expected_required_docs": [],
+    "expected_min_citations": null,
+    "notes": "Contract employee requires 12 months tenure for mental health; EMP015 (contract/premium) has only 10 months (R029). Keyword 'counseling' maps to therapy_session."
+  },
+  {
+    "case_id": "EVAL028",
+    "employee_id": "EMP001",
+    "question": "I need intensive psychiatric counseling sessions. What is covered?",
+    "expected_decision": "covered",
+    "expected_benefit_type": "mental_health",
+    "expected_required_docs": ["therapist_invoice", "license_proof", "diagnosis_summary", "preauth_form"],
+    "expected_min_citations": null,
+    "notes": "Premium plan intensive therapy covered at 85%, preauth required (R042). Keyword 'psychiatric' maps to intensive_therapy. EMP001 is Premium/full_time, 48 months."
+  },
+  {
+    "case_id": "EVAL029",
+    "employee_id": "EMP013",
+    "question": "I need to see a GP at a clinic for a medical checkup. Am I covered?",
+    "expected_decision": "covered",
+    "expected_benefit_type": "outpatient",
+    "expected_required_docs": [],
+    "expected_min_citations": null,
+    "notes": "Basic plan GP/outpatient covered at 60% (R001). EMP013 is Basic/full_time, 4 months. No specific service_category — falls back to general_consult."
+  },
+  {
+    "case_id": "EVAL030",
+    "employee_id": "EMP005",
+    "question": "I want to go for dental scaling and polishing. Am I eligible?",
+    "expected_decision": "not_covered",
+    "expected_benefit_type": "dental",
+    "expected_required_docs": [],
+    "expected_min_citations": null,
+    "notes": "Contract employees not eligible for dental regardless of plan tier (R010). EMP005 is contract/Plus. Keyword 'scaling' maps to preventive_dental."
   }
 ]

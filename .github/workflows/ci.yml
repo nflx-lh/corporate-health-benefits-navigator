@@ -25,3 +25,37 @@ jobs:
         run: |
           python -c "import fastapi; print('backend deps ok')"
           python -c "from app.main import app; print('app import ok')"
+
+      - name: Install eval deps
+        run: pip install requests
+
+      - name: Start backend (CSV-only, no LLM)
+        env:
+          PYTHONPATH: backend
+          REPO_MODE: csv_only
+          LLM_ENABLED: "false"
+          LLM_PROVIDER: none
+          APP_ENV: development
+        run: |
+          uvicorn app.main:app --host 127.0.0.1 --port 8000 &
+          echo $! > /tmp/uvicorn.pid
+          for i in $(seq 1 15); do
+            if curl -sf http://127.0.0.1:8000/v1/health > /dev/null 2>&1; then
+              echo "Backend ready after ${i}s"
+              break
+            fi
+            sleep 1
+          done
+
+      - name: Run golden eval (Layer 1)
+        env:
+          PYTHONPATH: backend
+        run: |
+          python scripts/run_eval.py \
+            --base-url http://127.0.0.1:8000 \
+            --cases eval/eval_cases.json \
+            --timeout 30
+
+      - name: Stop backend
+        if: always()
+        run: kill $(cat /tmp/uvicorn.pid) 2>/dev/null || true
