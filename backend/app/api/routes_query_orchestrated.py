@@ -14,6 +14,8 @@ from app.models.decision import QueryRequest
 from app.orchestration.graph import orchestration_graph
 from app.auth.rbac import require_role
 from app.services.input_sanitizer import sanitize_question
+from app.services.analytics_service import log_query
+from app.services.llm_client import chat_completion
 from app.config import get_settings
 from app.rate_limit import limiter
 
@@ -73,5 +75,27 @@ def query_orchestrated(request: Request, req: QueryRequest, _user: dict = Depend
                 }
             },
         )
+
+    # For insufficient_info decisions, extract an anonymous topic label via LLM
+    # so HR can see what benefit areas employees are asking about that aren't covered.
+    service_category = final.get("service_category")
+    if final.get("decision") == "insufficient_info" and not service_category:
+        try:
+            topic = chat_completion(
+                "Extract a short 2-4 word benefit topic from this employee query. "
+                "Reply with only the topic label, nothing else. "
+                "Examples: 'Weight Management', 'Yoga Classes', 'Vision Care', 'Fertility Treatment'.",
+                cleaned_question,
+            )
+            if topic and topic.strip():
+                service_category = topic.strip()[:50]
+        except Exception:
+            pass
+
+    log_query(
+        benefit_type=final.get("benefit_type"),
+        service_category=service_category,
+        decision=final.get("decision"),
+    )
 
     return final

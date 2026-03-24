@@ -4,6 +4,20 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [0.18.1] `v0.18.1-phase17-freeze` - 24-Mar-2026 — Analytics & UI Fixes
+
+### Fixed
+- **Analytics logging**: `log_query()` was defined but never called — wired into `/v1/query-orchestrated` route so queries are now actually recorded.
+- **Required documents formatting**: Displayed in Title Case without underscores (e.g. `Invoice, Treatment Summary` instead of `invoice, treatment_summary`).
+- **Sidebar width**: Increased from 22% to 26% to prevent guide button text from wrapping.
+
+### Added
+- **Policy Gaps breakdown**: New "Policy Gaps" table in Analytics tab — for `insufficient_info` queries, the LLM extracts an anonymous 2–4 word benefit topic (e.g. "Yoga Classes", "Weight Management") and logs it, so HR can see exactly what benefit areas employees are asking about that the system cannot answer.
+- **LLM topic extraction**: When a query returns `insufficient_info` and has no parsed service category, a lightweight LLM call extracts the benefit topic anonymously before logging. Silent on failure — falls back gracefully if LLM is unavailable.
+- **Policy Gaps table refinements**: Shows top 3 entries by count (highest first) with a compact "Show all" toggle for the full list.
+
+---
+
 ## [0.18.0] - 24-Mar-2026 — HR Analytics Dashboard (Phase 17)
 
 ### Added
