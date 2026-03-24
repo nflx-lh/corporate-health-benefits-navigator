@@ -9,13 +9,19 @@ All notable changes to this project are documented in this file.
 ### Added
 - **Golden eval dataset expanded**: `eval/eval_cases.json` grown from 15 → 30 cases (EVAL016–EVAL030), covering cosmetic procedure exclusions (all plan tiers), day surgery with preauth, mental health tenure gates, diagnostic imaging, restorative dental, cosmetic dental, orthodontic exclusions, intensive therapy, and contract employee edge cases.
 - **CI golden eval step**: `.github/workflows/ci.yml` now starts the backend in `REPO_MODE=csv_only` / `LLM_ENABLED=false` after the smoke import and runs `scripts/run_eval.py` against it. CI fails if any golden case regresses.
+- **Human eval scorecard**: `eval/human_eval_scorecard.md` — structured 10-case scoring template (Accuracy, Clarity, Tone, Completeness, 1–5 scale) with pass threshold mean ≥ 3.5 and overall pass rate guidance.
+- **Human eval review 1**: `eval/human_eval_review_1.md` — first completed review run (10 cases, 9/10 passed, 90% pass rate). One failure identified: contract employee dental exclusion reason incorrectly explained as "no coverage rules" (P0 finding for future fix).
 
 ### Fixed
 - **`test_seed_rules.py` row count**: Updated assertions from 46 → 51 to match the current `benefit_rules.csv` (R048–R052 added in Phase 15).
 
+### Deferred
+- **Layer 2 (DeepEval LLM quality metrics)**: Requires live LLM API calls — cannot run in CI. Deferred post-submission.
+- **Layer 3 (CloudWatch alarms)**: Pure Terraform/infra work, no user-visible output. Deferred post-submission.
+
 ### Architecture Notes
-- Layer 1 eval (golden cases + CI) is now active. Layer 2 (DeepEval LLM quality metrics) and Layer 4 (human eval scorecard) are planned for this branch.
-- Eval cases run deterministically — LLM is disabled in CI. LLM quality evaluation (faithfulness, hallucination) is a separate concern for Layer 2.
+- Layer 1 (golden eval + CI gate) and Layer 4 (human eval scorecard) are complete. Layer 2 and Layer 3 deferred.
+- Eval cases run deterministically — LLM disabled in CI. Human eval scorecard used for periodic LLM quality spot-checks with LLM enabled.
 
 ---
 

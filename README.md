@@ -13,8 +13,9 @@ This solution was developed as an MVP demonstration for a corporate health benef
 - **AI:** OpenAI LLM (explainer/critic agents) + embeddings (policy retrieval)
 
 ## Project Status
-- **v0.17.0** — Evaluation suite (golden eval expanded to 30 cases, CI golden eval gate, Layer 2 DeepEval LLM metrics and Layer 4 human scorecard in progress)
-- Phases 1–16 complete (rules engine, retrieval, orchestration, frontend, security, admin CRUD, password auth, UI polish, cloud deployment with RDS, production hardening, evaluation suite)
+- **v0.17.0** — Evaluation suite complete (30 golden eval cases wired into CI, human eval scorecard with first completed review — 90% pass rate)
+- Phases 1–16 complete; Phase 17 (multilingual support, voice input, HR analytics dashboard) in progress
+- Phases 1–16: rules engine, retrieval, orchestration, frontend, security, admin CRUD, password auth, UI polish, cloud deployment with RDS, production hardening, evaluation suite
 
 ## Quick Start
 1. Copy `.env.example` to `.env`
