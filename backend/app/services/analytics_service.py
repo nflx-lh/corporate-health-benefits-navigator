@@ -77,8 +77,9 @@ def get_analytics() -> dict[str, Any]:
                 by_benefit[row.benefit_type] += 1
             if row.service_category:
                 by_category[row.service_category] += 1
-            if row.decision == "insufficient_info" and row.service_category:
-                insufficient_by_category[row.service_category] += 1
+            if row.decision == "insufficient_info":
+                cat = row.service_category or "Unclassified"
+                insufficient_by_category[cat] += 1
             if row.logged_at and row.logged_at >= cutoff:
                 recent += 1
 
