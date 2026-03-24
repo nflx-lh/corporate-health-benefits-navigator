@@ -180,6 +180,44 @@ curl -s http://$ALB/ | head -5
 curl -s http://$ALB/v1/employees/EMP001/verify
 ```
 
+### Seed benefit rules (one-off)
+
+If `init_db()` didn't seed rules on startup (e.g. table already existed but was empty), run the seeder as a one-off ECS task:
+
+```bash
+aws ecs run-task \
+  --cluster chbn-cluster \
+  --task-definition chbn-api \
+  --launch-type FARGATE \
+  --network-configuration '{
+    "awsvpcConfiguration": {
+      "subnets": ["<PUBLIC_SUBNET_1>", "<PUBLIC_SUBNET_2>"],
+      "securityGroups": ["<ECS_SG_ID>"],
+      "assignPublicIp": "ENABLED"
+    }
+  }' \
+  --overrides '{
+    "containerOverrides": [{
+      "name": "api",
+      "command": ["python", "-m", "app.scripts.seed_rules"]
+    }]
+  }' \
+  --region ap-southeast-1
+```
+
+Get subnet/SG IDs from Terraform outputs or AWS Console. The seeder:
+- Creates tables if missing (`CREATE TABLE IF NOT EXISTS`)
+- Upserts by `rule_id` — safe to run multiple times (idempotent)
+- Prints before/upserted/after counts in CloudWatch logs
+
+**Verify seeding worked:**
+```bash
+# Query should return candidate_rules_count > 0
+curl -s http://$ALB/v1/query-orchestrated \
+  -H "Content-Type: application/json" \
+  -d '{"employee_id":"EMP001","benefit_type":"outpatient"}'
+```
+
 ### Persistence test
 
 Verify that data survives an ECS service restart:
