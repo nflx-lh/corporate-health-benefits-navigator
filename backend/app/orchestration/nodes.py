@@ -24,8 +24,9 @@ from app.services.llm_client import chat_completion
 
 logger = logging.getLogger(__name__)
 
-# Default index directory — resolved relative to repo root.
-_DEFAULT_INDEX_DIR = Path(__file__).resolve().parents[3] / "data" / "index"
+# Default index directory — use DATA_ROOT env var in Docker, fallback to repo root for local dev.
+_DATA_ROOT = Path(os.environ["DATA_ROOT"]) if "DATA_ROOT" in os.environ else Path(__file__).resolve().parents[3] / "data"
+_DEFAULT_INDEX_DIR = _DATA_ROOT / "index"
 
 
 # ------------------------------------------------------------------
@@ -306,21 +307,20 @@ def explainer_node(state: OrchestratorState) -> dict[str, Any]:
     # Build system prompt
     plan_name = rule_decision.get("plan_tier") or "your plan"
     system_prompt = (
-        "You are a benefits explanation assistant. Summarise the coverage decision for an employee. "
-        "IMPORTANT: Accurately reflect the decision — do not contradict it. "
-        f"The decision is: {rule_decision.get('decision', 'unknown')}. "
-        "Write in short, natural sentences — NOT a field dump. "
-        "Format example (follow this style exactly):\n"
-        f"Current Plan: {plan_name}\n"
-        "Your [benefit] [service] are covered at [x]%.\n"
-        "Annual limit: SGD [amount].\n"
-        "Co-pay: SGD [amount] per visit.\n"
-        "Please note to retain a copy of the required documents stated below.\n\n"
+        "You are a friendly but concise benefits assistant helping an employee understand their coverage. "
+        f"The deterministic decision is: {rule_decision.get('decision', 'unknown')}. "
+        "You MUST accurately reflect this decision — never contradict it. "
+        "Write in plain, conversational English as if speaking directly to the employee. "
+        "Lead with a direct yes/no answer to whether they are covered, then give the key details naturally. "
+        f"Always open with 'Current Plan: {plan_name}' on its own line. "
+        "Keep it brief — 3 to 5 sentences max. "
         "Rules:\n"
-        "- Start with 'Current Plan: [plan name]' on its own line.\n"
-        "- One fact per line. Use plain language.\n"
-        "- Do NOT mention internal rule IDs (e.g. R008). Do NOT list required documents by name.\n"
-        "- Do NOT add sign-offs like 'let me know' or 'Great news!'. This is a search result, not a chat."
+        "- Never mention internal rule IDs (e.g. R008) or field names.\n"
+        "- Never list required document names — just say they need to keep their documents.\n"
+        "- Do not use bullet points, headers, or markdown.\n"
+        "- Do not add greetings, sign-offs, or filler phrases like 'Great news!' or 'Let me know'.\n"
+        "- If policy citations are provided, reference them naturally (e.g. 'per your plan policy').\n"
+        "- This is a search result panel, not a chat — keep it factual and direct."
     )
 
     # Build user message

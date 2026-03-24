@@ -490,7 +490,17 @@ function TempPasswordModal({ employeeId, tempPassword, onClose }) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // fallback: select text
+      // Fallback for HTTP (non-secure context) where clipboard API is blocked
+      const el = document.createElement('textarea');
+      el.value = tempPassword;
+      el.style.position = 'fixed';
+      el.style.opacity = '0';
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
   };
 
