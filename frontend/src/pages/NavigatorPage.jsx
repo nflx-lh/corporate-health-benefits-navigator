@@ -223,7 +223,7 @@ function ActionZone({ data }) {
       )}
       {Array.isArray(data.required_docs) && data.required_docs.length > 0 && (
         <div style={styles.actionItem}>
-          Required documents: {data.required_docs.join(", ")}
+          Required documents: {data.required_docs.map(toTitleCase).join(", ")}
         </div>
       )}
     </div>

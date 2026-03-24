@@ -14,6 +14,7 @@ from app.models.decision import QueryRequest
 from app.orchestration.graph import orchestration_graph
 from app.auth.rbac import require_role
 from app.services.input_sanitizer import sanitize_question
+from app.services.analytics_service import log_query
 from app.config import get_settings
 from app.rate_limit import limiter
 
@@ -73,5 +74,11 @@ def query_orchestrated(request: Request, req: QueryRequest, _user: dict = Depend
                 }
             },
         )
+
+    log_query(
+        benefit_type=final.get("benefit_type"),
+        service_category=final.get("service_category"),
+        decision=final.get("decision"),
+    )
 
     return final
