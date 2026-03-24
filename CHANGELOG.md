@@ -4,6 +4,16 @@ All notable changes to this project are documented in this file.
 
 ---
 
+## [0.18.1] - 24-Mar-2026 — Voice Input (Phase 17, B-1702)
+
+### Added
+- **Voice input**: Microphone button added to the query form. Uses the browser Web Speech API — clicking the mic starts speech recognition, transcribed text populates the query input in real time. Supports auto language detection by the browser.
+- **Recording indicator**: Mic button pulses red while recording; stops on silence or second click.
+- **Graceful degradation**: Mic button is hidden on browsers that do not support the Web Speech API.
+- **Mobile layout**: On small screens, mic button stays visible alongside the input; Search button spans the full row.
+
+---
+
 ## [0.18.0] - 24-Mar-2026 — Multilingual Query Support (Phase 17, B-1701)
 
 ### Added
