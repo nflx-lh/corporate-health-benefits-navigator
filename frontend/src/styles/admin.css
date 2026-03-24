@@ -727,35 +727,32 @@
 
 .analytics-card {
   flex: 1;
-  min-width: 160px;
-  padding: 1.5rem 1.75rem;
-  background: #ffffff;
+  min-width: 140px;
+  padding: 1.25rem 1.5rem;
+  background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-top: 3px solid #0f766e;
-  border-radius: 12px;
+  border-radius: 10px;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 .analytics-card__label {
-  font-size: 0.72rem;
-  font-weight: 700;
+  font-size: 0.8rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #94a3b8;
-  margin-bottom: 0.5rem;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  margin-bottom: 0.4rem;
 }
 
 .analytics-card__value {
-  font-size: 2.25rem;
-  font-weight: 800;
+  font-size: 2rem;
+  font-weight: 700;
   color: #0f172a;
-  line-height: 1;
 }
 
 .analytics-tables {
   display: flex;
-  gap: 1.25rem;
+  gap: 1.5rem;
   flex-wrap: wrap;
   align-items: flex-start;
 }
@@ -763,64 +760,25 @@
 .analytics-section {
   flex: 1;
   min-width: 200px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 1.1rem 1.25rem 1rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 .analytics-section__title {
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: #64748b;
-  margin: 0 0 0.85rem;
-  padding-bottom: 0.6rem;
-  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 0.5rem;
 }
 
 .analytics-toggle-btn {
-  margin-top: 0.6rem;
-  font-size: 0.78rem;
-  font-weight: 600;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
   background: none;
   border: none;
   color: #0f766e;
   cursor: pointer;
   padding: 0;
-  letter-spacing: 0.02em;
 }
 
 .analytics-toggle-btn:hover {
   text-decoration: underline;
-}
-
-/* Strip double-border inside analytics cards */
-.analytics-section .admin-table-wrap {
-  border: none;
-  box-shadow: none;
-  border-radius: 0;
-}
-
-.analytics-section .admin-table {
-  font-size: 0.875rem;
-}
-
-.analytics-section .admin-table th {
-  background: transparent;
-  color: #94a3b8;
-  font-size: 0.72rem;
-  padding: 0 0.5rem 0.5rem;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.analytics-section .admin-table td {
-  padding: 0.55rem 0.5rem;
-  color: #1e293b;
-}
-
-.analytics-section .admin-table tbody tr:last-child td {
-  border-bottom: none;
 }

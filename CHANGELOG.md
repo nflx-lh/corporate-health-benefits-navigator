@@ -14,7 +14,7 @@ All notable changes to this project are documented in this file.
 ### Added
 - **Policy Gaps breakdown**: New "Policy Gaps" table in Analytics tab — for `insufficient_info` queries, the LLM extracts an anonymous 2–4 word benefit topic (e.g. "Yoga Classes", "Weight Management") and logs it, so HR can see exactly what benefit areas employees are asking about that the system cannot answer.
 - **LLM topic extraction**: When a query returns `insufficient_info` and has no parsed service category, a lightweight LLM call extracts the benefit topic anonymously before logging. Silent on failure — falls back gracefully if LLM is unavailable.
-- **Analytics dashboard redesign**: Stat cards with teal accent border and shadow; table sections styled as cards; Policy Gaps table shows top 3 by count (highest first) with a "Show all" toggle.
+- **Policy Gaps table refinements**: Shows top 3 entries by count (highest first) with a compact "Show all" toggle for the full list.
 
 ---
 
