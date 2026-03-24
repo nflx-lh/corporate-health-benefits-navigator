@@ -136,31 +136,6 @@ function SourceBadge({ source }) {
   );
 }
 
-const LANGUAGE_NAMES = {
-  en: "English", "zh-cn": "Mandarin", "zh-tw": "Mandarin", zh: "Mandarin",
-  ms: "Malay", ta: "Tamil", vi: "Vietnamese", ja: "Japanese", ko: "Korean",
-};
-
-function LanguageBadge({ lang }) {
-  if (!lang || lang === "en") return null;
-  const name = LANGUAGE_NAMES[lang] || lang.toUpperCase();
-  return (
-    <span
-      style={{
-        display: "inline-block",
-        padding: "0.2rem 0.6rem",
-        borderRadius: "6px",
-        fontSize: "0.8rem",
-        fontWeight: 600,
-        background: "#fef3c7",
-        color: "#92400e",
-      }}
-    >
-      {name}
-    </span>
-  );
-}
-
 function FieldRow({ label, value, fallback = "\u2014" }) {
   let display;
   if (value === null || value === undefined || value === "") {
@@ -279,7 +254,6 @@ function ResultPanel({ data }) {
       >
         <DecisionBadge decision={data.decision} />
         <SourceBadge source={data.ai_summary_source || "fallback"} />
-        <LanguageBadge lang={data.response_language} />
         <span style={{ fontSize: "0.85rem", color: "#6b7280" }}>
           {data.benefit_type || "—"} / {data.service_category || "—"}
         </span>
@@ -382,37 +356,8 @@ export default function NavigatorPage({ employeeId, onLogout }) {
   const [guideContent, setGuideContent] = useState("");
   const [guideLoading, setGuideLoading] = useState(false);
   const [guideError, setGuideError] = useState("");
-  const [isRecording, setIsRecording] = useState(false);
-  const recognitionRef = useRef(null);
   const queryInputRef = useRef(null);
   const drawerCloseBtnRef = useRef(null);
-
-  const speechSupported = typeof window !== "undefined" &&
-    ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
-
-  const toggleRecording = () => {
-    if (isRecording) {
-      recognitionRef.current?.stop();
-      setIsRecording(false);
-      return;
-    }
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = true;
-    recognition.lang = ""; // auto-detect language
-    recognition.onresult = (event) => {
-      const transcript = Array.from(event.results)
-        .map((r) => r[0].transcript)
-        .join("");
-      setQuestion(transcript);
-    };
-    recognition.onend = () => setIsRecording(false);
-    recognition.onerror = () => setIsRecording(false);
-    recognitionRef.current = recognition;
-    recognition.start();
-    setIsRecording(true);
-  };
 
   useEffect(() => {
     queryInputRef.current?.focus();
@@ -534,20 +479,6 @@ export default function NavigatorPage({ employeeId, onLogout }) {
               onChange={(e) => setQuestion(e.target.value)}
               disabled={loading}
             />
-            {speechSupported && (
-              <button
-                type="button"
-                className={`navigator-mic-btn${isRecording ? " navigator-mic-btn--active" : ""}`}
-                onClick={toggleRecording}
-                title={isRecording ? "Stop recording" : "Speak your question"}
-                aria-label={isRecording ? "Stop recording" : "Start voice input"}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                  <path d="M19 10v2a7 7 0 0 1-14 0v-2H3v2a9 9 0 0 0 8 8.94V22H8v2h8v-2h-3v-1.06A9 9 0 0 0 21 12v-2h-2z"/>
-                </svg>
-              </button>
-            )}
             <button
               type="submit"
               className="navigator-ask-btn"

@@ -16,5 +16,4 @@ class QueryLogDB(Base):
     benefit_type = Column(String, nullable=True)
     service_category = Column(String, nullable=True)
     decision = Column(String, nullable=True)
-    response_language = Column(String, nullable=True, default="en")
     logged_at = Column(DateTime, default=datetime.utcnow, nullable=False)

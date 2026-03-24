@@ -1,7 +1,7 @@
 """LangGraph orchestration graph for the benefits query pipeline.
 
 Flow:
-    START -> parse_input -> detect_language -> run_rules_engine -> conditional(should_retrieve)
+    START -> parse_input -> run_rules_engine -> conditional(should_retrieve)
       if "retrieve" -> retrieve_policy_hits -> conditional(should_run_explainer)
         if "explainer" -> explainer -> critic -> conditional(critic_decision)
           if "explainer" (retry) -> explainer -> critic -> ...
@@ -18,7 +18,6 @@ from app.orchestration.nodes import (
     compose_response_node,
     critic_decision_router,
     critic_node,
-    detect_language_node,
     explainer_node,
     parse_input_node,
     retrieve_policy_hits_node,
@@ -34,7 +33,6 @@ def build_graph() -> StateGraph:
     builder = StateGraph(OrchestratorState)
 
     builder.add_node("parse_input", parse_input_node)
-    builder.add_node("detect_language", detect_language_node)
     builder.add_node("run_rules_engine", run_rules_engine_node)
     builder.add_node("retrieve_policy_hits", retrieve_policy_hits_node)
     builder.add_node("explainer", explainer_node)
@@ -42,8 +40,7 @@ def build_graph() -> StateGraph:
     builder.add_node("compose_response", compose_response_node)
 
     builder.add_edge(START, "parse_input")
-    builder.add_edge("parse_input", "detect_language")
-    builder.add_edge("detect_language", "run_rules_engine")
+    builder.add_edge("parse_input", "run_rules_engine")
     builder.add_conditional_edges(
         "run_rules_engine",
         should_retrieve_router,

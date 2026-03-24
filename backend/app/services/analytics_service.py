@@ -18,7 +18,6 @@ def log_query(
     benefit_type: str | None,
     service_category: str | None,
     decision: str | None,
-    response_language: str | None = "en",
 ) -> None:
     """Persist an anonymous query log entry. Silent on failure."""
     try:
@@ -33,7 +32,6 @@ def log_query(
                 benefit_type=benefit_type,
                 service_category=service_category,
                 decision=decision,
-                response_language=response_language or "en",
             ))
             session.commit()
     except Exception as exc:
@@ -47,7 +45,6 @@ def get_analytics() -> dict[str, Any]:
         "by_decision": {},
         "by_benefit_type": {},
         "by_service_category": {},
-        "by_language": {},
         "recent_7_days": 0,
     }
 
@@ -69,7 +66,6 @@ def get_analytics() -> dict[str, Any]:
         by_decision: Counter = Counter()
         by_benefit: Counter = Counter()
         by_category: Counter = Counter()
-        by_language: Counter = Counter()
         recent = 0
 
         for row in rows:
@@ -79,8 +75,6 @@ def get_analytics() -> dict[str, Any]:
                 by_benefit[row.benefit_type] += 1
             if row.service_category:
                 by_category[row.service_category] += 1
-            lang = row.response_language or "en"
-            by_language[lang] += 1
             if row.logged_at and row.logged_at >= cutoff:
                 recent += 1
 
@@ -89,7 +83,6 @@ def get_analytics() -> dict[str, Any]:
             "by_decision": dict(by_decision),
             "by_benefit_type": dict(by_benefit),
             "by_service_category": dict(by_category),
-            "by_language": dict(by_language),
             "recent_7_days": recent,
         }
 

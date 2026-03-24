@@ -21,61 +21,11 @@ from app.services.employee_repo import get_employee
 from app.services.query_parser import parse_query
 from app.services.rules_engine import evaluate
 from app.services.llm_client import chat_completion
-from app.services.language_service import detect_language, is_english, language_display_name
-
 logger = logging.getLogger(__name__)
 
 # Default index directory — use DATA_ROOT env var in Docker, fallback to repo root for local dev.
 _DATA_ROOT = Path(os.environ["DATA_ROOT"]) if "DATA_ROOT" in os.environ else Path(__file__).resolve().parents[3] / "data"
 _DEFAULT_INDEX_DIR = _DATA_ROOT / "index"
-
-
-# ------------------------------------------------------------------
-# Node: detect_language  (Phase 17 B-1701)
-# ------------------------------------------------------------------
-
-def detect_language_node(state: OrchestratorState) -> dict[str, Any]:
-    """Detect query language; translate to English if needed so the rules
-    engine and query parser always receive English input.
-
-    If LLM is disabled or unavailable, keeps original query as-is.
-    Stores detected_language and query_text_original in state.
-    """
-    query_text: str = state.get("query_text", "")
-    settings = get_settings()
-
-    lang_code, confidence = detect_language(query_text)
-    logger.debug("detect_language_node | lang=%s conf=%.2f query=%r", lang_code, confidence, query_text[:60])
-
-    if is_english(lang_code):
-        return {
-            "detected_language": "en",
-            "query_text_original": query_text,
-        }
-
-    # Non-English detected — attempt translation via LLM if enabled
-    translated = query_text  # fallback: use original
-    llm_available = (
-        settings.LLM_ENABLED
-        and settings.LLM_PROVIDER.lower() != "none"
-        and os.getenv("OPENAI_API_KEY", "").strip()
-    )
-
-    if llm_available:
-        translate_prompt = (
-            "Translate the following text to English. "
-            "Respond with only the translation, nothing else."
-        )
-        result = chat_completion(translate_prompt, query_text)
-        if result and result.strip():
-            translated = result.strip()
-            logger.debug("detect_language_node | translated to: %r", translated[:80])
-
-    return {
-        "detected_language": lang_code,
-        "query_text_original": query_text,
-        "query_text": translated,
-    }
 
 
 # ------------------------------------------------------------------
@@ -265,14 +215,9 @@ def compose_response_node(state: OrchestratorState) -> dict[str, Any]:
     # --- Phase 8: Safety gate for ai_summary ---
     ai_summary = state.get("explanation_text")
     ai_summary_source = "fallback"
-    detected_language = state.get("detected_language", "en")
 
     if ai_summary and rule_decision:
-        # Safety gate: skip keyword validation for non-English responses
-        # (keywords are English-only; non-English responses are trusted via LLM instruction)
-        if not is_english(detected_language):
-            ai_summary_source = "llm"
-        elif _validate_ai_summary(ai_summary, rule_decision):
+        if _validate_ai_summary(ai_summary, rule_decision):
             ai_summary_source = "llm"
         else:
             logger.warning("Safety gate: ai_summary rejected (mismatch with deterministic decision)")
@@ -287,7 +232,6 @@ def compose_response_node(state: OrchestratorState) -> dict[str, Any]:
     final["explanation"] = explanation
     final["ai_summary"] = ai_summary
     final["ai_summary_source"] = ai_summary_source
-    final["response_language"] = detected_language
 
     # Pass through critic result if present
     critic = state.get("critic_result")
@@ -353,28 +297,19 @@ def explainer_node(state: OrchestratorState) -> dict[str, Any]:
     retrieval_hits = state.get("retrieval_hits") or []
     retry_count = state.get("retry_count", 0)
     critic_result = state.get("critic_result")
-    detected_language = state.get("detected_language", "en")
 
     # Build citation context
     citation_text = ""
     for h in retrieval_hits[:3]:
         citation_text += f"\n- {h.get('clause_id', '')}: {h.get('text', '')[:200]}"
 
-    # Build system prompt — include language instruction for non-English
+    # Build system prompt
     plan_name = rule_decision.get("plan_tier") or "your plan"
-    lang_instruction = ""
-    if detected_language and not is_english(detected_language):
-        lang_name = language_display_name(detected_language)
-        lang_instruction = (
-            f"IMPORTANT: You MUST write your entire response in {lang_name}. "
-            "Do not use English in your response. "
-        )
 
     system_prompt = (
         "You are a friendly but concise benefits assistant helping an employee understand their coverage. "
         f"The deterministic decision is: {rule_decision.get('decision', 'unknown')}. "
         "You MUST accurately reflect this decision — never contradict it. "
-        f"{lang_instruction}"
         "Lead with a direct yes/no answer to whether they are covered, then give the key details naturally. "
         f"Always open with 'Current Plan: {plan_name}' on its own line. "
         "Keep it brief — 3 to 5 sentences max. "

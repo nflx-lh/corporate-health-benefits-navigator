@@ -584,7 +584,6 @@ function AnalyticsDashboard({ headers }) {
       <div className="analytics-tables">
         <AnalyticsTable title="By Decision" rows={data.by_decision} />
         <AnalyticsTable title="By Benefit Type" rows={data.by_benefit_type} />
-        <AnalyticsTable title="By Language" rows={data.by_language} />
       </div>
     </>
   );
