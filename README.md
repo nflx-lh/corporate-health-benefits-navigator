@@ -30,14 +30,14 @@ A self-service guidance tool addresses this — but only if it is trustworthy. A
 ### Employee
 - Logs in with a verified employee ID and password
 - Asks plain-language questions about coverage (e.g. "Is my root canal covered?", "Do I need pre-authorisation for an MRI?")
-- Receives a coverage decision with financial details, required documents, pre-authorisation requirements, and a validated AI-generated plain-language summary with policy citations
+- Receives a coverage decision tailored to the employee’s plan tier and profile, including financial details, required documents, pre-authorisation requirements, and a validated AI-generated plain-language summary with policy citations
 - Accesses a Policy Library with guide cards covering Coverage & Eligibility, Claims & Pre-authorisation, and Exclusions & Clarifications
 - Submits a password reset request if locked out; completes a forced password change on first login
 
 ### HR Admin
 - Logs in with a separate admin credential path enforced by RBAC
 - Manages the full employee roster: create, read, update, delete with field validation and modal confirmations
-- Reviews pending password reset requests; approves (generating a temporary password) or rejects with notes
+- Reviews pending password reset requests; approves them by issuing a temporary password or rejects them through the admin workflow
 - Views anonymised usage analytics: total queries, last-7-days volume, breakdowns by benefit type and decision outcome
 - Monitors a Policy Gaps table — when employee queries return no policy match, an LLM extracts the anonymous topic (e.g. "Yoga Classes", "Weight Management") so HR can identify coverage gaps
 - Triggers a policy index rebuild when policy documents change
